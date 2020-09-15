@@ -38,6 +38,7 @@ public:
     Var &at(const MultiName &name);
     BasicName::List firstSegmentKeys() const;
     VarMap operator << (const Var &var);
+    QVariant toVariant() const;
     QStringList dumpList() const;
     void dump() const;
 

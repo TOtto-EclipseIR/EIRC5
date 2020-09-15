@@ -77,7 +77,7 @@ void CommandLine::process()
 {
     TRACEQFI << "ExeArgs:" << cmExeArgumentList;
     QStringList arguments;
-    mExeFileInfo = QQFileInfo(cmExeArgumentList.first());
+    mExeFileInfo = QFileInfo(cmExeArgumentList.first());
     arguments = expandFileArguments(cmExeArgumentList.mid(1), '@');
     TRACE << "Expanded:" << arguments;
     arguments = stripConfiguration(arguments);

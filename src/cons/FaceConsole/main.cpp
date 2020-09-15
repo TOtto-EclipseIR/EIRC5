@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     a.setApplicationName("INDI5faceConsole");
-    a.setApplicationVersion(EIRC2_VER_STRING " " EIRC2_VER_TRUNKNAME);
-    a.setOrganizationName(EIRC2_VER_ORGNAME);
+    a.setApplicationVersion(VER_STRING " " VER_TRUNKNAME);
+    a.setOrganizationName(VER_ORGNAME);
     sdo->start(argv[0], "./log");
 
     FaceConsole c(a.parent()); Q_UNUSED(c);

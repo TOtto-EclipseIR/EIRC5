@@ -4,6 +4,7 @@
 #include <QRect>
 
 #include <QList>
+#include <QMetaType>
 #include <QPoint>
 #include <QSize>
 
@@ -19,9 +20,16 @@ public:
     QQRect(const QRectF rcf);
     QQRect set(const QRectF rcf);
     void set(const QSize size, const QPoint center);
+    void makeSquare();
     int area() const;
-    qreal overlap(const QQRect other);
+    QQRect overlapped(const QQRect other) const;
+    qreal overlap(const QQRect other) const;
     QQRect expandedBy(const qreal factor) const;
     QQRect operator * (const qreal factor) const;
+    QString toString() const;
+    operator QString () const;
 };
+Q_DECLARE_METATYPE(QQRect);
+
+EIRTYPE_EXPORT QDebug operator<<(QDebug dbg, const QQRect &rc);
 

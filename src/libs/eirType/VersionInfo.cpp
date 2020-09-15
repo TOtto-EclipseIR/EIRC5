@@ -9,6 +9,6 @@ VersionInfo::VersionInfo() : VarMap(QString("VersionInfo")) {;}
 VersionInfo VersionInfo::version()
 {
     VersionInfo vi;
-    vi.insert(Var("Major", EIRC2_VER_MAJOR));
+    vi.insert(Var("Major", VER_MAJOR));
     return vi;
 }

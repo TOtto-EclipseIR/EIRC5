@@ -226,16 +226,18 @@ void FaceConsole::processCurrentFile()
 {
     TRACEQFI << mCurrentFileInfo << mCurrentFileInfo.isReadable();
     QImage rectImage;
-    QString markedRectOutputFileInfo;
+    QString markedRectOutputFileName;
 
     writeLine("---Processing: "+mCurrentFileInfo.absoluteFilePath());
     mPreScanCascade.imreadInputMat(mCurrentFileInfo);
     mCurrentRectangles = mPreScanCascade.detect();
     writeLine(QString("   %1 PreScan rectangles found")
                             .arg(mCurrentRectangles.size()));
-    markedRectOutputFileInfo = QQFileInfo(mMarkedRectOutputDir,
+    markedRectOutputFileName = QQFileInfo(mMarkedRectOutputDir,
                         mCurrentFileInfo.completeBaseName()+"-%M@.png")
                                   .absoluteFilePath();
+    QQFileInfo markedRectOutputFileInfo;
+    markedRectOutputFileInfo.setFile(markedRectOutputFileName);
     writeLine("   " + mPreScanCascade.imwriteMarkedImage(markedRectOutputFileInfo) + " written");
     EMIT(processed(QFileInfo(mCurrentFileInfo),
              mCurrentRectangles.size()));

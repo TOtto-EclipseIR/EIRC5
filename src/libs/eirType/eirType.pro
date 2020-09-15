@@ -26,12 +26,19 @@ SOURCES += \
     FunctionInfo.cpp \
     Id.cpp \
     MultiName.cpp \
+    QQByteArray.cpp \
     QQDir.cpp \
+    QQFile.cpp \
     QQFileInfo.cpp \
     QQFileInfoList.cpp \
     QQRect.cpp \
     QQRectF.cpp \
     QQRectList.cpp \
+    QQSize.cpp \
+    QQString.cpp \
+    Rational.cpp \
+    Real.cpp \
+    RealMath.cpp \
     Region.cpp \
     Sortable.cpp \
     BitFlags.cpp \
@@ -46,11 +53,10 @@ SOURCES += \
     Boolean.cpp \
     Milliseconds.cpp \
     Success.cpp \
-    UInt128.cpp \
-    Uid.cpp \
     eirType.cpp \
 
 HEADERS += \
+    ../../version.h \
     ArgumentItem.h \
     BitFlags.h \
     DProperty.h \
@@ -65,12 +71,19 @@ HEADERS += \
     NamedArray.h \
     NamedEnum.h \
     NamedMap.h \
+    QQByteArray.h \
     QQDir.h \
+    QQFile.h \
     QQFileInfo.h \
     QQFileInfoList.h \
     QQRect.h \
     QQRectF.h \
     QQRectList.h \
+    QQSize.h \
+    QQString.h \
+    Rational.h \
+    Real.h \
+    RealMath.h \
     Region.h \
     Sortable.h \
     Value.h \
@@ -85,8 +98,6 @@ HEADERS += \
     DualMap.h \
     Milliseconds.h \
     Success.h \
-    UInt128.h \
-    Uid.h \
     eirType_global.h \
     eirType.h \
 

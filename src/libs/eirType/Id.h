@@ -10,15 +10,14 @@
 #include <QUuid>
 #include <QVariant>
 
+#include <eirBase/Uuid.h>
 #include <eirType/MultiName.h>
-#include <eirType/Uid.h>
 
 #include "Var.h"
 
 class EIRTYPE_EXPORT Id
 {
 public:
-    typedef QUuid Uuid;
     typedef QList<Id> List;
 
 public:
@@ -36,13 +35,13 @@ public:
     ~Id();
     QVariant data() const;
     void clear();
-    void set(const QUuid &uuid);
+    void set(const Uuid &uuid);
     void set(const quint64 key64);
     void set(const MultiName name);
     void set(const QString desc);
     void set(const QVariant data);
     MultiName name() const;
-    QUuid uuid() const;
+    Uuid uuid() const;
     QString toString() const;
     QString operator () () const;
     bool operator <  (const Id & other);

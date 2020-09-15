@@ -64,7 +64,7 @@ private slots:
 
 private:
     const QStringList cmExeArgumentList;
-    QQFileInfo mExeFileInfo;
+    QFileInfo mExeFileInfo;
     CommandLineClientInterface * mpInterface=nullptr;
     LegacySettings * mpLegacySettings=nullptr;
     QStringList mPositionalArgumentList;

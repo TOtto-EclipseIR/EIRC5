@@ -64,8 +64,8 @@ ConfigObject *ApplicationHelper::config() const
 void ApplicationHelper::run()
 {
     TRACEFN
-    qApp->setOrganizationName(EIRC2_VER_ORGNAME);
-    qApp->setApplicationVersion(EIRC2_VER_APPVER);
+    qApp->setOrganizationName(VER_ORGNAME);
+    qApp->setApplicationVersion(VER_APPVER);
     QTimer::singleShot(100, this, &ApplicationHelper::initCommandLine);
 }
 
