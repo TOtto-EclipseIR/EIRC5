@@ -7,9 +7,10 @@
 class EIREXE_EXPORT Configuration : public VarMap
 {
 public:
-    Configuration();
+    Configuration(const MultiName &name=MultiName());
     Configuration(const VarMap &other);
-
+    void setDefault(const MultiName &key,
+                    const QVariant &defaultValue);
     QString string(const MultiName &key,
                    const QString &defValue=QString()) const;
     signed signedInt(const MultiName &key,

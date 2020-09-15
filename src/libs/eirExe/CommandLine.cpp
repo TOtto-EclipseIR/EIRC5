@@ -23,7 +23,12 @@ CommandLine::CommandLine(QObject *parent)
 void CommandLine::set(CommandLineClientInterface *interface)
 {
     TRACEFN
-    mpInterface = interface;
+            mpInterface = interface;
+}
+
+CommandLine::ExpandDirResultList CommandLine::expandDirResults() const
+{
+    return mExpandDirResultList;
 }
 
 int CommandLine::positionalArgumentSize() const
@@ -45,9 +50,18 @@ QString CommandLine::firstPositionalArgument() const
 QString CommandLine::takePositionalArgument()
 {
     TRACEQFI << firstPositionalArgument();
+    if (positionalArgumentSize())
+        ++mPositionalArgumentsTaken;
     return positionalArgumentSize()
             ? mPositionalArgumentList.takeFirst() : QString();
 }
+
+int CommandLine::takePositionalArgumentCount() const
+{
+    TRACEQFI << mPositionalArgumentsTaken;
+    return mPositionalArgumentsTaken;
+}
+
 /*
 QQFileInfoList CommandLine::positionalFileInfoList() const
 {
@@ -77,7 +91,7 @@ void CommandLine::process()
 {
     TRACEQFI << "ExeArgs:" << cmExeArgumentList;
     QStringList arguments;
-    mExeFileInfo = QFileInfo(cmExeArgumentList.first());
+    mExeFileInfo = QQFileInfo(QQString(cmExeArgumentList.first()));
     arguments = expandFileArguments(cmExeArgumentList.mid(1), '@');
     TRACE << "Expanded:" << arguments;
     arguments = stripConfiguration(arguments);
@@ -102,7 +116,6 @@ void CommandLine::expandDirectories(const int recurseDepth)
     WARN << "Only recurseDepth=1 for  now";
 
     QStringList expandedArgs;
-#if 1
     foreach (QString argIn, mPositionalArgumentList)
     {
         if (QQFileInfo::tryIsFile(argIn))
@@ -114,6 +127,14 @@ void CommandLine::expandDirectories(const int recurseDepth)
             QDir dir(argIn);
             QStringList fileNames
                 = dir.entryList(QDir::Files, QDir::NoSort);
+            if ( ! fileNames.isEmpty())
+            {
+                ExpandDirResult edr;
+                edr.dir = dir;
+                edr.firstFileName = fileNames.first();
+                edr.fileCount = fileNames.size();
+                mExpandDirResultList << edr;
+            }
             foreach (QString fileName, fileNames)
             {
                 QFileInfo fi(dir, fileName);
@@ -125,30 +146,6 @@ void CommandLine::expandDirectories(const int recurseDepth)
             WARN << argIn << "not file or dir";
         }
     }
-#else
-    foreach (QQFileInfo fileInfoIn, mPositionalFileDirInfoList)
-    {
-        QString argIn = mPositionalArgumentList.takeFirst();
-        TRACE << argIn << fileInfoIn.absoluteFilePath()
-              << fileInfoIn.attributes();
-        if (fileInfoIn.isNull() ||  ! fileInfoIn.tryIsDir())
-        {
-            expandedArgs << argIn;
-            expandedInfo << fileInfoIn;
-            continue;
-        }
-        WEXPECT(fileInfoIn.tryIsDir());
-        QFileInfoList insertInfoList
-            =  fileInfoIn.dir().entryInfoList(QDir::Files);
-        TRACE << "insertInfoList:" << insertInfoList;
-        foreach (QFileInfo insertInfo, insertInfoList)
-        {
-            TRACE << "Expanded:" << insertInfo;
-            expandedArgs << insertInfo.absoluteFilePath();
-            expandedInfo << insertInfoList;
-        }
-    }
-#endif
     mPositionalArgumentList = expandedArgs;
     TRACEQFI << "Output Files:";
     dumpPositionalArgs();

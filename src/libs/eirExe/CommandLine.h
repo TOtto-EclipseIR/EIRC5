@@ -6,6 +6,7 @@
 
 #include <QCommandLineParser>
 #include <QCommandLineOption>
+#include <QDir>
 #include <QFileInfoList>
 #include <QStateMachine>
 class QCommandLineParser;
@@ -27,12 +28,23 @@ class EIREXE_EXPORT CommandLine : public QObject
 {
     Q_OBJECT
 public:
+    struct ExpandDirResult
+    {
+        QDir dir;
+        QString firstFileName;
+        int fileCount;
+    };
+    typedef QList<ExpandDirResult> ExpandDirResultList;
+
+public:
     explicit CommandLine(QObject *parent = nullptr);
     void set(CommandLineClientInterface * interface);
+    ExpandDirResultList expandDirResults() const;
     int positionalArgumentSize() const;
     QStringList positionalArgumentList() const;
     QString firstPositionalArgument() const;
     QString takePositionalArgument();
+    int takePositionalArgumentCount() const;
     const QStringList exeArguments(bool withNumbers=false) const;
     const QQFileInfo exeFileInfo() const;
     Configuration configuration() const;
@@ -64,9 +76,11 @@ private slots:
 
 private:
     const QStringList cmExeArgumentList;
-    QFileInfo mExeFileInfo;
+    QQFileInfo mExeFileInfo;
     CommandLineClientInterface * mpInterface=nullptr;
     LegacySettings * mpLegacySettings=nullptr;
+    ExpandDirResultList mExpandDirResultList;
     QStringList mPositionalArgumentList;
+    int mPositionalArgumentsTaken=0;
     Configuration mConfiguration;
 };

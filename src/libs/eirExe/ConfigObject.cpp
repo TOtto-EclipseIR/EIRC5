@@ -84,4 +84,3 @@ void ConfigObject::setCurrent(MultiName key, QVariant currentVari)
     NEEDUSE(key); NEEDUSE(currentVari); NEEDDO(it)
 }
 
-
