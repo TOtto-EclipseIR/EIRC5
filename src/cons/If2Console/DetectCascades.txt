@@ -1,0 +1,13 @@
+# file {EIRC repo}./src/cons/If2Console/DetectCascades.txt
+
+/Detect/Resources/BaseDir=../Detectors/v1
+/Detect/Resources/Catalog/XmlFile=Detectors.XML
+
+### Face (Frontal)
+/Detect/Resources/HaarCascade/Face/XmlFile=Aim8A001-32-NoSplit.Xml
+
+### Left Eye
+/Detect/Resources/HaarCascade/LEye/XmlFile=haarcascade_lefteye_2splits.xml
+
+### Right Eye
+/Detect/Resources/HaarCascade/REye/XmlFile=haarcascade_righteye_2splits.xml

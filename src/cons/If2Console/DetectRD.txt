@@ -1,0 +1,7 @@
+# file {EIRC repo}./src/cons/If2Console/DetectRD.txt
+
+/Detect/Enable=true
+/Detect/Face/Enable=true
+/Detect/Face/Parameter/Overlap=1
+/Detect/Face/Parameter/Factor=1.125
+

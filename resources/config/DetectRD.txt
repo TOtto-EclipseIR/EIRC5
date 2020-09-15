@@ -1,0 +1,7 @@
+# file {EIRC repo}./src/cons/If2Console/DetectRD.txt
+
+#/PreScan/Enable=true
+#/PreScan/RectFinder/Enable=true
+/PreScan/RectFinder/Neighbors=1
+/PreScan/RectFinder/Factor=200
+

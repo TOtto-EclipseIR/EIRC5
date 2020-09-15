@@ -1,0 +1,5 @@
+# file {EIRC repo}./src/cons/If2Console/Input01.txt
+
+#/Input/Dir=/INDIface/INDIin/console
+#/Source/inConsole=/INDIface/INDIin/console
+#/Input/Source=inConsole

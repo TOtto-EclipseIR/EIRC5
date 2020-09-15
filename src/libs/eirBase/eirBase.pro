@@ -16,15 +16,32 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+include(../../EIRC2.pri)
+#??? LIBS *= -leirXfr5
+
 SOURCES += \
-    eirBase.cpp
+    UInt128.cpp \
+    Uuid.cpp \
+    eirBase.cpp \
 
 HEADERS += \
+    ../../version.h \
+    Typedefs.h \
+    UInt128.h \
+    Uuid.h \
     eirBase_global.h \
-    eirBase.h
+    eirBase.h \
 
 # Default rules for deployment.
 unix {
     target.path = /usr/lib
 }
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    ../../../depends.pri \
+    ../../../ourdest.pri \
+    ../../EIRC2.pri \
+    ../../apps/apps.pri \
+    ../../apps/cons/cons.pri \
+    ../../depends.pri

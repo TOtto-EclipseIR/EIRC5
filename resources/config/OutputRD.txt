@@ -1,0 +1,6 @@
+# file {EIRC repo}./src/cons/If2Console/OutputRD.txt
+
+/Output/BaseDir=../INDIface/INDIout/Console/@
+/Output/Dirs/MarkedPreScan=MarkedPreScan
+/Output/Dirs/PreScanAllRect=PreScanAllRect
+/Marker/PreScanAllRect/RawRect/Color=blue

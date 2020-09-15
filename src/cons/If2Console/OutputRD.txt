@@ -1,0 +1,5 @@
+# file {EIRC repo}./src/cons/If2Console/OutputRD.txt
+
+/Output/BaseDir=../INDIface/INDIout/Console/@
+/Output/GreyInputDir=./Input/Grey
+/Output/CaptureDir=./Input/Capture

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" version="1.0" binding="early" name="CommandLine" qt:editorversion="4.11.1" xmlns:qt="http://www.qt.io/2015/02/scxml-ext" initial="Start">
+    <qt:editorinfo initialGeometry="750;46.04;-20;-20;40;40"/>
+    <state id="Start">
+        <qt:editorinfo geometry="910.63;167.81;-60;-50;120;100" scenegeometry="910.63;167.81;850.63;117.81;120;100"/>
+        <transition type="external" event="Initialize" target="Initial"/>
+    </state>
+    <state id="Initial">
+        <qt:editorinfo geometry="910.63;315.14;-60;-50;120;100" scenegeometry="910.63;315.14;850.63;265.14;120;100"/>
+        <transition type="external" event="Gather" target="Gathering">
+            <qt:editorinfo endTargetFactors="71.06;58.82"/>
+        </transition>
+    </state>
+    <final id="Final_1">
+        <qt:editorinfo geometry="612.88;46.04;-20;-20;40;40" scenegeometry="612.88;46.04;592.88;26.04;40;40"/>
+    </final>
+    <state id="Gathering">
+        <qt:editorinfo geometry="888.12;512.61;-60;-50;120;100" scenegeometry="888.12;512.61;828.12;462.61;120;100"/>
+        <transition type="external" event="Generate" target="Generating">
+            <qt:editorinfo endTargetFactors="46.69;29.82"/>
+        </transition>
+    </state>
+    <parallel id="Generating">
+        <qt:editorinfo geometry="647.67;457.36;-106.41;-50;215.89;356.95" scenegeometry="647.67;457.36;541.26;407.36;215.89;356.95"/>
+        <transition type="external" event="Parse" target="Parsing">
+            <qt:editorinfo endTargetFactors="78.59;70.29"/>
+        </transition>
+    </parallel>
+    <state id="Parsing">
+        <qt:editorinfo geometry="435.87;565.82;-60;-50;120;100" scenegeometry="435.87;565.82;375.87;515.82;120;100"/>
+        <transition type="external" event="ParseComplete" target="Results"/>
+        <transition type="external" event="QtParse" target="QtParsing">
+            <qt:editorinfo movePoint="18.41;3.07" startTargetFactors="62.82;92.32"/>
+        </transition>
+    </state>
+    <state id="Results">
+        <qt:editorinfo geometry="447.12;167.81;-60;-50;120;100" scenegeometry="447.12;167.81;387.12;117.81;120;100"/>
+        <transition type="external" event="Transition_11" target="Final_1"/>
+    </state>
+    <state id="QtParsing">
+        <qt:editorinfo geometry="435.87;724.41;-60;-50;120;100" scenegeometry="435.87;724.41;375.87;674.41;120;100"/>
+        <transition type="external" event="QtParsed" target="Parsing">
+            <qt:editorinfo movePoint="1.03;6.14" endTargetFactors="28.18;52.64"/>
+        </transition>
+        <transition type="external" event="QtParseExit" target="Final_1">
+            <qt:editorinfo movePoint="3.07;-13.30" localGeometry="84.92;-56.27;96.18;-572.98"/>
+        </transition>
+    </state>
+    <state id="State_8">
+        <qt:editorinfo geometry="269.09;724.41;-60;-50;120;100" scenegeometry="269.09;724.41;209.09;674.41;120;100"/>
+    </state>
+</scxml>

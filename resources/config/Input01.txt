@@ -1,0 +1,2 @@
+# file {EIRC repo}./src/cons/If2Console/Input01.txt
+
