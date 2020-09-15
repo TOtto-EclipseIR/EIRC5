@@ -18,8 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include(../../EIRC2.pri)
 
-LIBS *= -leirType2
-LIBS *= -leirExe2
+LIBS *= -leirType5
+LIBS *= -leirExe5
 
 SOURCES += \
     CascadeParameters.cpp \

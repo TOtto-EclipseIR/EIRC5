@@ -18,8 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include(../../EIRC2.pri)
 
-#LIBS *= -leirBase2
-#LIBS *= -leirType2
+#LIBS *= -leirBase5
+#LIBS *= -leirType5
 
 SOURCES += \
     HexDump.cpp \
