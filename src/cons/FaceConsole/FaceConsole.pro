@@ -24,9 +24,8 @@ LIBS *= -leirXfr5
 LIBS *= -leirBase5
 LIBS *= -leirType5
 LIBS *= -leirExe5
-LIBS *= -leirCascade5
-#LIBS *= -leirFinder5
 LIBS *= -leirQtCV5
+LIBS *= -leirImage5
 
 SOURCES += \
     FaceConsole.cpp \

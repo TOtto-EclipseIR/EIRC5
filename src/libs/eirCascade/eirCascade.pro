@@ -22,13 +22,9 @@ LIBS *= -leirType5
 LIBS *= -leirExe5
 
 SOURCES += \
-    CascadeParameters.cpp \
-    CascadeType.cpp \
     eirCascade.cpp
 
 HEADERS += \
-    CascadeParameters.h \
-    CascadeType.h \
     eirCascade_global.h \
     eirCascade.h
 

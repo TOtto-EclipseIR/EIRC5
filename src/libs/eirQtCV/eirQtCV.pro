@@ -1,4 +1,4 @@
-QT *= gui
+QT *= gui xml
 
 TEMPLATE = lib
 DEFINES += EIRQTCV_LIBRARY
@@ -19,12 +19,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 include(../../EIRC2.pri)
 include(../../opencv4.pri)
 
+LIBS *= -leirBase5
 LIBS *= -leirType5
 LIBS *= -leirExe5
-LIBS *= -leirCascade5
 
 SOURCES += \
     cvBGRA.cpp \
+    cvCascade-Parameters.cpp \
     cvCascade.cpp \
     cvMat.cpp \
     cvString.cpp \

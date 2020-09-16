@@ -5,7 +5,7 @@ class EIRBASE_EXPORT eirBase
 {
 public:
     eirBase();
-    static void registerErrors();
 
 private:
 };
+

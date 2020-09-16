@@ -7,19 +7,15 @@
 
 #include <eirExe/CommandLine.h>
 #include <eirExe/ConfigObject.h>
-//#include <eirFinder/CascadeType.h>
+#include <eirImage/SimpleRectMarker.h>
 #include <eirType/Success.h>
 #include <eirXfr/Debug.h>
 #include <eirXfr/StartupDebug.h>
-//#include <eirImageIO/BaseOutputDir.h>
-//#include <eirImageIO/OutputManager.h>
-
-//#include <eirRectFind/RectFinder.h>
-//#include <eirMarker/MarkerManager.h>
 
 FaceConsole::FaceConsole(QObject *parent)
     : Console(parent)
     , cmpConfigObject(new ConfigObject(parent))
+    , mPreScanCascade(cvCascade::PreScan)
 {
     TRACEFN;
     setObjectName("FaceConsole");
@@ -191,9 +187,9 @@ void FaceConsole::initializeResources()
     EXPECT(mPreScanCascade.isLoaded());
 
     NEEDDO(mPreScanCascade.configure);
-    Configuration preScanConfig = config()->configuration("Option/RectFinder");
-    preScanConfig += config()->configuration("PreScan/RectFinder");
-    mPreScanCascade.configure(preScanConfig);
+//    Configuration preScanConfig = config()->configuration("Option/RectFinder");
+  //  preScanConfig += config()->configuration("PreScan/RectFinder");
+    //mPreScanCascade.configure(preScanConfig);
 
     writeLine("done");
     EMIT(resoursesInitd());
@@ -229,16 +225,27 @@ void FaceConsole::processCurrentFile()
     QString markedRectOutputFileName;
 
     writeLine("---Processing: "+mCurrentFileInfo.absoluteFilePath());
-    mPreScanCascade.imreadInputMat(mCurrentFileInfo);
-    mCurrentRectangles = mPreScanCascade.detect();
-    writeLine(QString("   %1 PreScan rectangles found")
-                            .arg(mCurrentRectangles.size()));
+    QQImage inputImage(mCurrentFileInfo.absoluteFilePath());
+    Configuration preScanConfig = config()->configuration("Option/RectFinder");
+    preScanConfig += config()->configuration("PreScan/RectFinder");
+    int rectCount = mPreScanCascade.detectRectangles(preScanConfig, inputImage);
+    mCurrentRectangles = mPreScanCascade.rectList();
+    BEXPECTNOT(rectCount < 0);
+    WEXPECTNOT(0 == rectCount);
+    EXPECTEQ(rectCount, mCurrentRectangles.size());
+    writeLine(QString("   %1 PreScan rectangles found").arg(rectCount));
     markedRectOutputFileName = QQFileInfo(mMarkedRectOutputDir,
-                        mCurrentFileInfo.completeBaseName()+"-%M@.png")
-                                  .absoluteFilePath();
+            mCurrentFileInfo.completeBaseName()+"-%M@.png").absoluteFilePath();
     QQFileInfo markedRectOutputFileInfo;
+    markedRectOutputFileInfo.replace("%M", mPreScanCascade.methodString());
     markedRectOutputFileInfo.setFile(markedRectOutputFileName);
-    writeLine("   " + mPreScanCascade.imwriteMarkedImage(markedRectOutputFileInfo) + " written");
+    //SimpleRectMarker rectMarker(inputImage);
+    SimpleRectMarker rectMarker(mPreScanCascade.detectImage());
+    rectMarker.markAll(Configuration(), mCurrentRectangles);
+    QQImage markedImage = rectMarker;
+    if (markedImage.save(markedRectOutputFileName))
+        writeLine(QString("   %1 written").arg(markedRectOutputFileName));
+
     EMIT(processed(QFileInfo(mCurrentFileInfo),
              mCurrentRectangles.size()));
     NEEDDO(processFailed());

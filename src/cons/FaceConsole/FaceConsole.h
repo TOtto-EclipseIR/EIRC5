@@ -51,7 +51,7 @@ private:
     QDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
     QFileInfo mCurrentFileInfo;
-    QList<QRect> mCurrentRectangles;
+    QQRectList mCurrentRectangles;
 //    FramePak mFramePak;
     QImage mRectImage;
 

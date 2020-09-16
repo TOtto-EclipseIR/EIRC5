@@ -1,0 +1,70 @@
+#include "QQImage.h"
+
+#include <QImageReader>
+#include <QImageWriter>
+
+#include <eirBase/eirBase.h>
+#include <eirXfr/Debug.h>
+
+QQImage::QQImage() {;}
+QQImage::QQImage(const QImage &other) : QImage(other) {;}
+QQImage::QQImage(const QString &fileName, const char *format) : QImage(fileName, format) {;}
+
+QQImage::QQImage(int width, int height, QImage::Format format)
+    : QImage(width, height, format)
+{
+    TRACEQFI << width << height << format;
+}
+
+QQImage::QQImage(const uchar *data, int width, int height, QImage::Format format)
+{
+    TRACEQFI << PTRSTRING(data) << width << height <<  format;
+#pragma warning(suppress : 4805)
+    if ((qptrdiff(data) & 0x0000001F))
+    {
+        ERROR << "Qt expects data to be 32-bit aligned";
+    }
+    else
+    {
+        QImage newImage(data, width, height, format, format);
+        EXPECTNOT(newImage.isNull());
+        *this = newImage;
+    }
+}
+
+void QQImage::nullify()
+{
+    *this = QImage();
+}
+
+int QQImage::rows() const
+{
+    return size().height();
+}
+
+int QQImage::cols() const
+{
+    return size().width();
+}
+
+QQSize QQImage::size() const
+{
+    return QImage::size();
+}
+
+int QQImage::stride() const
+{
+    return QImage::bytesPerLine();
+}
+
+QStringList QQImage::supportedReadFormats()
+{
+    QStringList supportedFormatStrings;
+    QByteArrayList supportedFormatBAs
+            = QImageReader::supportedImageFormats();
+    foreach (QByteArray fmt, supportedFormatBAs)
+        supportedFormatStrings << QString(fmt);
+    return supportedFormatStrings;
+}
+
+

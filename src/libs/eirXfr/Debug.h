@@ -5,8 +5,10 @@
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QPointer>
+#include <QString>
 #include <QTimer>
 
+#define PTRSTRING(ptr) QString("%1=0x%2").arg(#ptr).arg(quintptr(ptr), sizeof(quintptr) / 4, 16, QChar('0'))
 #define QOBJNAME(pqobj) ((nullptr == pqobj) ? ("{null} " #pqobj) : ("QObject:" #pqobj + pqobj->objectName()))
 #define TIME QDateTime::currentDateTime().toString("hh:mm:ss.zzz")
 #define DEBUG(qmt, pfx) qmt() << pfx << TIME << __LINE__

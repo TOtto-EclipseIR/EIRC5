@@ -1,4 +1,4 @@
-QT -= gui
+# QT -= gui ### QImage
 
 TEMPLATE = lib
 DEFINES += EIRTYPE_LIBRARY
@@ -31,6 +31,7 @@ SOURCES += \
     QQFile.cpp \
     QQFileInfo.cpp \
     QQFileInfoList.cpp \
+    QQImage.cpp \
     QQRect.cpp \
     QQRectF.cpp \
     QQRectList.cpp \
@@ -76,6 +77,7 @@ HEADERS += \
     QQFile.h \
     QQFileInfo.h \
     QQFileInfoList.h \
+    QQImage.h \
     QQRect.h \
     QQRectF.h \
     QQRectList.h \
