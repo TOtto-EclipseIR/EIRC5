@@ -7,6 +7,8 @@
 #include <eirObjDet/ObjDetPak.h>
 #include <eirObjDet/ObjDetResultList.h>
 
+#include "ColorWheel.h"
+
 class EIRIMAGE_EXPORT SimpleRectMarker : public QQImage
 {
 public:
@@ -15,6 +17,11 @@ public:
                  const QQRectList &rectList);
     void mark(const Configuration &markRectConfig,
               const ObjDetResultList &resultList,
-              const ObjDetPak &pak);
+              const ColorWheel &wheel,
+              const bool markAll=false);
+    ColorWheel qualityWheel();
+
+private:
+    ColorWheel mQualityWheel;
 };
 

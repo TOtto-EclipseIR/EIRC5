@@ -16,12 +16,14 @@ LIBS *= -leirObjDet5
 LIBS *= -leirQtCV5
 
 SOURCES += \
+    ColorWheel.cpp \
     Hue.cpp \
     MarkManager.cpp \
     OutputManager.cpp \
     SimpleRectMarker.cpp \
 
 HEADERS += \
+    ColorWheel.h \
     Hue.h \
     MarkManager.h \
     OutputManager.h \

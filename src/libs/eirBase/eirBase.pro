@@ -1,4 +1,4 @@
-QT -= gui
+# QT -= gui ### QColor
 
 TEMPLATE = lib
 DEFINES += EIRBASE_LIBRARY

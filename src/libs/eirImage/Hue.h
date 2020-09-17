@@ -7,8 +7,11 @@ class Hue : public Rational
 public:
     Hue();
     Hue(const int threesixty);
+    Hue(const int n, const int d);
     Hue(const qreal tworadians);
     Hue(const quint8 twofiftyfive);
+    void normalize();
+    Hue normalized() const;
 
 public: // static
     static Hue white;

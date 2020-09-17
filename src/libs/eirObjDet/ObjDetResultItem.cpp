@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include <eirType/Rational.h>
 #include <eirXfr/Debug.h>
 
 ObjDetResultItem::ObjDetResultItem() {;}
@@ -27,19 +28,27 @@ void ObjDetResultItem::unite(const QQRect rect)
     else
     {
         mOverlapAccumulator += unitedOverlap(rect);
-        mUnitedRect &= rect;
+        mUnitedRect.unite(rect);
     }
     mAccumulatedRects.append(rect);
     TRACEQFI << mAccumulatedRects.size() << mUnitedRect
              << mOverlapAccumulator << mOverlapAccumulator / (mAccumulatedRects.size()-1);
 }
 
-bool ObjDetResultItem::isOrphan() const
+bool ObjDetResultItem::unite(const QQRect rect, const qreal overlapThreshold)
 {
-    return 1 == mAccumulatedRects.size();
+    TRACEQFI << rect << overlapThreshold << mUnitedRect.toString();
+    bool overlapped = unitedOverlap(rect) > overlapThreshold;
+    if (overlapped) unite(rect);
+    return overlapped;
 }
 
-void ObjDetResultItem::calculate()
+bool ObjDetResultItem::isOrphan(const int threshold) const
+{
+    return mAccumulatedRects.size() <= threshold;
+}
+
+void ObjDetResultItem::calculate(const cvCascade *cascade)
 {
     TRACEQFI << mAccumulator << mUnitedRect;
     TODO(UnSmell);
@@ -55,7 +64,9 @@ void ObjDetResultItem::calculate()
 
     qreal qualityF = log(count()) * 900.0 / 4.0;
     qualityF *= averageOverlap();
-    TODO(UpScale by width from min to max width);
+    Rational widthFactor(mResultRect.width(), cascade->detectImage().width());
+    qualityF *= 0.5 + widthFactor.toReal();
+    TODO(Alpha4:ScaleFromMinToMaxWidth);
     TODO(Adjust for Factor);
     mQuality = qBound(1, qRound(qualityF), 999);
     TRACE << count() << log(count()) << averageOverlap() << qualityF;
@@ -81,6 +92,11 @@ qreal ObjDetResultItem::averageOverlap() const
     return count() > 1
             ? mOverlapAccumulator / qreal(count() - 1)
             : 0.0;
+}
+
+int ObjDetResultItem::rank() const
+{
+    return mRank;
 }
 
 int ObjDetResultItem::quality(const int ifZero) const

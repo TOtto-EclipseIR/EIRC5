@@ -16,17 +16,18 @@ QList<ObjDetResultItem> ObjDetResultList::list() const
     return mRankedList;
 }
 
-void ObjDetResultList::appendOrphan(const QQRect rect)
+void ObjDetResultList::appendOrphan(const QQRectList rect)
 {
     mOrphanRects.append(rect);
 }
 
-void ObjDetResultList::append(const ObjDetResultItem &item)
+void ObjDetResultList::append(ObjDetResultItem item, const cvCascade *cascade)
 {
     EXPECTNOT(item.isEmpty());
     EXPECTNOT(item.isOrphan());
+    item.calculate(cascade);
     if ( ! item.isEmpty() && ! item.isOrphan())
-        mQualityItemMap.insert(item.quality(), item);
+        mQualityItemMap.insert( - item.quality(), item);
 }
 
 void ObjDetResultList::assignRanks()

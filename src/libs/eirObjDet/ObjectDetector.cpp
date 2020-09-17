@@ -82,8 +82,9 @@ Uuid ObjectDetector::process(const Configuration &config,
     pak.set(cascade()->typeName()+"/MethodString", cascade()->methodString());
     QQRectList rectList = cascade()->rectList();
     pak.set(cascade()->typeName()+"/Rectangles", rectList);
-    qreal groupUnionThreshold = config.real("GroupUnionThreshold", 0.5);
-    ObjDetResultList resultList = groupByUnion(rectList, groupUnionThreshold);
+    qreal unionGroupOverlap = config.realPermille("UnionGroupOverlap", 500);
+    qreal unionGroupOrphan = config.unsignedInt("UnionGroupOrphan", 1);
+    ObjDetResultList resultList = groupByUnion(rectList, unionGroupOverlap, unionGroupOrphan);
     pak.set(cascade()->typeName()+"/ResultList", resultList.toVariant());
     insert(pak);
     TRACE << "return uuid" << pak.uuid();
@@ -91,9 +92,10 @@ Uuid ObjectDetector::process(const Configuration &config,
 }
 
 ObjDetResultList ObjectDetector::groupByUnion(const QQRectList &inputRects,
-                                        const qreal threshold)
+                                              const qreal overlapThreshold,
+                                              const int orphanThreshold)
 {
-    TRACEQFI << inputRects << threshold;
+    TRACEQFI << inputRects << overlapThreshold;
     EXPECTNOT(inputRects.isEmpty());
     if (inputRects.isEmpty()) return ObjDetResultList();
     ObjDetResultList resultList;
@@ -106,30 +108,19 @@ ObjDetResultList ObjectDetector::groupByUnion(const QQRectList &inputRects,
         ObjDetResultItem currentItem;
         currentItem.unite(currentRect);
         QQRectList nextRects;
+        while ( ! remainingRects.isEmpty())
         {
-            while ( ! remainingRects.isEmpty())
-            {
-                QQRect thisRect = remainingRects.takeFirst();
-                DUMPVAL(thisRect);
-                if (currentItem.unitedOverlap(thisRect) > threshold)
-                    currentItem.unite(thisRect);
-                else
-                    nextRects << thisRect;
-            }
+            QQRect thisRect = remainingRects.takeFirst();
+            DUMPVAL(thisRect);
+            if ( ! currentItem.unite(thisRect, overlapThreshold))
+                nextRects << thisRect;
         }
-        if (currentItem.isOrphan())
-        {
-            resultList.appendOrphan(currentRect);
-        }
-        else if (currentItem.isEmpty())
-        {
-            EXPECTNOT(currentItem.isEmpty());
-        }
+
+        EXPECTNOT(currentItem.isEmpty());
+        if (currentItem.isOrphan(orphanThreshold))
+            resultList.appendOrphan(currentItem.allRects());
         else
-        {
-            currentItem.calculate();
-            resultList.append(currentItem);
-        }
+            resultList.append(currentItem, cascade());
         remainingRects = nextRects;
     }
     resultList.assignRanks();
@@ -137,7 +128,7 @@ ObjDetResultList ObjectDetector::groupByUnion(const QQRectList &inputRects,
     return resultList;
 }
 
-QQImage ObjectDetector::processInputImage() const
+QQImage ObjectDetector::inputImageForProcess() const
 {
     return mProcessInputImage;
 }

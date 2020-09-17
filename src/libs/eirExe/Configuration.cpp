@@ -63,4 +63,13 @@ qreal Configuration::real(const MultiName &key,
             : defValue;
 }
 
+qreal Configuration::realPermille(const MultiName &key, const unsigned &defValue) const
+{
+    TRACEQFI << key() << defValue;
+    bool ok;
+    unsigned uintValue = value(key).value().toUInt(&ok);
+    TRACE << ok << contains(key) << uintValue;
+    return qBound(0.0, qreal((ok && contains(key)) ? uintValue : defValue) / 1000.0, 1.0);
+}
+
 

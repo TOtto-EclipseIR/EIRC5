@@ -15,12 +15,14 @@
 FaceConsole::FaceConsole(QObject *parent)
     : Console(parent)
     , cmpConfigObject(new ConfigObject(parent))
-    , mPreScanCascade(cvCascade::PreScan)
+    , cmpPreScanDetector(new ObjectDetector(cvCascade::PreScan, cmpConfigObject, this))
 {
     TRACEFN;
     setObjectName("FaceConsole");
     TSTALLOC(cmpConfigObject);
-
+    TSTALLOC(cmpPreScanDetector);
+    cmpConfigObject->setObjectName("ConfigObject:FaceConsole");
+    cmpPreScanDetector->setObjectName("ObjectDetector:FaceConsole");
     QTimer::singleShot(500, this, &FaceConsole::initializeApplication);
     TRACERTV();
 }
@@ -59,9 +61,14 @@ void FaceConsole::setupCommandLine()
     TRACEFN
     rCommandLine().process();
     rCommandLine().expandDirectories();
+    CommandLine::ExpandDirResultList xdrl = commandLine()->expandDirResults();
+    writeLine("---Directories:");
+    int k = 0;
+    foreach (CommandLine::ExpandDirResult xdr, xdrl)
+        writeLine(QString("   %1. %2 %3 %4").arg(++k, 2).arg(xdr.fileCount, 4)
+                  .arg(xdr.firstFileName, 20).arg(xdr.dir.path()));
     EMIT(commandLineSetup());
     QTimer::singleShot(100, this, &FaceConsole::setConfiguration);
-
 }
 
 void FaceConsole::setConfiguration()
@@ -104,7 +111,6 @@ void FaceConsole::setOutputDirs()
             configuration("Output/Dirs")
                 .string("MarkedRect"));
     DUMPVAL(markedRectDirString);
-#if 1
     if (markedRectDirString.isEmpty())
     {
         // do nothing, leave mMarkedRectOutputDir null
@@ -134,33 +140,27 @@ void FaceConsole::setOutputDirs()
     }
     else
     {
-        writeErr(QString("***%1 Dir = %2 is invalid").arg("MarkedRect").arg(markedRectDirString));
+        writeErr(QString("***%1 Dir = %2 is invalid").arg("MarkedRect")
+                        .arg(markedRectDirString));
     }
-#else
-    QQFileInfo markedRectDirFileInfo(mBaseOutputDir, markedRectDirString);
-    DUMPVAL(markedRectDirFileInfo);
-    DUMPVAL(markedRectDirFileInfo.exists());
-    if (markedRectDirFileInfo.exists())
-    {
-        EXPECTNOT(markedRectDirFileInfo.isFile());
-        mMarkedRectOutputDir = QDir(markedRectDirFileInfo.path());
-        writeLine("   " + mMarkedRectOutputDir.absolutePath() + " exists");
-    }
-    else
-    {
-        mMarkedRectOutputDir = markedRectDirFileInfo.dir();
-        EXPECT(mMarkedRectOutputDir.mkpath(markedRectDirString));
-        EXPECT(mMarkedRectOutputDir.cd(markedRectDirString));
-        EXPECT(mMarkedRectOutputDir.exists());
-        if (mMarkedRectOutputDir.exists())
-            writeLine("   " + mMarkedRectOutputDir.absolutePath() + " created");
-    }
-#endif
     DUMPVAL(mMarkedRectOutputDir.isNull());
     DUMPVAL(mMarkedRectOutputDir);
     if (mMarkedRectOutputDir.notNull())
+    {
         writeLine("---"+mMarkedRectOutputDir.absolutePath()
                   + (created ? " created" : " exists"));
+        for (int q00 = 0; q00 < 10; ++q00)
+        {
+            QDir q00Dir = mMarkedRectOutputDir;
+            QString q00Name = QString("Q%1").arg(q00 * 100, 3, 10, QChar('0'));
+            q00Dir.mkpath(q00Name);
+            if (q00Dir.cd(q00Name))
+            {
+                mMarkedFaceQualityDirs.append(q00Dir);
+                writeLine("   "+q00Dir.absolutePath()+" created");
+            }
+        }
+    }
 
     NEEDDO(OtherDirs);
     TODO(BackToImageIO);
@@ -183,13 +183,13 @@ void FaceConsole::initializeResources()
     EXPECT(cascadeFileInfo.isReadable());
     EXPECT(cascadeFileInfo.isFile());
     write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
-    mPreScanCascade.loadCascade(cascadeFileInfo.absoluteFilePath());
-    EXPECT(mPreScanCascade.isLoaded());
+    cmpPreScanDetector->cascade()->loadCascade(cascadeFileInfo.absoluteFilePath());
+    EXPECT(cmpPreScanDetector->cascade()->isLoaded());
 
-    NEEDDO(mPreScanCascade.configure);
+    NEEDDO(cmpPreScanDetector->cascade()->configure);
 //    Configuration preScanConfig = config()->configuration("Option/RectFinder");
   //  preScanConfig += config()->configuration("PreScan/RectFinder");
-    //mPreScanCascade.configure(preScanConfig);
+    //cmpPreScanDetector->cascade()->configure(preScanConfig);
 
     writeLine("done");
     EMIT(resoursesInitd());
@@ -224,27 +224,53 @@ void FaceConsole::processCurrentFile()
     QImage rectImage;
     QString markedRectOutputFileName;
 
-    writeLine("---Processing: "+mCurrentFileInfo.absoluteFilePath());
+    writeLine(QString("---Processing: %1. %2").arg(++mCurrentFileCount)
+              .arg(mCurrentFileInfo.fileName(QQString::Squeeze)));
     QQImage inputImage(mCurrentFileInfo.absoluteFilePath());
     Configuration preScanConfig = config()->configuration("Option/RectFinder");
     preScanConfig += config()->configuration("PreScan/RectFinder");
-    int rectCount = mPreScanCascade.detectRectangles(preScanConfig, inputImage);
-    mCurrentRectangles = mPreScanCascade.rectList();
+    int rectCount = cmpPreScanDetector->cascade()->detectRectangles(preScanConfig, inputImage);
+    mCurrentRectangles = cmpPreScanDetector->cascade()->rectList();
     BEXPECTNOT(rectCount < 0);
     WEXPECTNOT(0 == rectCount);
     EXPECTEQ(rectCount, mCurrentRectangles.size());
-    writeLine(QString("   %1 PreScan rectangles found").arg(rectCount));
-    markedRectOutputFileName = QQFileInfo(mMarkedRectOutputDir,
-            mCurrentFileInfo.completeBaseName()+"-%M@.png").absoluteFilePath();
-    QQFileInfo markedRectOutputFileInfo;
-    markedRectOutputFileInfo.replace("%M", mPreScanCascade.methodString());
-    markedRectOutputFileInfo.setFile(markedRectOutputFileName);
+    qreal unionGroupOverlap = cmpConfigObject->configuration("/PreScan/RectFinder")
+            .realPermille("UnionGroupOverlap", 500);
+    qreal unionGroupOrphan = cmpConfigObject->configuration("/PreScan/RectFinder")
+            .unsignedInt("UnionGroupOrphan", 1);
+    mCurrentResults = cmpPreScanDetector->groupByUnion(mCurrentRectangles,
+                                                       unionGroupOverlap,
+                                                       unionGroupOrphan);
+    writeLine(QString("   %1 PreScan rectangles found, %2 Candidate Faces, %3 Orphans")
+              .arg(rectCount).arg(mCurrentResults.count())
+              .arg(mCurrentResults.orphanCount()));
+    QQFileInfo markedRectOutputFileInfo(mMarkedRectOutputDir,
+            mCurrentFileInfo.completeBaseName()+"-%M@.png", QQString::Squeeze);
+    markedRectOutputFileInfo.replace("%M", cmpPreScanDetector->cascade()->methodString());
+    markedRectOutputFileName = markedRectOutputFileInfo.absoluteFilePath();
     //SimpleRectMarker rectMarker(inputImage);
-    SimpleRectMarker rectMarker(mPreScanCascade.detectImage());
-    rectMarker.markAll(Configuration(), mCurrentRectangles);
+    SimpleRectMarker rectMarker(cmpPreScanDetector->cascade()->detectImage());
+    //rectMarker.markAll(Configuration(), mCurrentRectangles);
+    rectMarker.mark(Configuration(), mCurrentResults, rectMarker.qualityWheel(), true);
     QQImage markedImage = rectMarker;
     if (markedImage.save(markedRectOutputFileName))
         writeLine(QString("   %1 written").arg(markedRectOutputFileName));
+
+    foreach (ObjDetResultItem item, mCurrentResults.list())
+    {
+        QQImage faceImage = markedImage.copy(item.resultRect() * 1.25);
+        QString faceName = QString("%1-R%2Q%3.PNG")
+                .arg(mCurrentFileInfo.completeBaseName(QQString::Squeeze))
+                .arg(item.rank(), 2, 10, QChar('0'))
+                .arg(item.quality(), 3, 10, QChar('0'));
+        QQFileInfo faceInfo(mMarkedFaceQualityDirs.at(item.quality() / 100), faceName);
+        if (faceImage.width() < 256)
+            faceImage = faceImage.scaledToWidth(256, Qt::SmoothTransformation);
+        bool saved = faceImage.save(faceInfo.absoluteFilePath());
+        TRACE << saved << faceInfo << faceImage;
+        if (saved)
+            writeLine(QString("   %1 written").arg(faceInfo.filePath()));
+    }
 
     EMIT(processed(QFileInfo(mCurrentFileInfo),
              mCurrentRectangles.size()));

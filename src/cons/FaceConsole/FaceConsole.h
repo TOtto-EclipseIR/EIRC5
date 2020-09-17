@@ -5,6 +5,7 @@
 
 #include <eirType/QQDir.h>
 #include <eirQtCV/cvCascade.h>
+#include <eirObjDet/ObjectDetector.h>
 
 class QCommandLineParser;
 class ConfigObject;
@@ -45,14 +46,14 @@ signals:
 
 private:
     ConfigObject * const cmpConfigObject=nullptr;
-//    OutputManager * const cmpOutput=nullptr;
-//    RectFinder * const cmpRectFinder=nullptr;
-    cvCascade mPreScanCascade;
+    ObjectDetector * const cmpPreScanDetector=nullptr;
     QDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
-    QFileInfo mCurrentFileInfo;
+    QQDir::Vector mMarkedFaceQualityDirs;
+    int mCurrentFileCount=0;
+    QQFileInfo mCurrentFileInfo;
     QQRectList mCurrentRectangles;
-//    FramePak mFramePak;
+    ObjDetResultList mCurrentResults;
     QImage mRectImage;
 
   //  MarkerManager * const cmpMarkerManager=nullptr;

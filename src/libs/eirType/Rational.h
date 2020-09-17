@@ -21,6 +21,9 @@ public:
     qreal toReal() const;
     float toFloat() const;
     double toDouble() const;
+    int numerator() const;
+    int denominator() const;
+    void set(const int n, const int d);
 
     void nullify();
     void unitify(const bool byModulo=false);

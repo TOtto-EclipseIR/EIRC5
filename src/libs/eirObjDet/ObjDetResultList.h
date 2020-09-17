@@ -17,8 +17,8 @@ public:
     void set(const QVariant &variant);
     QList<ObjDetResultItem> list() const;
     ObjDetResultItem at(const int rank) const;
-    void appendOrphan(const QQRect rect);
-    void append(const ObjDetResultItem &item);
+    void appendOrphan(const QQRectList rect);
+    void append(ObjDetResultItem item, const cvCascade *cascade);
     void assignRanks();
     int count() const;
     int orphanCount() const;

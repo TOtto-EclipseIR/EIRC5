@@ -9,15 +9,12 @@
 #include "QQRectF.h"
 
 QQRect::QQRect() {;}
-
+QQRect::QQRect(const QRect rc) : QRect(rc) {;}
 QQRect::QQRect(int x, int y, int width, int height)
     : QRect(x, y, width, height) {;}
-
 QQRect::QQRect(const QSize size, const QPoint center)
     : QRect(QPoint(center.x() - size.width()  / 2,
-                   center.y() - size.height() / 2),
-            size) {;}
-
+                   center.y() - size.height() / 2), size) {;}
 QQRect::QQRect(const QRectF rcf) { set(rcf); }
 
 QQRect QQRect::set(const QRectF rcf)
@@ -40,6 +37,11 @@ void QQRect::makeSquare()
     set(QSize(d,d), center());
 }
 
+void QQRect::unite(const QQRect other)
+{
+    *this = united(other);
+}
+
 int QQRect::area() const
 {
     return height() * width();
@@ -57,36 +59,8 @@ QQRect QQRect::overlapped(const QQRect other) const
     int l = left(),     ol = other.left(),      rl = 0;
     int b = bottom(),   ob = other.bottom(),    rb = 0;
     int r = right(),    ox = other.right(),     rr = 0;
-#if 1
     rt = qMax(t, ot), rb = qMin(b, ob);
     rl = qMax(l, ol), rr = qMin(r, ox);
-#else
-    if (contains(l, ol, r))
-        if (contains(l, ox, r))
-            rl = l, rr = r; // o left-right is inside this
-        else
-            rl = l, rr = ox; // o left is inside, o right isn't
-    else if (contains(ol, l, ox))
-        if (contains(ol, r, ox))
-            rl = ol, rr = ox; // this left-right is inside other
-        else
-            rl = ol, rr = r; // this l inside, this r not
-    else
-        return QQRect(); // no left-right overlap
-
-    if (contains(t, ot, b))
-        if (contains(t, ob, b))
-            rt = t, rb = b; // o top-bottom is inside this
-        else
-            rt = t, rr = ob; // o top is inside, o bottom isn't
-    else if (contains(ot, t, ob))
-        if (contains(ot, b, ob))
-            rt = ot, rb = ob; // this top-bottom is inside other
-        else
-            rt = ot, rb = b; // this t inside, this b not
-    else
-        return QQRect(); // no top-bottom overlap
-#endif
     QQRect rc(rl, rt, rr-rl, rb-rt);
     TRACE << rc;
     EXPECT(rc.isValid());
@@ -95,14 +69,19 @@ QQRect QQRect::overlapped(const QQRect other) const
 
 qreal QQRect::overlap(const QQRect other) const
 {
+    TRACEQFI << other << toString();
     EXPECT(isValid());
-    if ( ! isValid()) return 0.0;
-    QQRect intersection = overlapped(other);
-    TRACEQFI  << toString() << area()
-              << intersection << intersection.area()
-              << other << other.area()
-              << QQRectF(intersection).area() / qreal(area());
-    return QQRectF(intersection).area() / qreal(area());
+    EXPECT(other.isValid());
+    if ( ! isValid() || ! other.isValid()) return 0.0;
+    if (contains(other)) return 1.0;
+    if (other.contains(*this)) return 1.0;
+    if ( ! intersects(other)) return 0.0;
+
+    QQRect intersection = intersected(other);
+    qreal intArea = intersection.area();
+    qreal minArea = qMin(area(), other.area());
+    TRACE << intersection << intArea << minArea << intArea / minArea;
+    return intArea / minArea;
 }
 
 QQRect QQRect::expandedBy(const qreal factor) const

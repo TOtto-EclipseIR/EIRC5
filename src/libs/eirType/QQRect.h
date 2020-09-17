@@ -15,12 +15,14 @@ public:
     typedef QList<QQRect> List;
 public:
     QQRect();
+    QQRect(const QRect rc);
     QQRect(int x, int y, int width, int height);
     QQRect(const QSize size, const QPoint center);
     QQRect(const QRectF rcf);
     QQRect set(const QRectF rcf);
     void set(const QSize size, const QPoint center);
     void makeSquare();
+    void unite(const QQRect other);
     int area() const;
     QQRect overlapped(const QQRect other) const;
     qreal overlap(const QQRect other) const;

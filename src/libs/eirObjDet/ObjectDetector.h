@@ -33,9 +33,10 @@ public:
                        const QFileInfo &inputFileInfo,
                        bool showDetect=false);
     ObjDetResultList groupByUnion(const QQRectList &inputRects,
-                            const qreal threshold);
+                            const qreal overlapThreshold,
+                            const int orphanThreshold);
     qreal calculateQuality(const ObjDetResultItem &item) const;
-    QQImage processInputImage() const;
+    QQImage inputImageForProcess() const;
 
 public slots:
     // setup

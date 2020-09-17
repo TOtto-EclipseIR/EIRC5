@@ -11,4 +11,19 @@ qreal Rational::toReal() const
     return qreal(mNumerator) / qreal(mDenominator);
 }
 
+int Rational::numerator() const
+{
+    return mNumerator;
+}
+
+int Rational::denominator() const
+{
+    return mDenominator;
+}
+
+void Rational::set(const int n, const int d)
+{
+    mNumerator = n, mDenominator = d;
+}
+
 
