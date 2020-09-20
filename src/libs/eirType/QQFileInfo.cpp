@@ -55,7 +55,7 @@ void QQFileInfo::setFile(const QQString &filePathName)
     TRACEQFI << filePathName;
     mIsNull = false;
     QFileInfo::setFile(filePathName);
-    replace("@", Milliseconds::baseDateStamp());
+//    replace("@", Milliseconds::baseDateStamp());
     TRACE << QFileInfo::filePath();
 }
 
@@ -81,6 +81,21 @@ void QQFileInfo::replace(const QQString &trigger, const QQString &with)
 bool QQFileInfo::isNull() const
 {
     return mIsNull;
+}
+
+bool QQFileInfo::notExists() const
+{
+    return ! exists();
+}
+
+bool QQFileInfo::notFile() const
+{
+    return ! isFile();
+}
+
+bool QQFileInfo::notReadable() const
+{
+    return ! isReadable();
 }
 
 bool QQFileInfo::tryIsFile(const QIODevice::OpenMode mode) const

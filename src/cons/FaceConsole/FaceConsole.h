@@ -31,6 +31,7 @@ private slots:
     void nextFile();
     void processCurrentFile();
     void finishProcessing();
+    void failedExit(const qint8 retcode, const QString &errmsg);
 
 signals:
     void applicationInitd();
@@ -39,6 +40,7 @@ signals:
     void baseDirSet();
     void outputDirsSet();
     void resoursesInitd();
+    void resourseInitFailed(const qint8 retcode, const QString &errmsg);
     void processingStarted();
     void processed(QFileInfo fileInfo, int rectCount);
     void processFailed(QFileInfo fileInfo, QString errorString);

@@ -37,6 +37,9 @@ public:
     void setFile(const QDir &dir, const QQString &fileName);
     void replace(const QQString &trigger, const QQString &with);
     bool isNull() const;
+    bool notExists() const;
+    bool notFile() const;
+    bool notReadable() const;
     bool tryIsFile(const QIODevice::OpenMode mode=QIODevice::ReadOnly) const;
     bool tryIsDir() const;
     QQString attributes() const;

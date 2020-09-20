@@ -8,6 +8,7 @@
 #include <eirExe/CommandLine.h>
 #include <eirExe/ConfigObject.h>
 #include <eirImage/SimpleRectMarker.h>
+#include <eirQtCV/cvVersion.h>
 #include <eirType/Success.h>
 #include <eirXfr/Debug.h>
 #include <eirXfr/StartupDebug.h>
@@ -36,16 +37,22 @@ void FaceConsole::initializeApplication()
 {
     TRACEFN;
     QLocale locale;
+    cvVersion cvv;
     writeLine(QString("%1 %2 started %3")
               .arg(qApp->applicationName())
               .arg(qApp->applicationVersion())
               .arg(locale.toString(QDateTime::currentDateTime())));
+    writeLine("   with Open Source Computer Vision library (OpenCV) " + cvv.toString());
+    CONNECT(this, &FaceConsole::resourseInitFailed,
+            qApp, &QCoreApplication::quit);
     CONNECT(this, &FaceConsole::processingStarted,
             this, &FaceConsole::nextFile);
     CONNECT(this, &FaceConsole::processed,
             this, &FaceConsole::nextFile);
     CONNECT(this, &FaceConsole::processingComplete,
             qApp, &QCoreApplication::quit);
+    CONNECT(this, &FaceConsole::resourseInitFailed,
+            this, &FaceConsole::failedExit);
     EMIT(applicationInitd());
     QTimer::singleShot(100, this, &FaceConsole::setupCommandLine);
 }
@@ -171,19 +178,37 @@ void FaceConsole::setOutputDirs()
 void FaceConsole::initializeResources()
 {
     TRACEFN;
-    QDir baseCascadeDir(config()->configuration("/Resources/RectFinder")
+    QQDir baseCascadeDir(config()->configuration("/Resources/RectFinder")
                  .string("BaseDir"));
+    TRACE << baseCascadeDir << baseCascadeDir.exists() << baseCascadeDir.isReadable();
+    EXPECT(baseCascadeDir.exists());
+    EXPECT(baseCascadeDir.isReadable());
     QString cascadeFileName = config()->
             configuration("/Resources/RectFinder/PreScan")
                 .string("XmlFile");
-    QFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
-    TRACE << cascadeFileInfo << cascadeFileInfo.exists()
+    QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
+    TRACE << cascadeFileInfo.absoluteFilePath() << cascadeFileInfo.exists()
           << cascadeFileInfo.isReadable() << cascadeFileInfo.isFile();
-    EXPECT(cascadeFileInfo.exists());
-    EXPECT(cascadeFileInfo.isReadable());
-    EXPECT(cascadeFileInfo.isFile());
+    EXPECTNOT(cascadeFileInfo.notExists());
+    EXPECTNOT(cascadeFileInfo.notReadable());
+    EXPECTNOT(cascadeFileInfo.notFile());
     write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
-    cmpPreScanDetector->cascade()->loadCascade(cascadeFileInfo.absoluteFilePath());
+    if (cascadeFileInfo.notExists()
+            || cascadeFileInfo.notFile()
+            || cascadeFileInfo.notReadable())
+    {
+        writeLine("error");
+        writeErr("***Invalid cascade file specified: "
+                 + cascadeFileInfo.absoluteFilePath());
+        EMIT(resourseInitFailed(1, "Invalid Cascade"));
+    }
+    if ( ! cmpPreScanDetector->cascade()->loadCascade(cascadeFileInfo))
+    {
+        writeLine("error");
+        writeErr("***Cascade file load failed: "
+                 + cascadeFileInfo.absoluteFilePath());
+        EMIT(resourseInitFailed(2, "Cascade Failed"));
+    }
     EXPECT(cmpPreScanDetector->cascade()->isLoaded());
 
     NEEDDO(cmpPreScanDetector->cascade()->configure);
@@ -191,9 +216,13 @@ void FaceConsole::initializeResources()
   //  preScanConfig += config()->configuration("PreScan/RectFinder");
     //cmpPreScanDetector->cascade()->configure(preScanConfig);
 
-    writeLine("done");
-    EMIT(resoursesInitd());
-    QTimer::singleShot(100, this, &FaceConsole::startProcessing);}
+    if (nullptr != cmpPreScanDetector->cascade())
+    {
+        writeLine("done");
+        EMIT(resoursesInitd());
+        QTimer::singleShot(100, this, &FaceConsole::startProcessing);
+    }
+}
 
 void FaceConsole::startProcessing()
 {
@@ -227,9 +256,15 @@ void FaceConsole::processCurrentFile()
     writeLine(QString("---Processing: %1. %2").arg(++mCurrentFileCount)
               .arg(mCurrentFileInfo.fileName(QQString::Squeeze)));
     QQImage inputImage(mCurrentFileInfo.absoluteFilePath());
+    if (inputImage.isNull())
+    {
+        writeLine("***Invalid Image File");
+        EMIT(processed(QFileInfo(mCurrentFileInfo),0));
+    }
     Configuration preScanConfig = config()->configuration("Option/RectFinder");
     preScanConfig += config()->configuration("PreScan/RectFinder");
     int rectCount = cmpPreScanDetector->cascade()->detectRectangles(preScanConfig, inputImage);
+    DUMPVAL(rectCount);
     mCurrentRectangles = cmpPreScanDetector->cascade()->rectList();
     BEXPECTNOT(rectCount < 0);
     WEXPECTNOT(0 == rectCount);
@@ -246,11 +281,11 @@ void FaceConsole::processCurrentFile()
               .arg(mCurrentResults.orphanCount()));
     QQFileInfo markedRectOutputFileInfo(mMarkedRectOutputDir,
             mCurrentFileInfo.completeBaseName()+"-%M@.png", QQString::Squeeze);
+    markedRectOutputFileInfo.replace("@", Milliseconds::baseDateStamp());
     markedRectOutputFileInfo.replace("%M", cmpPreScanDetector->cascade()->methodString());
     markedRectOutputFileName = markedRectOutputFileInfo.absoluteFilePath();
     //SimpleRectMarker rectMarker(inputImage);
     SimpleRectMarker rectMarker(cmpPreScanDetector->cascade()->detectImage());
-    //rectMarker.markAll(Configuration(), mCurrentRectangles);
     rectMarker.mark(Configuration(), mCurrentResults, rectMarker.qualityWheel(), true);
     QQImage markedImage = rectMarker;
     if (markedImage.save(markedRectOutputFileName))
@@ -290,4 +325,11 @@ void FaceConsole::finishProcessing()
     writeLine("===Processing Complete");
     NEEDDO(more);
     EMIT(processingComplete());
+}
+
+void FaceConsole::failedExit(const qint8 retcode, const QString &errmsg)
+{
+    TRACEQFI << retcode << errmsg;
+    writeErr(QString("@@@Failure Code=%1: %2").arg(retcode).arg(errmsg));
+    qApp->exit(retcode);
 }

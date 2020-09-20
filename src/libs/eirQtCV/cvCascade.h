@@ -1,7 +1,6 @@
 #pragma once
 #include "eirQtCV.h"
 
-#include <QFileInfo>
 #include <QImage>
 #include <QList>
 #include <QPair>
@@ -73,7 +72,7 @@ public:
     Type type() const;
     BasicName typeName() const;
     bool isNull() const;
-    bool loadCascade(const QFileInfo &cascadeXmlInfo);
+    bool loadCascade(const QQFileInfo &cascadeXmlInfo);
     bool loadCoreSize(const QFileInfo &cascadeXmlInfo,
                       int cascadeVersion=0);
     bool notLoaded() const;

@@ -22,6 +22,7 @@ include(../../EIRC2.pri)
 SOURCES += \
     UInt128.cpp \
     Uuid.cpp \
+    Version.cpp \
     eirBase.cpp \
 
 HEADERS += \
@@ -29,6 +30,7 @@ HEADERS += \
     Typedefs.h \
     UInt128.h \
     Uuid.h \
+    Version.h \
     eirBase_global.h \
     eirBase.h \
 

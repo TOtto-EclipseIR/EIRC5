@@ -36,17 +36,25 @@ bool cvCascade::isNull() const
     return nullType == cmType;
 }
 
-bool cvCascade::loadCascade(const QFileInfo &cascadeXmlInfo)
+bool cvCascade::loadCascade(const QQFileInfo &cascadeXmlInfo)
 {
-    TRACEQFI << cmType << cascadeXmlInfo;
+    TRACEQFI << typeName()() << cascadeXmlInfo.absoluteFilePath();
     unload();
+    EXPECT(cascadeFileInfo().exists());
+    EXPECT(cascadeFileInfo().isFile());
+    EXPECT(cascadeFileInfo().isReadable());
+    if (cascadeFileInfo().notExists()
+            || cascadeFileInfo().notFile()
+            || cascadeFileInfo().notReadable())
+        return false;                                               /* /========\ */
     cv::CascadeClassifier * pcvcc = new cv::CascadeClassifier;
     if (pcvcc->load(cvString(cascadeXmlInfo.absoluteFilePath())))
     {
         mpClassifier = pcvcc;
         mCascadeXmlInfo = cascadeXmlInfo;
+        EXPECTNOT(mpClassifier->empty());
+        EXPECTNOT(mpClassifier->empty());
     }
-    EXPECTNOT(mpClassifier->empty());
     return nullptr != mpClassifier;
 }
 
@@ -152,19 +160,23 @@ int cvCascade::detectRectangles(const Configuration &rectFinderConfig,
     rectFinderConfig.dump();
 
     EXPECTNOT(inputImage.isNull());
-    if (inputImage.isNull()) return -1; // null image      /* /========\ */
+    if (inputImage.isNull()) return -1; // null image       /* /========\ */
     mMethodString.clear();
     mDetectMat.clear();
     mRectList.clear();
 
     mDetectMat.setGrey(inputImage);
     DUMP << mDetectMat.dumpString();
-    //if (inputImage.isNull()) return -2; // null detect cvMat /* /========\ */
+    if (mDetectMat.isNull()) return -2; // null cvMat       /* /========\ */
     if (showDetect)
     {
         cv::imshow("DetectMat", mDetectMat.mat());
         cv::waitKey(5000);
     }
+
+    EXPECTNE(nullptr, mpClassifier);
+    if (nullptr == mpClassifier)
+        return -3;                                          /* /========\ */
 
     mParameters.set(rectFinderConfig);
     mParameters.calculate(cmType, mDetectMat.size(), coreSize());

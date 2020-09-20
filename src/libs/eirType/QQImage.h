@@ -7,6 +7,7 @@
 #include <eirBase/Typedefs.h>
 
 #include "QQSize.h"
+#include "Rational.h"
 
 class EIRTYPE_EXPORT QQImage : public QImage
 {
@@ -20,8 +21,12 @@ public:
     void nullify();
     int rows() const;
     int cols() const;
+    int area() const;
     QQSize size() const;
     int stride() const;
+    QRgb operator[](const int index) const;
+    QRgb &operator[](const int index);
+    void overlay(const QQImage &other, const Rational opacity=Rational());
 
 public: // static
     static QStringList supportedReadFormats();

@@ -12,8 +12,6 @@
 #include <eirType/QQSize.h>
 #include <eirXfr/Debug.h>
 
-#include "ColorWheel.h"
-
 SimpleRectMarker::SimpleRectMarker(const QQImage &inputImage)
     : QQImage(inputImage.convertToFormat(QImage::Format_ARGB32))
 {
@@ -48,10 +46,9 @@ void SimpleRectMarker::mark(const Configuration &markRectConfig,
     QPainter painter(this);
     qreal penWidth = markRectConfig.real("PenWidth", 5.0);
     Qt::PenStyle penStyle = Qt::PenStyle(markRectConfig.unsignedInt("PenStyle", 1));
-    int kItem = 0;
     foreach (ObjDetResultItem item, resultList.list())
     {
-        QBrush penBrush(wheel.at(item.quality(kItem++ / resultList.count()) / 4));
+        QBrush penBrush(wheel.at(item.quality(item.quality())));
         QPen pen(penBrush, penWidth, penStyle);
         painter.setPen(pen);
         painter.drawRect(item.resultRect());
@@ -61,7 +58,7 @@ void SimpleRectMarker::mark(const Configuration &markRectConfig,
             painter.setPen(allPen);
             painter.drawRects(item.allRects().vector());
         }
-        TODO(TitleQuality);
+        //TODO(TitleQuality);
     }
     painter.setPen(Qt::black);
     painter.drawRects(resultList.orphanRects().vector());
