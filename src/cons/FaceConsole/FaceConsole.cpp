@@ -23,6 +23,8 @@ FaceConsole::FaceConsole(QObject *parent)
     setObjectName("FaceConsole");
     TSTALLOC(cmpConfigObject);
     cmpConfigObject->setObjectName("ConfigObject:FaceConsole");
+    new ObjectDetector(cvCascade::PreScan, cmpConfigObject, this);
+    TSTALLOC(ObjectDetector::p(cvCascade::PreScan));
     QTimer::singleShot(500, this, &FaceConsole::initializeApplication);
     TRACERTV();
 }
@@ -201,31 +203,26 @@ void FaceConsole::initializeResources()
                  + cascadeFileInfo.absoluteFilePath());
         EMIT(resourseInitFailed(1, "Invalid Cascade"));
     }
-#if 1
-#else
-    if ( ! cmpPreScanDetector->cascade()->loadCascade(cascadeFileInfo))
-    {
-        writeLine("error");
-        writeErr("***Cascade file load failed: "
-                 + cascadeFileInfo.absoluteFilePath());
-        EMIT(resourseInitFailed(2, "Cascade Failed"));
-    }
-    EXPECT(cmpPreScanDetector->cascade()->isLoaded());
-#endif
 
-    NEEDDO(cmpPreScanDetector->cascade()->configure);
-//    Configuration preScanConfig = config()->configuration("Option/RectFinder");
-  //  preScanConfig += config()->configuration("PreScan/RectFinder");
-    //cmpPreScanDetector->cascade()->configure(preScanConfig);
-#if 1
-#else
-    if (nullptr != cmpPreScanDetector->cascade())
+    EXPECT(ObjectDetector::p(cvCascade::PreScan)->loadCascade(cascadeFileInfo));
+    if (ObjectDetector::p(cvCascade::PreScan)->isLoaded())
     {
         writeLine("done");
         EMIT(resoursesInitd());
         QTimer::singleShot(100, this, &FaceConsole::startProcessing);
     }
-#endif
+    else
+    {
+        writeLine("error");
+        writeErr("***Cascade file load failed: "
+                 + cascadeFileInfo.absoluteFilePath());
+        EMIT(resourseInitFailed(2, "Cascade Load Failed"));
+    }
+
+    NEEDDO(cmpPreScanDetector->cascade()->configure);
+//    Configuration preScanConfig = config()->configuration("Option/RectFinder");
+  //  preScanConfig += config()->configuration("PreScan/RectFinder");
+    //cmpPreScanDetector->cascade()->configure(preScanConfig);
 }
 
 void FaceConsole::startProcessing()

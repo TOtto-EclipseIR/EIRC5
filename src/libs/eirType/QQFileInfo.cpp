@@ -83,6 +83,12 @@ bool QQFileInfo::isNull() const
     return mIsNull;
 }
 
+bool QQFileInfo::isReadableFile() const
+{
+    return ! isNull() && exists() && isFile() && isReadable();
+
+}
+
 bool QQFileInfo::notExists() const
 {
     return ! exists();

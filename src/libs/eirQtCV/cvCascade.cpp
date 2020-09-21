@@ -96,7 +96,7 @@ bool cvCascade::notLoaded() const
 
 bool cvCascade::isLoaded() const
 {
-    return mpClassifier ? (! mpClassifier->empty()) : false;
+    return mpClassifier ? ( ! mpClassifier->empty()) : false;
 }
 
 void cvCascade::unload()

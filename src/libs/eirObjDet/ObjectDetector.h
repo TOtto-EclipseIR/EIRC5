@@ -26,6 +26,8 @@ public:
     ~ObjectDetector();
     static ObjectDetector * p(const cvCascadeType type);
     cvCascade * cascade();
+    bool loadCascade(const QQFileInfo cascadeFInfo);
+    bool isLoaded();
     ObjDetResultList process(const Configuration &config,
                        const QFileInfo &inputFileInfo,
                        bool showDetect=false);

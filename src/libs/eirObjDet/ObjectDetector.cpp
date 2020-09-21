@@ -19,7 +19,7 @@ ObjectDetector::ObjectDetector(const cvCascade::Type type,
     , cmpTimer(new QTimer(parent))
 {
     TRACEQFI << cvCascade::typeName(type)() << QOBJNAME(parent);
-    setObjectName("ObjectDetector");
+    setObjectName("ObjectDetector:"+cvCascade::typeName(type));
     TSTALLOC(cmpConfig);
     TSTALLOC(cmpTimer);
     cmpConfig->setObjectName("ConfigObject:ObjectDetector");
@@ -32,7 +32,6 @@ ObjectDetector::ObjectDetector(const cvCascade::Type type,
     }
     smTypeDetectorHash.insert(type, this);
     EMIT(ctored());
-    //QTimer::singleShot(100, this, &ObjectDetector::initialize);
 }
 
 ObjectDetector::~ObjectDetector()
@@ -51,6 +50,21 @@ ObjectDetector *ObjectDetector::p(const cvCascadeType type)
 cvCascade *ObjectDetector::cascade()
 {
     return &mCascade;
+}
+
+bool ObjectDetector::loadCascade(const QQFileInfo cascadeFInfo)
+{
+    TRACEQFI << cascadeFInfo << cascadeFInfo.isReadableFile();
+    bool loaded = cascade()->loadCascade(cascadeFInfo);
+    bool coreok = cascade()->loadCoreSize(cascadeFInfo);
+    EXPECT(loaded);
+    EXPECT(coreok);
+    return loaded && coreok;
+}
+
+bool ObjectDetector::isLoaded()
+{
+    return cascade()->isLoaded();
 }
 
 ObjDetResultList ObjectDetector::process(const Configuration &config,
