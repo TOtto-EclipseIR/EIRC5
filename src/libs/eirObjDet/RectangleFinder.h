@@ -11,8 +11,6 @@
 
 #include <eirQtCV/cvCascade.h>
 
-#include "ObjDetPak.h"
-
 class EIROBJDET_EXPORT RectangleFinder : public QObject
 {
     Q_OBJECT
@@ -24,8 +22,7 @@ public slots:
     void setCascadeBaseDir(const QString &cascadeBaseDirName);
     void loadCascade(const cvCascade::Type type,
                      const QString &cascadeXmlFileName);
-    void enqueue(const cvCascade::Type type,
-                 const ObjDetPak &pak);
+    void enqueue(const cvCascade::Type type);
 
 signals:
     void cascadeBaseDirSet(cvCascade::Type type,

@@ -7,7 +7,9 @@
 
 #include <eirExe/CommandLine.h>
 #include <eirExe/ConfigObject.h>
+#include <eirImage/HeatmapMarker.h>
 #include <eirImage/SimpleRectMarker.h>
+#include <eirObjDet/ObjectDetector.h>
 #include <eirQtCV/cvVersion.h>
 #include <eirType/Success.h>
 #include <eirXfr/Debug.h>
@@ -263,6 +265,7 @@ void FaceConsole::processCurrentFile()
     }
     Configuration preScanConfig = config()->configuration("Option/RectFinder");
     preScanConfig += config()->configuration("PreScan/RectFinder");
+    QbjectDetector::p(cvCascade::PreScan)->process();
     int rectCount = cmpPreScanDetector->cascade()->detectRectangles(preScanConfig, inputImage);
     DUMPVAL(rectCount);
     mCurrentRectangles = cmpPreScanDetector->cascade()->rectList();
@@ -290,6 +293,13 @@ void FaceConsole::processCurrentFile()
     QQImage markedImage = rectMarker;
     if (markedImage.save(markedRectOutputFileName))
         writeLine(QString("   %1 written").arg(markedRectOutputFileName));
+    HeatmapMarker heatMarker(inputImage);
+    heatMarker.mark(Configuration(), mCurrentResults);
+    QQImage heatImage = heatMarker;
+    QQFileInfo heatRectOutputFileInfo(mMarkedRectOutputDir,
+            mCurrentFileInfo.completeBaseName()+"-heat.png", QQString::Squeeze);
+    if (heatImage.save(heatRectOutputFileInfo.absoluteFilePath(QQString::Squeeze)))
+        writeLine("   " + heatRectOutputFileInfo.absoluteFilePath() + " written");
 
     foreach (ObjDetResultItem item, mCurrentResults.list())
     {

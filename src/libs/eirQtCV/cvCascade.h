@@ -21,6 +21,7 @@
 
 #include "cvMat.h"
 
+class QDomElement;
 
 namespace cv { class CascadeClassifier; }
 
@@ -73,8 +74,7 @@ public:
     BasicName typeName() const;
     bool isNull() const;
     bool loadCascade(const QQFileInfo &cascadeXmlInfo);
-    bool loadCoreSize(const QFileInfo &cascadeXmlInfo,
-                      int cascadeVersion=0);
+    bool loadCoreSize(const QFileInfo &cascadeXmlInfo);
     bool notLoaded() const;
     bool isLoaded() const;
     void unload();
@@ -94,6 +94,11 @@ public:
 
 public: // static
     static BasicName typeName(Type type);
+
+private: // static
+    int determineVersion(const QDomElement topDE);
+    QQSize getSize2(const QDomElement topDE);
+    QQSize getSize4(const QDomElement topDE);
 
 private:
     Type cmType=nullType;

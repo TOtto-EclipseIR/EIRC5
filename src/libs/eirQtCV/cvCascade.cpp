@@ -1,5 +1,6 @@
 #include "cvCascade.h"
 
+#include <QDomElement>
 #include <QColor>
 #include <QTextStream>
 #include <QDomElement>
@@ -58,57 +59,31 @@ bool cvCascade::loadCascade(const QQFileInfo &cascadeXmlInfo)
     return nullptr != mpClassifier;
 }
 
-bool cvCascade::loadCoreSize(const QFileInfo &cascadeXmlInfo,
-                             int cascadeVersion)
+bool cvCascade::loadCoreSize(const QFileInfo &cascadeXmlInfo)
 {
-    TRACEQFI << cmType << cascadeXmlInfo << cascadeVersion;
+    TRACEQFI << cmType << cascadeXmlInfo;
     mCoreSize = QSize();
 
     XmlFile xmlFile(cascadeXmlInfo.absoluteFilePath());
     bool loaded = xmlFile.load();
     EXPECT(loaded);
     if ( ! loaded) return loaded;
+
     QDomElement rootDE = xmlFile.rootElement();
     DUMPVAL(rootDE.tagName());
     QDomElement topDE = rootDE.firstChildElement();
     DUMPVAL(topDE.tagName());
     DUMPVAL(topDE.attribute("type_id"));
 
-    if (cascadeVersion != 2 && cascadeVersion != 4)
-    {
-        QString typeId = topDE.attribute("type_id");
-        if (typeId == "opencv-haar-classifier")
-            cascadeVersion = 2;
-        else if (typeId == "opencv-cascade-classifier")
-            cascadeVersion = 4;
-    }
-
-    int height, width;
+    int cascadeVersion = determineVersion(topDE);
+    QSize sz;
     switch (cascadeVersion)
     {
-    case 2:
-    {
-        QDomElement sizeDE = topDE.firstChildElement("size");
-        QString sizeText = sizeDE.text();
-        QTextStream ts(&sizeText);
-        ts >> width >> height;
-    }
-        break;
-
-    case 4:
-    {
-        QDomElement heightDE = topDE.firstChildElement("height");
-        QDomElement widthDE  = topDE.firstChildElement("width");
-        height = heightDE.text().toInt();
-        width  = widthDE.text().toInt();
-    }
-        break;
-
-    default:
-        return false;
+    case 2:     sz = getSize2(topDE);       break;
+    case 4:     sz = getSize2(topDE);       break;
+    default:    return false;
     }
 
-    QSize sz(width, height);
     DUMPVAL(sz);
     if (sz.isValid()) mCoreSize = sz;
     return mCoreSize.isValid();
@@ -241,4 +216,39 @@ BasicName cvCascade::typeName(cvCascade::Type type)
             break;
     }
     return "{unknown}";
+}
+
+int cvCascade::determineVersion(const QDomElement topDE)
+{
+    TRACEQFI << topDE.text();
+    int ver = -1;
+    QString typeId = topDE.attribute("type_id");
+    if (typeId == "opencv-haar-classifier")
+        ver = 2;
+    else if (typeId == "opencv-cascade-classifier")
+        ver = 4;
+    EXPECTNE(-1, ver);
+    return ver;
+}
+
+QQSize cvCascade::getSize2(const QDomElement topDE)
+{
+    TRACEQFI << topDE.text();
+    int width = -1, height = -1;
+    QDomElement sizeDE = topDE.firstChildElement("size");
+    QString sizeText = sizeDE.text();
+    QTextStream ts(&sizeText);
+    ts >> width >> height;
+    return QQSize(width, height);
+}
+
+QQSize cvCascade::getSize4(const QDomElement topDE)
+{
+    TRACEQFI << topDE.text();
+    int width = -1, height = -1;
+    QDomElement heightDE = topDE.firstChildElement("height");
+    QDomElement widthDE  = topDE.firstChildElement("width");
+    height = heightDE.text().toInt();
+    width  = widthDE.text().toInt();
+    return QQSize(width, height);
 }
