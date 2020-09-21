@@ -4,8 +4,9 @@
 #include <eirExe/Console.h>
 
 #include <eirType/QQDir.h>
+#include <eirObjDet/ObjDetResultList.h>
 #include <eirQtCV/cvCascade.h>
-#include <eirObjDet/ObjectDetector.h>
+//#include <eirObjDet/ObjectDetector.h>
 
 class QCommandLineParser;
 class ConfigObject;
@@ -48,7 +49,7 @@ signals:
 
 private:
     ConfigObject * const cmpConfigObject=nullptr;
-    ObjectDetector * const cmpPreScanDetector=nullptr;
+    //ObjectDetector * const cmpPreScanDetector=nullptr;
     QDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
     QQDir::Vector mMarkedFaceQualityDirs;

@@ -4,7 +4,6 @@
 #include <eirType/QQImage.h>
 #include <eirType/QQRectList.h>
 #include <eirExe/Configuration.h>
-#include <eirObjDet/ObjDetPak.h>
 #include <eirObjDet/ObjDetResultList.h>
 
 #include "ColorWheel.h"

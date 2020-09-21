@@ -53,42 +53,20 @@ cvCascade *ObjectDetector::cascade()
     return &mCascade;
 }
 
-ObjDetPak &ObjectDetector::pak(const Uuid uuid)
-{
-    return mPakMap[uuid];
-}
-
-void ObjectDetector::insert(const ObjDetPak &pak)
-{
-    TRACEQFI << pak;
-    mPakMap.insert(pak.uuid(), pak);
-}
-
-Uuid ObjectDetector::process(const Configuration &config,
+ObjDetResultList ObjectDetector::process(const Configuration &config,
                                    const QFileInfo &inputFileInfo,
                                    bool showDetect)
 {
     TRACEQFI << inputFileInfo << showDetect;
     config.dump();
-    ObjDetPak pak(inputFileInfo);
-    QQImage inputImage = pak.inputImage();
-    pak.set("InputImage/Configuration", config.toVariant());
-    mProcessInputImage = inputImage;
+    QQImage inputImage(inputFileInfo.absoluteFilePath());
     cascade()->detectRectangles(config, inputImage, showDetect);
-    pak.set(cascade()->typeName()+"/Cascade", cascade()->cascadeFileInfo());
-    pak.set(cascade()->typeName()+"/CoreSize", cascade()->coreSize());
     DUMP << cascade()->parameters();
-    pak.set(cascade()->typeName()+"/Parameters", cascade()->parameters().toVariant());
-    pak.set(cascade()->typeName()+"/MethodString", cascade()->methodString());
     QQRectList rectList = cascade()->rectList();
-    pak.set(cascade()->typeName()+"/Rectangles", rectList);
     qreal unionGroupOverlap = config.realPermille("UnionGroupOverlap", 500);
     qreal unionGroupOrphan = config.unsignedInt("UnionGroupOrphan", 1);
     ObjDetResultList resultList = groupByUnion(rectList, unionGroupOverlap, unionGroupOrphan);
-    pak.set(cascade()->typeName()+"/ResultList", resultList.toVariant());
-    insert(pak);
-    TRACE << "return uuid" << pak.uuid();
-    return pak.uuid();
+    return resultList;
 }
 
 ObjDetResultList ObjectDetector::groupByUnion(const QQRectList &inputRects,
@@ -155,18 +133,7 @@ void ObjectDetector::enqueue(const QFileInfo &inputFileInfo)
 {
     bool autoLoad = mObjDetConfig.boolean("InputQueue/AutoLoad");
     TRACEQFI << inputFileInfo << autoLoad;
-    ObjDetPak pak(inputFileInfo, autoLoad);
-    Uuid uuid = pak.uuid();
-    DUMPVAL(uuid);
-    mPakMap.insert(uuid, pak);
-    EMIT(pakInserted(mPakMap.size()));
-    if ( ! autoLoad)
-    {
-        mInputQueue.enqueue(uuid);
-        EMIT(inputQueued(uuid));
-        EMIT(inputQueued(mInputQueue.size()));
-        EMIT(inputQueueNotEmpty());
-    }
+    MUSTDO(it);
 }
 
 void ObjectDetector::dequeue(const int count)
@@ -235,7 +202,6 @@ void ObjectDetector::pulse()
 {
     TRACEFN;
     static int kHold = 0;
-    int nPak        = mPakMap.size();
     int nInput      = mInputQueue.size();
     int nFinder     = mFinderQueue.size();
     int nGrouper    = mGrouperQueue.size();
@@ -245,7 +211,7 @@ void ObjectDetector::pulse()
     int processedLimit  = mObjDetConfig.unsignedInt("ProcessedHoldCount");
     int holdLimit       = mObjDetConfig.unsignedInt("HoldMaxIntervals", 4);
     int releasedLimit   = mObjDetConfig.unsignedInt("ReleasedRemoveCount");
-    DUMP << "Pulse:" << nPak
+    DUMP << "Pulse:"
          << nInput << nFinder << nGrouper << nProcessed << nReleased
          << processedLimit << holdLimit << releasedLimit;
     LATERDO(PerformanceRecorder);
@@ -290,47 +256,24 @@ void ObjectDetector::pulse()
 void ObjectDetector::loadInput(const Uuid uuid)
 {
     TRACEQFI << uuid.trace();
-    pak(uuid).loadInputImage();
-    if ( ! pak(uuid).inputImage().isNull())
-        mFinderQueue.enqueue(uuid);
-    else
-        ERROR << "inputImage() null" << uuid.trace();
+    MUSTDO(it);
     TRACERTV();
 }
 
 void ObjectDetector::findRects(const Uuid uuid)
 {
     TRACEQFI << uuid.trace();
-    QQImage inputImage = pak(uuid).inputImage();
-    if (inputImage.isNull())
-    {
-        ERROR << "inputImage() null" << uuid.trace();
-    }
-    else
-    {
-        int rects = cascade()->detectRectangles(Configuration(), inputImage);
-        if (rects < 0)
-            ERROR << "detectRectangles() Error:" << rects;
-        else if (0 == rects)
-            WARN << "No Rectangles Detected";
-        else
-            TRACE << rects << "Detectected";
-    }
-    MUSTDO(saveRectsAndEnqueueGrouper);
+    MUSTDO(it);
 }
 
 void ObjectDetector::groupRects(const Uuid uuid)
 {
     TRACEQFI << uuid.trace();
     MUSTDO(it);
-
-
 }
 
 void ObjectDetector::removeReleased(const Uuid uuid)
 {
     TRACEQFI << uuid.trace();
     MUSTDO(it);
-
-
 }

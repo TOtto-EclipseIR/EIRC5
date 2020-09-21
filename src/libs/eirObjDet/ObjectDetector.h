@@ -11,7 +11,6 @@ class QTimer;
 #include <eirExe/ConfigObject.h>
 #include <eirQtCV/cvCascade.h>
 
-#include "ObjDetPak.h"
 #include "ObjDetResultItem.h"
 #include "ObjDetResultList.h"
 
@@ -27,16 +26,16 @@ public:
     ~ObjectDetector();
     static ObjectDetector * p(const cvCascadeType type);
     cvCascade * cascade();
-    ObjDetPak &pak(const Uuid uuid); // non-const ref
-    void insert(const ObjDetPak &pak);
-    Uuid process(const Configuration &config,
+    ObjDetResultList process(const Configuration &config,
                        const QFileInfo &inputFileInfo,
                        bool showDetect=false);
+    QQImage inputImageForProcess() const;
+
+private:
     ObjDetResultList groupByUnion(const QQRectList &inputRects,
                             const qreal overlapThreshold,
                             const int orphanThreshold);
     qreal calculateQuality(const ObjDetResultItem &item) const;
-    QQImage inputImageForProcess() const;
 
 public slots:
     // setup
@@ -91,7 +90,6 @@ private:
     QTimer  * const cmpTimer=nullptr;
     Configuration mObjDetConfig;
     QQImage mProcessInputImage;
-    ObjDetPak::UuidMap mPakMap;
     Uuid::Queue mInputQueue;
     Uuid::Queue mFinderQueue;
     Uuid::Queue mGrouperQueue;

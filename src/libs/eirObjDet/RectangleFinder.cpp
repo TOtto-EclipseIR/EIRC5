@@ -17,7 +17,7 @@ void RectangleFinder::loadCascade(const cvCascade::Type type, const QString &cas
     MUSTUSE(type); MUSTUSE(cascadeXmlFileName);
 }
 
-void RectangleFinder::enqueue(const cvCascade::Type type, const ObjDetPak &pak)
+void RectangleFinder::enqueue(const cvCascade::Type type)
 {
-    MUSTUSE(type); MUSTUSE(pak);
+    MUSTUSE(type);
 }

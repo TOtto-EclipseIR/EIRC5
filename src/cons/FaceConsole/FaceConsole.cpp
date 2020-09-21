@@ -7,7 +7,9 @@
 
 #include <eirExe/CommandLine.h>
 #include <eirExe/ConfigObject.h>
+#include <eirImage/HeatmapMarker.h>
 #include <eirImage/SimpleRectMarker.h>
+#include <eirObjDet/ObjectDetector.h>
 #include <eirQtCV/cvVersion.h>
 #include <eirType/Success.h>
 #include <eirXfr/Debug.h>
@@ -16,14 +18,11 @@
 FaceConsole::FaceConsole(QObject *parent)
     : Console(parent)
     , cmpConfigObject(new ConfigObject(parent))
-    , cmpPreScanDetector(new ObjectDetector(cvCascade::PreScan, cmpConfigObject, this))
 {
     TRACEFN;
     setObjectName("FaceConsole");
     TSTALLOC(cmpConfigObject);
-    TSTALLOC(cmpPreScanDetector);
     cmpConfigObject->setObjectName("ConfigObject:FaceConsole");
-    cmpPreScanDetector->setObjectName("ObjectDetector:FaceConsole");
     QTimer::singleShot(500, this, &FaceConsole::initializeApplication);
     TRACERTV();
 }
@@ -202,6 +201,8 @@ void FaceConsole::initializeResources()
                  + cascadeFileInfo.absoluteFilePath());
         EMIT(resourseInitFailed(1, "Invalid Cascade"));
     }
+#if 1
+#else
     if ( ! cmpPreScanDetector->cascade()->loadCascade(cascadeFileInfo))
     {
         writeLine("error");
@@ -210,18 +211,21 @@ void FaceConsole::initializeResources()
         EMIT(resourseInitFailed(2, "Cascade Failed"));
     }
     EXPECT(cmpPreScanDetector->cascade()->isLoaded());
+#endif
 
     NEEDDO(cmpPreScanDetector->cascade()->configure);
 //    Configuration preScanConfig = config()->configuration("Option/RectFinder");
   //  preScanConfig += config()->configuration("PreScan/RectFinder");
     //cmpPreScanDetector->cascade()->configure(preScanConfig);
-
+#if 1
+#else
     if (nullptr != cmpPreScanDetector->cascade())
     {
         writeLine("done");
         EMIT(resoursesInitd());
         QTimer::singleShot(100, this, &FaceConsole::startProcessing);
     }
+#endif
 }
 
 void FaceConsole::startProcessing()
@@ -263,6 +267,9 @@ void FaceConsole::processCurrentFile()
     }
     Configuration preScanConfig = config()->configuration("Option/RectFinder");
     preScanConfig += config()->configuration("PreScan/RectFinder");
+#if 1
+    //QbjectDetector::p(cvCascade::PreScan)->process();
+#else
     int rectCount = cmpPreScanDetector->cascade()->detectRectangles(preScanConfig, inputImage);
     DUMPVAL(rectCount);
     mCurrentRectangles = cmpPreScanDetector->cascade()->rectList();
@@ -290,6 +297,13 @@ void FaceConsole::processCurrentFile()
     QQImage markedImage = rectMarker;
     if (markedImage.save(markedRectOutputFileName))
         writeLine(QString("   %1 written").arg(markedRectOutputFileName));
+    HeatmapMarker heatMarker(inputImage);
+    heatMarker.mark(Configuration(), mCurrentResults);
+    QQImage heatImage = heatMarker;
+    QQFileInfo heatRectOutputFileInfo(mMarkedRectOutputDir,
+            mCurrentFileInfo.completeBaseName()+"-heat.png", QQString::Squeeze);
+    if (heatImage.save(heatRectOutputFileInfo.absoluteFilePath(QQString::Squeeze)))
+        writeLine("   " + heatRectOutputFileInfo.absoluteFilePath() + " written");
 
     foreach (ObjDetResultItem item, mCurrentResults.list())
     {
@@ -306,6 +320,7 @@ void FaceConsole::processCurrentFile()
         if (saved)
             writeLine(QString("   %1 written").arg(faceInfo.filePath()));
     }
+#endif
 
     EMIT(processed(QFileInfo(mCurrentFileInfo),
              mCurrentRectangles.size()));
