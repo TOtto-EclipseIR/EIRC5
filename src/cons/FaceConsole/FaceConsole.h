@@ -9,7 +9,6 @@
 //#include <eirObjDet/ObjectDetector.h>
 
 class QCommandLineParser;
-class ConfigObject;
 
 class FaceConsole : public Console
 {

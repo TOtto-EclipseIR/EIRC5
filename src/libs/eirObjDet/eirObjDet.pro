@@ -16,7 +16,6 @@ LIBS *= -leirExe5
 LIBS *= -leirQtCV5
 
 SOURCES += \
-    CascadeType.cpp \
     ObjDetResultItem.cpp \
     ObjDetResultList.cpp \
     ObjectDetector.cpp \
@@ -25,7 +24,6 @@ SOURCES += \
     eirObjDet.cpp
 
 HEADERS += \
-    CascadeType.h \
     ObjDetResultItem.h \
     ObjDetResultList.h \
     ObjectDetector.h \

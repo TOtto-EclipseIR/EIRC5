@@ -18,7 +18,6 @@ SettingsFile::SettingsFile(ApplicationHelper *helper)
     mpTempIniFile->setObjectName("SettingsFile:TempIniFile");
     EXPECT(mpTempIniFile->open(QIODevice::ReadWrite | QIODevice::Text));
     mpSettings = new QSettings(mpTempIniFile->fileName(), QSettings::IniFormat, this);
-
 }
 
 bool SettingsFile::isNull() const
@@ -46,11 +45,6 @@ QString SettingsFile::value(const QString &key, const QString &defaultValue) con
     return mpSettings->value(key, defaultValue).toString();
 }
 
-QString SettingsFile::string(const QString &key, const QString &defaultValue) const
-{
-    return value(key, defaultValue);
-}
-
 SettingsFile::Map SettingsFile::map() const
 {
     SettingsFile::Map extracted;
@@ -71,6 +65,47 @@ SettingsFile::Map SettingsFile::extract(const QString groupKey, const bool keepK
 
 
 SettingsFile::Map::Map() {;}
+
+int SettingsFile::Map::signedInt(const QString &key, const int &defaultValue) const
+{
+    if ( ! contains(key))   return defaultValue;
+    bool ok = false;
+    QString sv = value(key);
+    int result = sv.toInt(&ok);
+    return ok ? result : defaultValue;
+}
+
+unsigned SettingsFile::Map::unsignedInt(const QString &key, const unsigned &defaultValue) const
+{
+    if ( ! contains(key))   return defaultValue;
+    bool ok = false;
+    QString sv = value(key);
+    unsigned result = sv.toUInt(&ok);
+    return ok ? result : defaultValue;
+}
+
+QString SettingsFile::Map::string(const QString &key, const QString &defaultValue) const
+{
+    return value(key, defaultValue);
+}
+
+qreal SettingsFile::Map::real(const QString &key, const qreal &defaultValue) const
+{
+    if ( ! contains(key))   return defaultValue;
+    bool ok = false;
+    QString sv = value(key);
+    qreal result = sv.toDouble(&ok);
+    return ok ? result : defaultValue;
+}
+
+qreal SettingsFile::Map::realPerMille(const QString &key, const int &defaultValue) const
+{
+    if ( ! contains(key))   return qreal(defaultValue) / 1000.0;
+    bool ok = false;
+    QString sv = value(key);
+    int result = sv.toInt(&ok);
+    return qreal(ok ? result : defaultValue) / 1000.0;
+}
 
 SettingsFile::Map SettingsFile::Map::extract(const QString groupKey, const bool keepKey) const
 {

@@ -64,18 +64,18 @@ bool ObjectDetector::isLoaded()
     return cascade()->isLoaded();
 }
 
-ObjDetResultList ObjectDetector::process(const Configuration &config,
+ObjDetResultList ObjectDetector::process(const SettingsFile::Map &settingsMap,
                                    const QFileInfo &inputFileInfo,
                                    bool showDetect)
 {
     TRACEQFI << inputFileInfo << showDetect;
-    config.dump();
+    settingsMap.dump();
     QQImage inputImage(inputFileInfo.absoluteFilePath());
-    cascade()->detectRectangles(config, inputImage, showDetect);
+    cascade()->detectRectangles(settingsMap, inputImage, showDetect);
     DUMP << cascade()->parameters();
     QQRectList rectList = cascade()->rectList();
-    qreal unionGroupOverlap = config.realPermille("UnionGroupOverlap", 500);
-    qreal unionGroupOrphan = config.unsignedInt("UnionGroupOrphan", 1);
+    qreal unionGroupOverlap = settingsMap.realPerMille("UnionGroupOverlap", 500);
+    qreal unionGroupOrphan = settingsMap.unsignedInt("UnionGroupOrphan", 1);
     ObjDetResultList resultList = groupByUnion(rectList, unionGroupOverlap, unionGroupOrphan);
     return resultList;
 }

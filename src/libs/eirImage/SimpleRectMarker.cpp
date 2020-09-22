@@ -18,15 +18,15 @@ SimpleRectMarker::SimpleRectMarker(const QQImage &inputImage)
     TRACEQFI << inputImage << format();
 }
 
-void SimpleRectMarker::markAll(const Configuration &markRectConfig,
+void SimpleRectMarker::markAll(const SettingsFile::Map &markRectSettings,
                                const QQRectList &rectList)
 {
     TRACEQFI << rectList.size();
-    markRectConfig.dump();
+    markRectSettings.dump();
     QPainter painter(this);
-    QColor penColor = QColor(markRectConfig.string("PenColor","#7f00CCCC"));
-    qreal penWidth = markRectConfig.real("PenWidth", 1.0);
-    Qt::PenStyle penStyle = Qt::PenStyle(markRectConfig.unsignedInt("PenStyle", 1));
+    QColor penColor = QColor(markRectSettings.string("PenColor","#7f00CCCC"));
+    qreal penWidth = markRectSettings.real("PenWidth", 1.0);
+    Qt::PenStyle penStyle = Qt::PenStyle(markRectSettings.unsignedInt("PenStyle", 1));
     QBrush penBrush(penColor);
     QPen pen(penBrush, penWidth, penStyle);
     painter.setPen(pen);
@@ -34,18 +34,18 @@ void SimpleRectMarker::markAll(const Configuration &markRectConfig,
     painter.end();
 }
 
-void SimpleRectMarker::mark(const Configuration &markRectConfig,
+void SimpleRectMarker::mark(const SettingsFile::Map &markRectSettings,
                             const ObjDetResultList &resultList,
                             const ColorWheel &wheel,
                             const bool markAll)
 {
     TRACEFN;
     BEXPECTNOT(wheel.isEmpty());
-    markRectConfig.dump();
+    markRectSettings.dump();
     resultList.dump(2);
     QPainter painter(this);
-    qreal penWidth = markRectConfig.real("PenWidth", 5.0);
-    Qt::PenStyle penStyle = Qt::PenStyle(markRectConfig.unsignedInt("PenStyle", 1));
+    qreal penWidth = markRectSettings.real("PenWidth", 5.0);
+    Qt::PenStyle penStyle = Qt::PenStyle(markRectSettings.unsignedInt("PenStyle", 1));
     foreach (ObjDetResultItem item, resultList.list())
     {
         QBrush penBrush(wheel.at(item.quality(item.quality())));

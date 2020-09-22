@@ -21,10 +21,10 @@ HeatmapMarker::HeatmapMarker(const QQImage &inputImage)
     TRACEQFI << inputImage << format();
 }
 
-void HeatmapMarker::mark(const Configuration &markRectConfig, const ObjDetResultList &resultList)
+void HeatmapMarker::mark(const SettingsFile::Map &markHeatSettings, const ObjDetResultList &resultList)
 {
     TRACEFN;
-    markRectConfig.dump();
+    markHeatSettings.dump();
     resultList.dump(2);
 
     QImage heat(size(), QImage::Format_Indexed8);

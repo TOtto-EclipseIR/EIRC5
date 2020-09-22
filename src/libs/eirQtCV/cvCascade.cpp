@@ -126,13 +126,13 @@ cv::CascadeClassifier *cvCascade::classifier()
     return mpClassifier;
 }
 
-int cvCascade::detectRectangles(const Configuration &rectFinderConfig,
+int cvCascade::detectRectangles(const SettingsFile::Map &rectFinderSettingsMap,
                                 const QQImage &inputImage,
                                 const bool showDetect,
                                 const QQRect &region)
 {
     TRACEQFI << inputImage << region;
-    rectFinderConfig.dump();
+    rectFinderSettingsMap.dump();
 
     EXPECTNOT(inputImage.isNull());
     if (inputImage.isNull()) return -1; // null image       /* /========\ */
@@ -153,7 +153,7 @@ int cvCascade::detectRectangles(const Configuration &rectFinderConfig,
     if (nullptr == mpClassifier)
         return -3;                                          /* /========\ */
 
-    mParameters.set(rectFinderConfig);
+    mParameters.set(rectFinderSettingsMap);
     mParameters.calculate(cmType, mDetectMat.size(), coreSize());
 #if 0
     QSize minSize = mParameters.minSize();

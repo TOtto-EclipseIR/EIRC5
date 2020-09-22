@@ -23,6 +23,13 @@ public:
     {
     public:
         Map();
+        int signedInt(const QString &key, const int &defaultValue=0) const;
+        unsigned unsignedInt(const QString &key, const unsigned &defaultValue=0) const;
+        QString string(const QString &key, const QString &defaultValue=QString()) const;
+        bool boolean(const QString &key, const bool &defaultValue=false) const;
+        qreal real(const QString &key, const qreal &defaultValue=0) const;
+        Rational rational(const QString &key, const Rational &defaultValue=Rational(0)) const;
+        qreal realPerMille(const QString &key, const int &defaultValue=0) const;
         Map extract(const QString groupKey, const bool keepKey=false) const;
         void import(const Map &keyValueStringMap);
         void operator += (const Map &keyValueStringMap);
@@ -43,13 +50,6 @@ public:
     void set(const QString &key, const QVariant &value) const;
     QString value(const QString &key, const QString &defaultValue=QString()) const;
     QVariant variant(const QString &key, const QVariant &defaultValue=QVariant()) const;
-    int signedInt(const QString &key, const int &defaultValue=0) const;
-    QString string(const QString &key, const QString &defaultValue=QString()) const;
-    bool boolean(const QString &key, const bool &defaultValue=false) const;
-    unsigned unsignedInt(const QString &key, const int &defaultValue=0) const;
-    qreal real(const QString &key, const int &defaultValue=0) const;
-    Rational rational(const QString &key, const Rational &defaultValue=Rational(0)) const;
-    qreal realPerMille(const QString &key, const int &defaultValue=0) const;
     Map map() const;
     Map extract() const;
     Map extract(const QString groupKey, const bool keepKey=false) const;

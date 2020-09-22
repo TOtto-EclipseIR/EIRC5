@@ -31,9 +31,6 @@ SOURCES += \
     BaseArgumentHandler.cpp \
     CommandLine.cpp \
     CommandLineClientInterface.cpp \
-    ConfigObject.cpp \
-    ConfigPak.cpp \
-    Configuration.cpp \
     Console.cpp \
     FileExtension.cpp \
     FileInfoQueue.cpp \
@@ -55,9 +52,6 @@ HEADERS += \
     BaseArgumentHandler.h \
     CommandLine.h \
     CommandLineClientInterface.h \
-    ConfigObject.h \
-    ConfigPak.h \
-    Configuration.h \
     Console.h \
     FileExtension.h \
     FileInfoQueue.h \

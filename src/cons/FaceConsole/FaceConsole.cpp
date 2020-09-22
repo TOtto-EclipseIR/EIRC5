@@ -94,7 +94,7 @@ void FaceConsole::setConfiguration()
 void FaceConsole::setBaseOutputDir()
 {
     TRACEFN;
-    QString baseDirString(settings()->string("/Output/BaseDir"));
+    QString baseDirString(settings()->map().string("/Output/BaseDir"));
     baseDirString.replace("@", QDateTime::currentDateTime()
         .toString("DyyyyMMdd-Thhmm"));
     DUMPVAL(baseDirString);
@@ -114,7 +114,7 @@ void FaceConsole::setOutputDirs()
     TRACEFN;
     bool created = false;
     mMarkedRectOutputDir.setNull(true);
-    QString markedRectDirString(settings()->string("Output/Dirs/MarkedRect"));
+    QString markedRectDirString(settings()->map().string("Output/Dirs/MarkedRect"));
     DUMPVAL(markedRectDirString);
     if (markedRectDirString.isEmpty())
     {
@@ -176,11 +176,11 @@ void FaceConsole::setOutputDirs()
 void FaceConsole::initializeResources()
 {
     TRACEFN;
-    QQDir baseCascadeDir(settings()->string("/Resources/RectFinder/BaseDir"));
+    QQDir baseCascadeDir(settings()->map().string("/Resources/RectFinder/BaseDir"));
     TRACE << baseCascadeDir << baseCascadeDir.exists() << baseCascadeDir.isReadable();
     EXPECT(baseCascadeDir.exists());
     EXPECT(baseCascadeDir.isReadable());
-    QString cascadeFileName = settings()->
+    QString cascadeFileName = settings()->map().
             string("/Resources/RectFinder/PreScan/XmlFile");
     QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
     TRACE << cascadeFileInfo.absoluteFilePath() << cascadeFileInfo.exists()
