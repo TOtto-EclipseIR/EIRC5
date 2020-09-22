@@ -14,7 +14,7 @@ class ErrorHandler;
 
 class CommandLine;
 class CommandLineClientInterface;
-class ConfigObject;
+class SettingsFile;
 
 class EIREXE_EXPORT ApplicationHelper : public QObject
 {
@@ -24,18 +24,18 @@ public:
     VersionInfo version() const;
     void set(CommandLineClientInterface const * client) const;
     void set(const VersionInfo & verInfo);
-    QFile * tempFile(const QString &ext,
+    QFile * tempDirFile(const QString &ext,
                      QObject * parent=nullptr);
     const CommandLine *commandLine() const;
-    CommandLine &rCommandLine();
-    ConfigObject *config() const;
+    CommandLine &rCommandLine(); // non-const
+    SettingsFile *settings() const;
 
 public slots:
     void run();
 
 protected:
 
-public slots:
+private slots:
     void initCommandLine();
 
 signals:
@@ -43,11 +43,8 @@ signals:
 
 private:
     VersionInfo cmVerInfo;
-//    ArgumentList mArguments;
-//    LegacySettings * mpSettings=nullptr;
-    CommandLine * const cmpCommandLine=nullptr;
-    ConfigObject * const cmpConfigObject=nullptr;
     QTemporaryDir const * cmpTempDir=nullptr;
-    QList<QFile *> mTempFiles;
+    CommandLine * const cmpCommandLine=nullptr;
+    SettingsFile * const cmpSettings=nullptr;
 };
 

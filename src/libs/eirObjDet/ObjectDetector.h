@@ -8,7 +8,7 @@ class QTimer;
 
 #include <eirBase/Uuid.h>
 #include <eirType/Milliseconds.h>
-#include <eirExe/ConfigObject.h>
+#include <eirExe/SettingsFile.h>
 #include <eirQtCV/cvCascade.h>
 
 #include "ObjDetResultItem.h"
@@ -20,13 +20,14 @@ class EIROBJDET_EXPORT ObjectDetector : public QObject
 public:
     typedef ObjectDetector * This;
 public:
-    explicit ObjectDetector(const cvCascade::Type type,
-                            ConfigObject * cfgObj,
+    ObjectDetector(const cvCascade::Type type,
                             QObject *parent = nullptr);
     ~ObjectDetector();
     static ObjectDetector * p(const cvCascadeType type);
     cvCascade * cascade();
-    bool loadCascade(const QQFileInfo cascadeFInfo);
+
+    // single-threaded execution
+    bool load(const QQFileInfo cascadeFInfo);
     bool isLoaded();
     ObjDetResultList process(const Configuration &config,
                        const QFileInfo &inputFileInfo,
@@ -41,7 +42,7 @@ private:
 
 public slots:
     // setup
-    void initialize();
+    void initialize(const SettingsFile::Map map);
     void start();
 
     // running
@@ -75,8 +76,8 @@ signals:
 
 private slots:
     // setup
-    void setDefaults();
     void configure();
+    void setDefaults();
     void readyStart();
 
     // running
@@ -88,9 +89,8 @@ private slots:
 
 private:
     cvCascade mCascade;
-    ConfigObject  * const cmpConfig=nullptr;
     QTimer  * const cmpTimer=nullptr;
-    Configuration mObjDetConfig;
+    SettingsFile::Map mObjDetSettings;
     QQImage mProcessInputImage;
     Uuid::Queue mInputQueue;
     Uuid::Queue mFinderQueue;

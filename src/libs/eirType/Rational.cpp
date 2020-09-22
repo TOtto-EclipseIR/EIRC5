@@ -15,7 +15,7 @@ bool Rational::isNull() const
 
 qreal Rational::toReal() const
 {
-    return qreal(mNumerator) / qreal(mDenominator);
+    return isNull() ? qQNaN() : qreal(mNumerator) / qreal(mDenominator);
 }
 
 int Rational::numerator() const

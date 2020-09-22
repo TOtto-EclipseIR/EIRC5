@@ -3,6 +3,7 @@
 #include <QTimer>
 
 #include <eirBase/Uuid.h>
+#include <eirExe/SettingsFile.h>
 #include <eirXfr/Debug.h>
 
 #include "ObjDetResultItem.h"
@@ -11,18 +12,14 @@
 QHash<cvCascadeType, ObjectDetector::This> ObjectDetector::smTypeDetectorHash;
 
 ObjectDetector::ObjectDetector(const cvCascade::Type type,
-                               ConfigObject *cfgObj,
                                QObject *parent)
     : QObject(parent)
     , mCascade(type)
-    , cmpConfig(cfgObj)
     , cmpTimer(new QTimer(parent))
 {
     TRACEQFI << cvCascade::typeName(type)() << QOBJNAME(parent);
     setObjectName("ObjectDetector:"+cvCascade::typeName(type));
-    TSTALLOC(cmpConfig);
     TSTALLOC(cmpTimer);
-    cmpConfig->setObjectName("ConfigObject:ObjectDetector");
     cmpTimer->setObjectName("QTimer:ObjectDetector");
     if (smTypeDetectorHash.contains(type))
     {
@@ -52,13 +49,13 @@ cvCascade *ObjectDetector::cascade()
     return &mCascade;
 }
 
-bool ObjectDetector::loadCascade(const QQFileInfo cascadeFInfo)
+bool ObjectDetector::load(const QQFileInfo cascadeFInfo)
 {
     TRACEQFI << cascadeFInfo << cascadeFInfo.isReadableFile();
-    bool loaded = cascade()->loadCascade(cascadeFInfo);
     bool coreok = cascade()->loadCoreSize(cascadeFInfo);
-    EXPECT(loaded);
+    bool loaded = cascade()->loadCascade(cascadeFInfo);
     EXPECT(coreok);
+    EXPECT(loaded);
     return loaded && coreok;
 }
 
@@ -127,7 +124,7 @@ QQImage ObjectDetector::inputImageForProcess() const
 
 void ObjectDetector::start()
 {
-    Milliseconds pulseMsec = mObjDetConfig.signedInt("PulseMsec");
+    Milliseconds pulseMsec( mObjDetSettings.value("PulseMsec"));
     TRACEQFI << pulseMsec;
     EXPECT(pulseMsec);
     if (pulseMsec > 0)
@@ -145,8 +142,7 @@ void ObjectDetector::start()
 
 void ObjectDetector::enqueue(const QFileInfo &inputFileInfo)
 {
-    bool autoLoad = mObjDetConfig.boolean("InputQueue/AutoLoad");
-    TRACEQFI << inputFileInfo << autoLoad;
+    TRACEQFI << inputFileInfo;
     MUSTDO(it);
 }
 
@@ -172,35 +168,33 @@ void ObjectDetector::stop()
     EMIT(stopped());
 }
 
-void ObjectDetector::initialize()
+void ObjectDetector::initialize(const SettingsFile::Map map)
 {
     TRACEFN;
     NEEDDO(anyConnect);
+    mObjDetSettings = map;
     EMIT(initialized());
-    QTimer::singleShot(100, this, &ObjectDetector::setDefaults);
-}
-
-void ObjectDetector::setDefaults()
-{
-    TRACEFN;
-    mObjDetConfig.setDefault("PulseMsec", 64);
-    mObjDetConfig.setDefault("ProcessedHoldCount", 32);
-    mObjDetConfig.setDefault("HoldMaxIntervals", 4);
-    mObjDetConfig.setDefault("ReleasedRemoveCount", 32);
-    mObjDetConfig.setDefault("InputQueue/AutoLoad", false);
-    TODO(RectFinder/TBD);
-    TODO(RectGrouper/TBD);
-    EMIT(defaultsSet());
     QTimer::singleShot(100, this, &ObjectDetector::configure);
 }
 
 void ObjectDetector::configure()
 {
     TRACEFN;
-    mObjDetConfig += cmpConfig->configuration().
-            extract(cascade()->typeName()+"/ObjectDetector");
-    LATERDO("connectDispatcher");
+    mObjDetSettings.dump();
     EMIT(configured());
+    QTimer::singleShot(100, this, &ObjectDetector::setDefaults);
+}
+
+void ObjectDetector::setDefaults()
+{
+    TRACEFN;
+    mObjDetSettings.setDefault("PulseMsec", 64);
+    mObjDetSettings.setDefault("ProcessedHoldCount", 32);
+    mObjDetSettings.setDefault("HoldMaxIntervals", 4);
+    mObjDetSettings.setDefault("ReleasedRemoveCount", 32);
+    TODO(RectFinder/TBD);
+    TODO(RectGrouper/TBD);
+    EMIT(defaultsSet());
     QTimer::singleShot(100, this, &ObjectDetector::readyStart);
 }
 
@@ -215,6 +209,7 @@ void ObjectDetector::readyStart()
 void ObjectDetector::pulse()
 {
     TRACEFN;
+#if 0
     static int kHold = 0;
     int nInput      = mInputQueue.size();
     int nFinder     = mFinderQueue.size();
@@ -222,11 +217,11 @@ void ObjectDetector::pulse()
     int nProcessed  = mProcessedQueue.size();
     int nReleased   = mReleasedQueue.size();
 
-    int processedLimit  = mObjDetConfig.unsignedInt("ProcessedHoldCount");
-    int holdLimit       = mObjDetConfig.unsignedInt("HoldMaxIntervals", 4);
-    int releasedLimit   = mObjDetConfig.unsignedInt("ReleasedRemoveCount");
+    int processedLimit  = mObjDetSettings.unsignedInt("ProcessedHoldCount");
+    int holdLimit       = mObjDetSettings.unsignedInt("HoldMaxIntervals", 4);
+    int releasedLimit   = mObjDetSettings.unsignedInt("ReleasedRemoveCount");
     DUMP << "Pulse:"
-         << nInput << nFinder << nGrouper << nProcessed << nReleased
+         << nInput << nFinder << nGrouper << nProcessed << nReleased;
          << processedLimit << holdLimit << releasedLimit;
     LATERDO(PerformanceRecorder);
     NEEDDO(RefactorReturns&TrackTime);
@@ -265,6 +260,7 @@ void ObjectDetector::pulse()
     {
         ; // nothing to do, wait for next time?
     }
+#endif
 }
 
 void ObjectDetector::loadInput(const Uuid uuid)

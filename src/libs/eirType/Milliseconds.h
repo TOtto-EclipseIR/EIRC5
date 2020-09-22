@@ -4,6 +4,7 @@
 
 #include <QtGlobal>
 #include <QtCore/QDateTime>
+#include <QVariant>
 
 class EIRTYPE_EXPORT Milliseconds
 {
@@ -11,6 +12,7 @@ public:
     Milliseconds(void);
     Milliseconds(qint64 ems);
     Milliseconds(const QDateTime & dt);
+    Milliseconds(const QVariant &var);
     bool isNull(void) const;
     bool isBaseNull(void) const;
     bool isValid(void) const;

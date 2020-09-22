@@ -5,7 +5,7 @@
 
 #include <eirType/QQDir.h>
 #include <eirObjDet/ObjDetResultList.h>
-#include <eirQtCV/cvCascade.h>
+//#include <eirQtCV/cvCascade.h>
 //#include <eirObjDet/ObjectDetector.h>
 
 class QCommandLineParser;
@@ -16,14 +16,14 @@ class FaceConsole : public Console
     Q_OBJECT
 public:
     explicit FaceConsole(QObject *parent = nullptr);
-    ConfigObject *config() const;
+    SettingsFile *settings() const;
 
 public slots:
     void initializeApplication();
     void enqueueNext();
 
 private slots:
-    void setupCommandLine();
+    void processCommandLine();
     void setConfiguration();
     void setBaseOutputDir();
     void setOutputDirs();
@@ -36,7 +36,7 @@ private slots:
 
 signals:
     void applicationInitd();
-    void commandLineSetup();
+    void commandLineProcessed();
     void configurationSet();
     void baseDirSet();
     void outputDirsSet();
@@ -48,8 +48,6 @@ signals:
     void processingComplete();
 
 private:
-    ConfigObject * const cmpConfigObject=nullptr;
-    //ObjectDetector * const cmpPreScanDetector=nullptr;
     QDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
     QQDir::Vector mMarkedFaceQualityDirs;
@@ -58,7 +56,5 @@ private:
     QQRectList mCurrentRectangles;
     ObjDetResultList mCurrentResults;
     QImage mRectImage;
-
-  //  MarkerManager * const cmpMarkerManager=nullptr;
 };
 
