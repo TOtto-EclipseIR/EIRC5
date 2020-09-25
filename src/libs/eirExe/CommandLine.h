@@ -17,10 +17,8 @@ class QCommandLineParser;
 #include <eirType/Sortable.h>
 #include <eirType/QQFileInfo.h>
 #include <eirType/QQFileInfoList.h>
-
-#include "Configuration.h"
 class CommandLineClientInterface;
-class LegacySettings;
+class SettingsFile;
 
 #include "../../version.h"
 
@@ -47,7 +45,7 @@ public:
     int takePositionalArgumentCount() const;
     const QStringList exeArguments(bool withNumbers=false) const;
     const QQFileInfo exeFileInfo() const;
-    Configuration configuration() const;
+    SettingsFile *settings() const;
 
 public slots:
     void process();
@@ -67,7 +65,7 @@ protected:
                                    const MultiName &prefix=MultiName(),
                                    const QChar &trigger=QChar('/'));
     // utility
-    void parseConfigArgument(const QString &arg,
+    void parseSettingArgument(const QString &arg,
                              const MultiName &prefix=MultiName());
     QStringList readTxtFileArguments(const QFileInfo &argFileInfo);
 
@@ -78,9 +76,8 @@ private:
     const QStringList cmExeArgumentList;
     QQFileInfo mExeFileInfo;
     CommandLineClientInterface * mpInterface=nullptr;
-    LegacySettings * mpLegacySettings=nullptr;
     ExpandDirResultList mExpandDirResultList;
     QStringList mPositionalArgumentList;
     int mPositionalArgumentsTaken=0;
-    Configuration mConfiguration;
+    SettingsFile * mpSettings;
 };

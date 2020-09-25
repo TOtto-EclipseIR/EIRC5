@@ -6,6 +6,8 @@
 #include <eirBase/eirBase.h>
 #include <eirXfr/Debug.h>
 
+#include "QQPoint.h"
+
 QQImage::QQImage() {;}
 QQImage::QQImage(const QImage &other) : QImage(other) {;}
 QQImage::QQImage(const QString &fileName, const char *format) : QImage(fileName, format) {;}
@@ -47,6 +49,11 @@ int QQImage::cols() const
     return size().width();
 }
 
+int QQImage::area() const
+{
+    return size().area();
+}
+
 QQSize QQImage::size() const
 {
     return QImage::size();
@@ -56,6 +63,26 @@ int QQImage::stride() const
 {
     return QImage::bytesPerLine();
 }
+
+QRgb QQImage::operator[](const int index) const
+{
+    return ((const QRgb*)(bits()))[index];
+}
+
+QRgb &QQImage::operator[](const int index)
+{
+    return ((QRgb*)(bits()))[index];
+}
+
+void QQImage::overlay(const QQImage &other, const Rational opacity)
+{
+    TRACEQFI << other << opacity;
+    convertTo(QImage::Format_ARGB32);
+    QQImage ovImage = other.scaled(size()).convertToFormat(QImage::Format_ARGB32);
+    for (int index = 0; index < area(); ++index)
+        (*this)[index] = (*this)[index] + ((opacity.isNull() ? qAlpha(other[index]) : opacity.toReal()) * other[index]);
+}
+
 
 QStringList QQImage::supportedReadFormats()
 {

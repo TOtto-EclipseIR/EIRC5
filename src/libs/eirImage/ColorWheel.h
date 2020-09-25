@@ -17,7 +17,9 @@ public:
     ColorWheel(const qreal baseOpacity, const qreal baseSaturation, const qreal baseValue);
     bool isEmpty() const;
     void set(const int count, const Hue begin, const Hue end);
+    void setQuality(const Hue begin, const Hue end);
     QQColor at(const int index) const;
+    QQColor quality(const int q) const;
     QRgb rgba(const int index);
 
 private:

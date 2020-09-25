@@ -6,48 +6,59 @@
 #include <QTimer>
 
 #include <eirExe/CommandLine.h>
-#include <eirExe/ConfigObject.h>
+#include <eirExe/SettingsFile.h>
+#include <eirImage/HeatmapMarker.h>
 #include <eirImage/SimpleRectMarker.h>
+#include <eirObjDet/ObjectDetector.h>
+#include <eirQtCV/cvVersion.h>
 #include <eirType/Success.h>
 #include <eirXfr/Debug.h>
 #include <eirXfr/StartupDebug.h>
 
 FaceConsole::FaceConsole(QObject *parent)
     : Console(parent)
-    , cmpConfigObject(new ConfigObject(parent))
-    , cmpPreScanDetector(new ObjectDetector(cvCascade::PreScan, cmpConfigObject, this))
 {
     TRACEFN;
     setObjectName("FaceConsole");
-    TSTALLOC(cmpConfigObject);
-    TSTALLOC(cmpPreScanDetector);
-    cmpConfigObject->setObjectName("ConfigObject:FaceConsole");
-    cmpPreScanDetector->setObjectName("ObjectDetector:FaceConsole");
     QTimer::singleShot(500, this, &FaceConsole::initializeApplication);
     TRACERTV();
 }
 
-ConfigObject *FaceConsole::config() const
+SettingsFile *FaceConsole::settings() const
 {
-    return cmpConfigObject;
+    return commandLine()->settings();
 }
 
 void FaceConsole::initializeApplication()
 {
     TRACEFN;
     QLocale locale;
+    cvVersion cvv;
+    TODO(WhyZero);
     writeLine(QString("%1 %2 started %3")
               .arg(qApp->applicationName())
               .arg(qApp->applicationVersion())
               .arg(locale.toString(QDateTime::currentDateTime())));
+    writeLine("   with Open Source Computer Vision library (OpenCV) " + cvv.getString());
+    CONNECT(this, &FaceConsole::resourseInitFailed,
+            qApp, &QCoreApplication::quit);
     CONNECT(this, &FaceConsole::processingStarted,
             this, &FaceConsole::nextFile);
     CONNECT(this, &FaceConsole::processed,
             this, &FaceConsole::nextFile);
     CONNECT(this, &FaceConsole::processingComplete,
             qApp, &QCoreApplication::quit);
+    CONNECT(this, &FaceConsole::resourseInitFailed,
+            this, &FaceConsole::failedExit);
+    TSTALLOC(settings());
+    TRACE << QOBJNAME(settings());
+    new ObjectDetector(cvCascade::PreScan, this);
+    TSTALLOC(ObjectDetector::p(cvCascade::PreScan));
+    SettingsFile::Map objDetMap = settings()->extract("ObjectDetector");
+    objDetMap.dump();
+    ObjectDetector::p(cvCascade::PreScan)->initialize(objDetMap);
     EMIT(applicationInitd());
-    QTimer::singleShot(100, this, &FaceConsole::setupCommandLine);
+    QTimer::singleShot(100, this, &FaceConsole::processCommandLine);
 }
 
 void FaceConsole::enqueueNext()
@@ -56,9 +67,9 @@ void FaceConsole::enqueueNext()
     QString fileNameArgument = commandLine()->firstPositionalArgument();
 }
 
-void FaceConsole::setupCommandLine()
+void FaceConsole::processCommandLine()
 {
-    TRACEFN
+    TRACEFN;
     rCommandLine().process();
     rCommandLine().expandDirectories();
     CommandLine::ExpandDirResultList xdrl = commandLine()->expandDirResults();
@@ -67,17 +78,15 @@ void FaceConsole::setupCommandLine()
     foreach (CommandLine::ExpandDirResult xdr, xdrl)
         writeLine(QString("   %1. %2 %3 %4").arg(++k, 2).arg(xdr.fileCount, 4)
                   .arg(xdr.firstFileName, 20).arg(xdr.dir.path()));
-    EMIT(commandLineSetup());
+    EMIT(commandLineProcessed());
     QTimer::singleShot(100, this, &FaceConsole::setConfiguration);
 }
 
 void FaceConsole::setConfiguration()
 {
     TRACEFN;
-    cmpConfigObject->set(commandLine()->configuration());
     writeLine("---Configuration:");
-    writeLines(commandLine()->configuration().dumpList());
-
+    writeLines(commandLine()->settings()->map().toStringList());
     EMIT(configurationSet());
     QTimer::singleShot(100, this, &FaceConsole::setBaseOutputDir);
 }
@@ -85,8 +94,7 @@ void FaceConsole::setConfiguration()
 void FaceConsole::setBaseOutputDir()
 {
     TRACEFN;
-
-    QString baseDirString(config()->configuration("/Output").string("BaseDir"));
+    QString baseDirString(settings()->map().string("/Output/BaseDir"));
     baseDirString.replace("@", QDateTime::currentDateTime()
         .toString("DyyyyMMdd-Thhmm"));
     DUMPVAL(baseDirString);
@@ -104,12 +112,9 @@ void FaceConsole::setBaseOutputDir()
 void FaceConsole::setOutputDirs()
 {
     TRACEFN;
-
     bool created = false;
     mMarkedRectOutputDir.setNull(true);
-    QString markedRectDirString(config()->
-            configuration("Output/Dirs")
-                .string("MarkedRect"));
+    QString markedRectDirString(settings()->map().string("Output/Dirs/MarkedRect"));
     DUMPVAL(markedRectDirString);
     if (markedRectDirString.isEmpty())
     {
@@ -171,29 +176,49 @@ void FaceConsole::setOutputDirs()
 void FaceConsole::initializeResources()
 {
     TRACEFN;
-    QDir baseCascadeDir(config()->configuration("/Resources/RectFinder")
-                 .string("BaseDir"));
-    QString cascadeFileName = config()->
-            configuration("/Resources/RectFinder/PreScan")
-                .string("XmlFile");
-    QFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
-    TRACE << cascadeFileInfo << cascadeFileInfo.exists()
+    QQDir baseCascadeDir(settings()->map().string("/Resources/RectFinder/BaseDir"));
+    TRACE << baseCascadeDir << baseCascadeDir.exists() << baseCascadeDir.isReadable();
+    EXPECT(baseCascadeDir.exists());
+    EXPECT(baseCascadeDir.isReadable());
+    QString cascadeFileName = settings()->map().
+            string("/Resources/RectFinder/PreScan/XmlFile");
+    QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
+    TRACE << cascadeFileInfo.absoluteFilePath() << cascadeFileInfo.exists()
           << cascadeFileInfo.isReadable() << cascadeFileInfo.isFile();
-    EXPECT(cascadeFileInfo.exists());
-    EXPECT(cascadeFileInfo.isReadable());
-    EXPECT(cascadeFileInfo.isFile());
+    EXPECTNOT(cascadeFileInfo.notExists());
+    EXPECTNOT(cascadeFileInfo.notReadable());
+    EXPECTNOT(cascadeFileInfo.notFile());
     write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
-    cmpPreScanDetector->cascade()->loadCascade(cascadeFileInfo.absoluteFilePath());
-    EXPECT(cmpPreScanDetector->cascade()->isLoaded());
+    if (cascadeFileInfo.notExists()
+            || cascadeFileInfo.notFile()
+            || cascadeFileInfo.notReadable())
+    {
+        writeLine("error");
+        writeErr("***Invalid cascade file specified: "
+                 + cascadeFileInfo.absoluteFilePath());
+        EMIT(resourseInitFailed(1, "Invalid Cascade"));
+    }
+
+    EXPECT(ObjectDetector::p(cvCascade::PreScan)->load(cascadeFileInfo));
+    if (ObjectDetector::p(cvCascade::PreScan)->isLoaded())
+    {
+        writeLine("done");
+        EMIT(resoursesInitd());
+        QTimer::singleShot(100, this, &FaceConsole::startProcessing);
+    }
+    else
+    {
+        writeLine("error");
+        writeErr("***Cascade file load failed: "
+                 + cascadeFileInfo.absoluteFilePath());
+        EMIT(resourseInitFailed(2, "Cascade Load Failed"));
+    }
 
     NEEDDO(cmpPreScanDetector->cascade()->configure);
 //    Configuration preScanConfig = config()->configuration("Option/RectFinder");
   //  preScanConfig += config()->configuration("PreScan/RectFinder");
     //cmpPreScanDetector->cascade()->configure(preScanConfig);
-
-    writeLine("done");
-    EMIT(resoursesInitd());
-    QTimer::singleShot(100, this, &FaceConsole::startProcessing);}
+}
 
 void FaceConsole::startProcessing()
 {
@@ -227,9 +252,18 @@ void FaceConsole::processCurrentFile()
     writeLine(QString("---Processing: %1. %2").arg(++mCurrentFileCount)
               .arg(mCurrentFileInfo.fileName(QQString::Squeeze)));
     QQImage inputImage(mCurrentFileInfo.absoluteFilePath());
-    Configuration preScanConfig = config()->configuration("Option/RectFinder");
-    preScanConfig += config()->configuration("PreScan/RectFinder");
+    if (inputImage.isNull())
+    {
+        writeLine("***Invalid Image File");
+        EMIT(processed(QFileInfo(mCurrentFileInfo),0));
+    }
+    SettingsFile::Map preScanSettings = settings()->extract("Option/RectFinder");
+    preScanSettings += settings()->extract("PreScan/RectFinder");
+#if 1
+    //QbjectDetector::p(cvCascade::PreScan)->process();
+#else
     int rectCount = cmpPreScanDetector->cascade()->detectRectangles(preScanConfig, inputImage);
+    DUMPVAL(rectCount);
     mCurrentRectangles = cmpPreScanDetector->cascade()->rectList();
     BEXPECTNOT(rectCount < 0);
     WEXPECTNOT(0 == rectCount);
@@ -246,15 +280,22 @@ void FaceConsole::processCurrentFile()
               .arg(mCurrentResults.orphanCount()));
     QQFileInfo markedRectOutputFileInfo(mMarkedRectOutputDir,
             mCurrentFileInfo.completeBaseName()+"-%M@.png", QQString::Squeeze);
+    markedRectOutputFileInfo.replace("@", Milliseconds::baseDateStamp());
     markedRectOutputFileInfo.replace("%M", cmpPreScanDetector->cascade()->methodString());
     markedRectOutputFileName = markedRectOutputFileInfo.absoluteFilePath();
     //SimpleRectMarker rectMarker(inputImage);
     SimpleRectMarker rectMarker(cmpPreScanDetector->cascade()->detectImage());
-    //rectMarker.markAll(Configuration(), mCurrentRectangles);
     rectMarker.mark(Configuration(), mCurrentResults, rectMarker.qualityWheel(), true);
     QQImage markedImage = rectMarker;
     if (markedImage.save(markedRectOutputFileName))
         writeLine(QString("   %1 written").arg(markedRectOutputFileName));
+    HeatmapMarker heatMarker(inputImage);
+    heatMarker.mark(Configuration(), mCurrentResults);
+    QQImage heatImage = heatMarker;
+    QQFileInfo heatRectOutputFileInfo(mMarkedRectOutputDir,
+            mCurrentFileInfo.completeBaseName()+"-heat.png", QQString::Squeeze);
+    if (heatImage.save(heatRectOutputFileInfo.absoluteFilePath(QQString::Squeeze)))
+        writeLine("   " + heatRectOutputFileInfo.absoluteFilePath() + " written");
 
     foreach (ObjDetResultItem item, mCurrentResults.list())
     {
@@ -271,6 +312,7 @@ void FaceConsole::processCurrentFile()
         if (saved)
             writeLine(QString("   %1 written").arg(faceInfo.filePath()));
     }
+#endif
 
     EMIT(processed(QFileInfo(mCurrentFileInfo),
              mCurrentRectangles.size()));
@@ -290,4 +332,11 @@ void FaceConsole::finishProcessing()
     writeLine("===Processing Complete");
     NEEDDO(more);
     EMIT(processingComplete());
+}
+
+void FaceConsole::failedExit(const qint8 retcode, const QString &errmsg)
+{
+    TRACEQFI << retcode << errmsg;
+    writeErr(QString("@@@Failure Code=%1: %2").arg(retcode).arg(errmsg));
+    qApp->exit(retcode);
 }

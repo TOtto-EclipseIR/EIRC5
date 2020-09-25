@@ -17,6 +17,7 @@ LIBS *= -leirQtCV5
 
 SOURCES += \
     ColorWheel.cpp \
+    HeatmapMarker.cpp \
     Hue.cpp \
     MarkManager.cpp \
     OutputManager.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
 
 HEADERS += \
     ColorWheel.h \
+    HeatmapMarker.h \
     Hue.h \
     MarkManager.h \
     OutputManager.h \

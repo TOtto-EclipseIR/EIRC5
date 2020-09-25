@@ -6,7 +6,7 @@ class EIRTYPE_EXPORT RealMath
 public:
     struct Constants
     {
-        constexpr static qreal E =             2.71828182845904523536;
+        constexpr static qreal EULER =             2.71828182845904523536;
         constexpr static qreal LOG2E =         1.44269504088896340736;
         constexpr static qreal LOG10E =        0.434294481903251827651;
         constexpr static qreal LN2 =           0.693147180559945309417;

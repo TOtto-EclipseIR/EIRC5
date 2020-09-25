@@ -26,6 +26,7 @@ SOURCES += \
     FunctionInfo.cpp \
     Id.cpp \
     MultiName.cpp \
+    Palette.cpp \
     QQByteArray.cpp \
     QQColor.cpp \
     QQDir.cpp \
@@ -33,6 +34,7 @@ SOURCES += \
     QQFileInfo.cpp \
     QQFileInfoList.cpp \
     QQImage.cpp \
+    QQPoint.cpp \
     QQRect.cpp \
     QQRectF.cpp \
     QQRectList.cpp \
@@ -73,6 +75,7 @@ HEADERS += \
     NamedArray.h \
     NamedEnum.h \
     NamedMap.h \
+    Palette.h \
     QQByteArray.h \
     QQColor.h \
     QQDir.h \
@@ -80,6 +83,7 @@ HEADERS += \
     QQFileInfo.h \
     QQFileInfoList.h \
     QQImage.h \
+    QQPoint.h \
     QQRect.h \
     QQRectF.h \
     QQRectList.h \

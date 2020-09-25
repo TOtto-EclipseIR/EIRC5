@@ -23,12 +23,29 @@ include(../../EIRC2.pri)
 SOURCES += \
     HexDump.cpp \
     StartupDebug.cpp \
+    XfrBaseEventReceiver.cpp \
+    XfrEntry.cpp \
+    XfrEvent.cpp \
+    XfrEventQueue.cpp \
+    XfrFlags.cpp \
+    XfrFunctionInfo.cpp \
+    XfrLevel.cpp \
+    XfrTrollEventReceiver.cpp \
     eirXfr.cpp \
 
 HEADERS += \
     Debug.h \
     HexDump.h \
     StartupDebug.h \
+    XfrBaseEventReceiver.h \
+    XfrEntry.h \
+    XfrEvent.h \
+    XfrEventQueue.h \
+    XfrFlags.h \
+    XfrFunctionInfo.h \
+    XfrLevel.h \
+    XfrMacros.h \
+    XfrTrollEventReceiver.h \
     eirXfr_global.h \
     eirXfr.h \
 
@@ -37,3 +54,6 @@ unix {
     target.path = /usr/lib
 }
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    ../XFR

@@ -7,21 +7,24 @@
 #include <eirType/Milliseconds.h>
 #include <eirType/VersionInfo.h>
 
-//#include "ArgumentList.h"
 #include "CommandLine.h"
-#include "ConfigObject.h"
+#include "SettingsFile.h"
 
 #include "../../version.h"
 
 ApplicationHelper::ApplicationHelper(QObject *parent)
     : QObject(parent)
-    , cmpCommandLine(new CommandLine(this))
-    , cmpConfigObject(new ConfigObject(this))
     , cmpTempDir(new QTemporaryDir())
+    , cmpCommandLine(new CommandLine(this))
+    , cmpSettings(new SettingsFile(this))
 {
     TRACEFN
     setObjectName("ApplicationHelper");
+    TSTALLOC(cmpCommandLine);
+    TSTALLOC(cmpSettings);
     TSTALLOC(cmpTempDir);
+    cmpCommandLine->setObjectName("ApplicationHelper::CommandLine");
+    cmpSettings->setObjectName("ApplicationHelper::Settings");
     EXPECT(cmpTempDir->isValid())
 }
 
@@ -30,35 +33,37 @@ VersionInfo ApplicationHelper::version() const
     return cmVerInfo;
 }
 
-QFile *ApplicationHelper::tempFile(const QString &ext,
+QFile *ApplicationHelper::tempDirFile(const QString &ext,
                                    QObject *parent)
 {
-    //QString fileBaseName = Uid::create().toString();
+    TRACEQFI << ext << QOBJNAME(parent);
     QString fileBaseName = Milliseconds::current()
             .toByteArray().toHex();
     QFile * f = new QFile(parent ? parent : this);
     TSTALLOC(f);
-    f->setFileName(cmpTempDir->filePath(fileBaseName + ext));
+    f->setFileName(cmpTempDir->filePath(fileBaseName + "." + ext));
     // Returning a closed, unique QFile pointer.
     // The developer can open them as the apps need,
     // but is not responsible for deleting the file.
-    mTempFiles.append(f);
     return f;
 }
 
 const CommandLine *ApplicationHelper::commandLine() const
 {
+    TSTALLOC(cmpCommandLine);
     return cmpCommandLine;
 }
 
 CommandLine &ApplicationHelper::rCommandLine()
 {
+    TSTALLOC(cmpCommandLine);
     return *cmpCommandLine;
 }
 
-ConfigObject *ApplicationHelper::config() const
+SettingsFile *ApplicationHelper::settings() const
 {
-    return cmpConfigObject;
+    TSTALLOC(cmpSettings);
+    return cmpSettings;
 }
 
 void ApplicationHelper::run()

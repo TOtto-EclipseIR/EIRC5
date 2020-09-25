@@ -1,15 +1,19 @@
 // file: {EIRC2 repo}./src/libs/eirType/UInt128.cpp
 #include "UInt128.h"
 
-#include <eirXfr/Debug.h>
+#include <XFR>
 
-UInt128::UInt128()
+UInt128::UInt128() : mUpperLowerPair(0,0)
 {
-
+    XENTER();
 }
 
 UInt128::UInt128(const quint64 upper, const quint64 lower)
 {
+    XENTER();
+    XARG1(upper);
+    XARG2(lower);
+
     set(upper, lower);
 }
 
@@ -18,9 +22,7 @@ UInt128::UInt128(const QUuid quuid)
     bool ok;
     QByteArray qbaRaw128 = quuid.toByteArray(QUuid::Id128);
     quint64 u64upper = qbaRaw128.left(128).toULongLong(&ok, 16);
-    WEXPECT(ok);
     quint64 u64lower = qbaRaw128.mid(128).toULongLong(&ok, 16);
-    WEXPECT(ok);
     set(u64upper, u64lower);
 }
 

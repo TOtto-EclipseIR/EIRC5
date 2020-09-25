@@ -8,8 +8,10 @@
 #include <eirXfr/Debug.h>
 #include <eirType/QQFileInfo.h>
 #include <eirType/QQFileInfoList.h>
+#include <eirType/QQString.h>
 
 #include "CommandLineClientInterface.h"
+#include "SettingsFile.h"
 
 CommandLine::CommandLine(QObject *parent)
     : QObject(parent)
@@ -82,9 +84,9 @@ const QQFileInfo CommandLine::exeFileInfo() const
     return mExeFileInfo;
 }
 
-Configuration CommandLine::configuration() const
+SettingsFile *CommandLine::settings() const
 {
-    return mConfiguration;
+    return mpSettings;
 }
 
 void CommandLine::process()
@@ -95,8 +97,8 @@ void CommandLine::process()
     arguments = expandFileArguments(cmExeArgumentList.mid(1), '@');
     TRACE << "Expanded:" << arguments;
     arguments = stripConfiguration(arguments);
-    TRACE << "Configuration:";
-    mConfiguration.dump();
+    TRACE << "Settings:";
+    DUMP << settings()->map().toStringList();
     TRACE << "Post Configuration:" << arguments;
     arguments = extractDirectiveArguments(arguments);
     TRACE << "Post Extract:" << arguments;
@@ -160,8 +162,8 @@ void CommandLine::dump()
     DUMP << "---exeFileInfo:" << mExeFileInfo;
     DUMP << "---positionalArgumentList:";
     dumpPositionalArgs();
-    DUMP << "---Configuration:";
-    mConfiguration.dump();
+    DUMP << "---Settings:";
+    DUMP << settings()->map().toStringList();
 }
 
 
@@ -170,11 +172,11 @@ QStringList CommandLine::expandFileArguments(const QStringList arguments,
 {
     TRACEQFI << arguments;
     QStringList expanded;
-    foreach (QString arg, arguments)
+    foreach (QQString arg, arguments)
     {
         if (arg.startsWith(trigger))
         {
-            QFileInfo argFileInfo(arg.mid(1));
+            QQFileInfo argFileInfo(arg.mid(1), QQString::NoFlag);
             TRACE << "Expanding" << argFileInfo.absoluteFilePath();
             TEXPECT(argFileInfo.exists());
             TEXPECT(argFileInfo.isReadable());
@@ -216,7 +218,7 @@ QStringList CommandLine::stripConfiguration(
     QStringList remainingArgs;
     foreach (QString arg, expandedArgs)
         if (arg.startsWith(trigger))
-            parseConfigArgument(arg, prefix);
+            parseSettingArgument(arg, prefix);
         else
             remainingArgs << arg;
     TRACEQFI << remainingArgs;
@@ -224,17 +226,15 @@ QStringList CommandLine::stripConfiguration(
 }
 
 
-void CommandLine::parseConfigArgument(const QString &arg,
+void CommandLine::parseSettingArgument(const QString &arg,
                                       const MultiName &prefix)
 {
     TRACEQFI << arg << prefix();
     QStringList qsl = arg.split('=');
     MultiName key = qsl[0].mid(1);
     key.prependName(prefix);
-    QVariant value = (qsl.size() > 1)
-            ? QVariant(qsl[1])
-            : QVariant(true);
-    mConfiguration.insert(key, value);
+    QString value = (qsl.size() > 1) ? qsl[1] : "true";
+    settings()->set(key, value);
     TRACE << key() << "=" << value;
 }
 

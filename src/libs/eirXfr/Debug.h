@@ -136,4 +136,4 @@
 
 #define TSTALLOC(ptr)           DEBUGXPTR(qCritical, PABORT, ptr);
 #define TRYALLOC(typ, var, nexpr) typ * var = new nexpr; TSTALLOC(var)
-#define QOBJPTR(ptr)            ExeFlightRecorder::objectPointerString(#ptr, ptr)
+//#define QOBJPTR(ptr)            ExeFlightRecorder::objectPointerString(#ptr, ptr)

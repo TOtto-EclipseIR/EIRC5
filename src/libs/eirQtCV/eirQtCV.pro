@@ -29,6 +29,7 @@ SOURCES += \
     cvCascade.cpp \
     cvMat.cpp \
     cvString.cpp \
+    cvVersion.cpp \
     eirQtCV.cpp
 
 HEADERS += \
@@ -36,6 +37,7 @@ HEADERS += \
     cvCascade.h \
     cvMat.h \
     cvString.h \
+    cvVersion.h \
     eirQtCV_global.h \
     eirQtCV.h
 

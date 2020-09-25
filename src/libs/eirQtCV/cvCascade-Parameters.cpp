@@ -13,22 +13,22 @@ cvCascade::Parameters::Parameters(const QVariant &variant)
     *this = variant.value<cvCascade::Parameters>();
 }
 
-cvCascade::Parameters::Parameters(const Configuration &cascadeConfig)
+cvCascade::Parameters::Parameters(const SettingsFile::Map &cascadeSettingsMap)
 {
     TRACEFN;
-    set(cascadeConfig);
+    set(cascadeSettingsMap);
 }
 
-Configuration &cvCascade::Parameters::cascadeConfig()
+SettingsFile::Map &cvCascade::Parameters::cascadeSettingsMap()
 {
-    return mConfig;
+    return mSettingsMap;
 }
 
-void cvCascade::Parameters::set(const Configuration &cascadeConfig)
+void cvCascade::Parameters::set(const SettingsFile::Map &cascadeSettingsMap)
 {
     TRACEFN;
-    cascadeConfig.dump();
-    mConfig = cascadeConfig;
+    cascadeSettingsMap.dump();
+    mSettingsMap = cascadeSettingsMap;
 }
 
 void cvCascade::Parameters::calculate(const cvCascade::Type type,
@@ -83,7 +83,7 @@ void cvCascade::Parameters::calculate(const cvCascade::Type type,
     mFactor = qIsNull(fac) ? 1.160 : fac;
     NEEDDO("Default Based on Image/Core size & MaxDetectors, etc.");
 
-    int neigh = mConfig.signedInt("Neighbors");
+    int neigh = mSettingsMap.signedInt("Neighbors");
     mNeighbors = (neigh >= 0) ? neigh : 2;
 
     DUMP << dumpList();
@@ -131,7 +131,7 @@ QVariant cvCascade::Parameters::toVariant() const
 double cvCascade::Parameters::parseFactor()
 {
     double result=qQNaN();
-    double f = mConfig.real("Factor");
+    double f = mSettingsMap.real("Factor");
     if (f >= 1.001 && f <= 2.000)
         result = 0.0;
     else if (f > 1.0 && f < 999.0)

@@ -1,7 +1,6 @@
 #pragma once
 #include "eirQtCV.h"
 
-#include <QFileInfo>
 #include <QImage>
 #include <QList>
 #include <QPair>
@@ -11,6 +10,7 @@
 
 #include <eirBase/Typedefs.h>
 #include <eirBase/Uuid.h>
+#include <eirExe/SettingsFile.h>
 #include <eirType/BasicName.h>
 #include <eirType/Boolean.h>
 #include <eirType/QQFileInfo.h>
@@ -18,10 +18,10 @@
 #include <eirType/QQRect.h>
 #include <eirType/QQRectList.h>
 #include <eirType/QQSize.h>
-#include <eirExe/Configuration.h>
 
 #include "cvMat.h"
 
+class QDomElement;
 
 namespace cv { class CascadeClassifier; }
 
@@ -40,9 +40,9 @@ public:
     public:
         Parameters();
         Parameters(const QVariant &variant);
-        Parameters(const Configuration &cascadeConfig);
-        Configuration &cascadeConfig();
-        void set(const Configuration &cascadeConfig);
+        Parameters(const SettingsFile::Map &cascadeSettingsMap);
+        SettingsFile::Map &cascadeSettingsMap();
+        void set(const SettingsFile::Map &cascadeSettingsMap);
         void calculate(const Type type,
                        const QQSize imageSize,
                        const QQSize coreSize);
@@ -59,7 +59,7 @@ public:
         double parseFactor();
 
     private:
-        Configuration mConfig;
+        SettingsFile::Map mSettingsMap;
         double mFactor=Q_QNAN;
         int mNeighbors=0;
         int mFlags=0;
@@ -73,9 +73,8 @@ public:
     Type type() const;
     BasicName typeName() const;
     bool isNull() const;
-    bool loadCascade(const QFileInfo &cascadeXmlInfo);
-    bool loadCoreSize(const QFileInfo &cascadeXmlInfo,
-                      int cascadeVersion=0);
+    bool loadCascade(const QQFileInfo &cascadeXmlInfo);
+    bool loadCoreSize(const QFileInfo &cascadeXmlInfo);
     bool notLoaded() const;
     bool isLoaded() const;
     void unload();
@@ -83,7 +82,7 @@ public:
     QQFileInfo cascadeFileInfo() const;
     cv::CascadeClassifier *classifier();
 
-    int detectRectangles(const Configuration &rectFinderConfig,
+    int detectRectangles(const SettingsFile::Map &rectFinderConfig,
                          const QQImage &inputImage,
                          const bool showDetect=false,
                          const QQRect &region=QQRect());
@@ -95,6 +94,11 @@ public:
 
 public: // static
     static BasicName typeName(Type type);
+
+private: // static
+    int determineVersion(const QDomElement topDE);
+    QQSize getSize2(const QDomElement topDE);
+    QQSize getSize4(const QDomElement topDE);
 
 private:
     Type cmType=nullType;

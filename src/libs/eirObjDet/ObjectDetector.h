@@ -8,10 +8,9 @@ class QTimer;
 
 #include <eirBase/Uuid.h>
 #include <eirType/Milliseconds.h>
-#include <eirExe/ConfigObject.h>
+#include <eirExe/SettingsFile.h>
 #include <eirQtCV/cvCascade.h>
 
-#include "ObjDetPak.h"
 #include "ObjDetResultItem.h"
 #include "ObjDetResultList.h"
 
@@ -21,26 +20,29 @@ class EIROBJDET_EXPORT ObjectDetector : public QObject
 public:
     typedef ObjectDetector * This;
 public:
-    explicit ObjectDetector(const cvCascade::Type type,
-                            ConfigObject * cfgObj,
+    ObjectDetector(const cvCascade::Type type,
                             QObject *parent = nullptr);
     ~ObjectDetector();
     static ObjectDetector * p(const cvCascadeType type);
     cvCascade * cascade();
-    ObjDetPak &pak(const Uuid uuid); // non-const ref
-    void insert(const ObjDetPak &pak);
-    Uuid process(const Configuration &config,
+
+    // single-threaded execution
+    bool load(const QQFileInfo cascadeFInfo);
+    bool isLoaded();
+    ObjDetResultList process(const SettingsFile::Map &settingsMap,
                        const QFileInfo &inputFileInfo,
                        bool showDetect=false);
+    QQImage inputImageForProcess() const;
+
+private:
     ObjDetResultList groupByUnion(const QQRectList &inputRects,
                             const qreal overlapThreshold,
                             const int orphanThreshold);
     qreal calculateQuality(const ObjDetResultItem &item) const;
-    QQImage inputImageForProcess() const;
 
 public slots:
     // setup
-    void initialize();
+    void initialize(const SettingsFile::Map map);
     void start();
 
     // running
@@ -74,8 +76,8 @@ signals:
 
 private slots:
     // setup
-    void setDefaults();
     void configure();
+    void setDefaults();
     void readyStart();
 
     // running
@@ -87,11 +89,9 @@ private slots:
 
 private:
     cvCascade mCascade;
-    ConfigObject  * const cmpConfig=nullptr;
     QTimer  * const cmpTimer=nullptr;
-    Configuration mObjDetConfig;
+    SettingsFile::Map mObjDetSettings;
     QQImage mProcessInputImage;
-    ObjDetPak::UuidMap mPakMap;
     Uuid::Queue mInputQueue;
     Uuid::Queue mFinderQueue;
     Uuid::Queue mGrouperQueue;

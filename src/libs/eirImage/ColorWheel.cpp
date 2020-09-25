@@ -28,9 +28,19 @@ void ColorWheel::set(const int count, const Hue begin, const Hue end)
     }
 }
 
+void ColorWheel::setQuality(const Hue begin, const Hue end)
+{
+    set(250, begin, end);
+}
+
 QQColor ColorWheel::at(const int index) const
 {
     return (index >= 0 && index < mColorVector.size()) ? mColorVector.at(index) : QQColor();
+}
+
+QQColor ColorWheel::quality(const int q) const
+{
+    return at(q/4);
 }
 
 QRgb ColorWheel::rgba(const int index)

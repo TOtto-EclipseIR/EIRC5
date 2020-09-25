@@ -3,6 +3,7 @@
 #include <QTimer>
 
 #include <eirBase/Uuid.h>
+#include <eirExe/SettingsFile.h>
 #include <eirXfr/Debug.h>
 
 #include "ObjDetResultItem.h"
@@ -11,18 +12,14 @@
 QHash<cvCascadeType, ObjectDetector::This> ObjectDetector::smTypeDetectorHash;
 
 ObjectDetector::ObjectDetector(const cvCascade::Type type,
-                               ConfigObject *cfgObj,
                                QObject *parent)
     : QObject(parent)
     , mCascade(type)
-    , cmpConfig(cfgObj)
     , cmpTimer(new QTimer(parent))
 {
     TRACEQFI << cvCascade::typeName(type)() << QOBJNAME(parent);
-    setObjectName("ObjectDetector");
-    TSTALLOC(cmpConfig);
+    setObjectName("ObjectDetector:"+cvCascade::typeName(type));
     TSTALLOC(cmpTimer);
-    cmpConfig->setObjectName("ConfigObject:ObjectDetector");
     cmpTimer->setObjectName("QTimer:ObjectDetector");
     if (smTypeDetectorHash.contains(type))
     {
@@ -32,7 +29,6 @@ ObjectDetector::ObjectDetector(const cvCascade::Type type,
     }
     smTypeDetectorHash.insert(type, this);
     EMIT(ctored());
-    //QTimer::singleShot(100, this, &ObjectDetector::initialize);
 }
 
 ObjectDetector::~ObjectDetector()
@@ -53,42 +49,35 @@ cvCascade *ObjectDetector::cascade()
     return &mCascade;
 }
 
-ObjDetPak &ObjectDetector::pak(const Uuid uuid)
+bool ObjectDetector::load(const QQFileInfo cascadeFInfo)
 {
-    return mPakMap[uuid];
+    TRACEQFI << cascadeFInfo << cascadeFInfo.isReadableFile();
+    bool coreok = cascade()->loadCoreSize(cascadeFInfo);
+    bool loaded = cascade()->loadCascade(cascadeFInfo);
+    EXPECT(coreok);
+    EXPECT(loaded);
+    return loaded && coreok;
 }
 
-void ObjectDetector::insert(const ObjDetPak &pak)
+bool ObjectDetector::isLoaded()
 {
-    TRACEQFI << pak;
-    mPakMap.insert(pak.uuid(), pak);
+    return cascade()->isLoaded();
 }
 
-Uuid ObjectDetector::process(const Configuration &config,
+ObjDetResultList ObjectDetector::process(const SettingsFile::Map &settingsMap,
                                    const QFileInfo &inputFileInfo,
                                    bool showDetect)
 {
     TRACEQFI << inputFileInfo << showDetect;
-    config.dump();
-    ObjDetPak pak(inputFileInfo);
-    QQImage inputImage = pak.inputImage();
-    pak.set("InputImage/Configuration", config.toVariant());
-    mProcessInputImage = inputImage;
-    cascade()->detectRectangles(config, inputImage, showDetect);
-    pak.set(cascade()->typeName()+"/Cascade", cascade()->cascadeFileInfo());
-    pak.set(cascade()->typeName()+"/CoreSize", cascade()->coreSize());
+    settingsMap.dump();
+    QQImage inputImage(inputFileInfo.absoluteFilePath());
+    cascade()->detectRectangles(settingsMap, inputImage, showDetect);
     DUMP << cascade()->parameters();
-    pak.set(cascade()->typeName()+"/Parameters", cascade()->parameters().toVariant());
-    pak.set(cascade()->typeName()+"/MethodString", cascade()->methodString());
     QQRectList rectList = cascade()->rectList();
-    pak.set(cascade()->typeName()+"/Rectangles", rectList);
-    qreal unionGroupOverlap = config.realPermille("UnionGroupOverlap", 500);
-    qreal unionGroupOrphan = config.unsignedInt("UnionGroupOrphan", 1);
+    qreal unionGroupOverlap = settingsMap.realPerMille("UnionGroupOverlap", 500);
+    qreal unionGroupOrphan = settingsMap.unsignedInt("UnionGroupOrphan", 1);
     ObjDetResultList resultList = groupByUnion(rectList, unionGroupOverlap, unionGroupOrphan);
-    pak.set(cascade()->typeName()+"/ResultList", resultList.toVariant());
-    insert(pak);
-    TRACE << "return uuid" << pak.uuid();
-    return pak.uuid();
+    return resultList;
 }
 
 ObjDetResultList ObjectDetector::groupByUnion(const QQRectList &inputRects,
@@ -135,7 +124,7 @@ QQImage ObjectDetector::inputImageForProcess() const
 
 void ObjectDetector::start()
 {
-    Milliseconds pulseMsec = mObjDetConfig.signedInt("PulseMsec");
+    Milliseconds pulseMsec( mObjDetSettings.value("PulseMsec"));
     TRACEQFI << pulseMsec;
     EXPECT(pulseMsec);
     if (pulseMsec > 0)
@@ -153,20 +142,8 @@ void ObjectDetector::start()
 
 void ObjectDetector::enqueue(const QFileInfo &inputFileInfo)
 {
-    bool autoLoad = mObjDetConfig.boolean("InputQueue/AutoLoad");
-    TRACEQFI << inputFileInfo << autoLoad;
-    ObjDetPak pak(inputFileInfo, autoLoad);
-    Uuid uuid = pak.uuid();
-    DUMPVAL(uuid);
-    mPakMap.insert(uuid, pak);
-    EMIT(pakInserted(mPakMap.size()));
-    if ( ! autoLoad)
-    {
-        mInputQueue.enqueue(uuid);
-        EMIT(inputQueued(uuid));
-        EMIT(inputQueued(mInputQueue.size()));
-        EMIT(inputQueueNotEmpty());
-    }
+    TRACEQFI << inputFileInfo;
+    MUSTDO(it);
 }
 
 void ObjectDetector::dequeue(const int count)
@@ -191,35 +168,33 @@ void ObjectDetector::stop()
     EMIT(stopped());
 }
 
-void ObjectDetector::initialize()
+void ObjectDetector::initialize(const SettingsFile::Map map)
 {
     TRACEFN;
     NEEDDO(anyConnect);
+    mObjDetSettings = map;
     EMIT(initialized());
-    QTimer::singleShot(100, this, &ObjectDetector::setDefaults);
-}
-
-void ObjectDetector::setDefaults()
-{
-    TRACEFN;
-    mObjDetConfig.setDefault("PulseMsec", 64);
-    mObjDetConfig.setDefault("ProcessedHoldCount", 32);
-    mObjDetConfig.setDefault("HoldMaxIntervals", 4);
-    mObjDetConfig.setDefault("ReleasedRemoveCount", 32);
-    mObjDetConfig.setDefault("InputQueue/AutoLoad", false);
-    TODO(RectFinder/TBD);
-    TODO(RectGrouper/TBD);
-    EMIT(defaultsSet());
     QTimer::singleShot(100, this, &ObjectDetector::configure);
 }
 
 void ObjectDetector::configure()
 {
     TRACEFN;
-    mObjDetConfig += cmpConfig->configuration().
-            extract(cascade()->typeName()+"/ObjectDetector");
-    LATERDO("connectDispatcher");
+    mObjDetSettings.dump();
     EMIT(configured());
+    QTimer::singleShot(100, this, &ObjectDetector::setDefaults);
+}
+
+void ObjectDetector::setDefaults()
+{
+    TRACEFN;
+    mObjDetSettings.setDefault("PulseMsec", 64);
+    mObjDetSettings.setDefault("ProcessedHoldCount", 32);
+    mObjDetSettings.setDefault("HoldMaxIntervals", 4);
+    mObjDetSettings.setDefault("ReleasedRemoveCount", 32);
+    TODO(RectFinder/TBD);
+    TODO(RectGrouper/TBD);
+    EMIT(defaultsSet());
     QTimer::singleShot(100, this, &ObjectDetector::readyStart);
 }
 
@@ -234,19 +209,19 @@ void ObjectDetector::readyStart()
 void ObjectDetector::pulse()
 {
     TRACEFN;
+#if 0
     static int kHold = 0;
-    int nPak        = mPakMap.size();
     int nInput      = mInputQueue.size();
     int nFinder     = mFinderQueue.size();
     int nGrouper    = mGrouperQueue.size();
     int nProcessed  = mProcessedQueue.size();
     int nReleased   = mReleasedQueue.size();
 
-    int processedLimit  = mObjDetConfig.unsignedInt("ProcessedHoldCount");
-    int holdLimit       = mObjDetConfig.unsignedInt("HoldMaxIntervals", 4);
-    int releasedLimit   = mObjDetConfig.unsignedInt("ReleasedRemoveCount");
-    DUMP << "Pulse:" << nPak
-         << nInput << nFinder << nGrouper << nProcessed << nReleased
+    int processedLimit  = mObjDetSettings.unsignedInt("ProcessedHoldCount");
+    int holdLimit       = mObjDetSettings.unsignedInt("HoldMaxIntervals", 4);
+    int releasedLimit   = mObjDetSettings.unsignedInt("ReleasedRemoveCount");
+    DUMP << "Pulse:"
+         << nInput << nFinder << nGrouper << nProcessed << nReleased;
          << processedLimit << holdLimit << releasedLimit;
     LATERDO(PerformanceRecorder);
     NEEDDO(RefactorReturns&TrackTime);
@@ -285,52 +260,30 @@ void ObjectDetector::pulse()
     {
         ; // nothing to do, wait for next time?
     }
+#endif
 }
 
 void ObjectDetector::loadInput(const Uuid uuid)
 {
     TRACEQFI << uuid.trace();
-    pak(uuid).loadInputImage();
-    if ( ! pak(uuid).inputImage().isNull())
-        mFinderQueue.enqueue(uuid);
-    else
-        ERROR << "inputImage() null" << uuid.trace();
+    MUSTDO(it);
     TRACERTV();
 }
 
 void ObjectDetector::findRects(const Uuid uuid)
 {
     TRACEQFI << uuid.trace();
-    QQImage inputImage = pak(uuid).inputImage();
-    if (inputImage.isNull())
-    {
-        ERROR << "inputImage() null" << uuid.trace();
-    }
-    else
-    {
-        int rects = cascade()->detectRectangles(Configuration(), inputImage);
-        if (rects < 0)
-            ERROR << "detectRectangles() Error:" << rects;
-        else if (0 == rects)
-            WARN << "No Rectangles Detected";
-        else
-            TRACE << rects << "Detectected";
-    }
-    MUSTDO(saveRectsAndEnqueueGrouper);
+    MUSTDO(it);
 }
 
 void ObjectDetector::groupRects(const Uuid uuid)
 {
     TRACEQFI << uuid.trace();
     MUSTDO(it);
-
-
 }
 
 void ObjectDetector::removeReleased(const Uuid uuid)
 {
     TRACEQFI << uuid.trace();
     MUSTDO(it);
-
-
 }

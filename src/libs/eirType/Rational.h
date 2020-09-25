@@ -24,10 +24,9 @@ public:
     int numerator() const;
     int denominator() const;
     void set(const int n, const int d);
-
     void nullify();
     void unitify(const bool byModulo=false);
-
+    QString toString() const;
 
 
 private:
@@ -36,3 +35,4 @@ private:
 
 };
 
+EIRTYPE_EXPORT QDebug operator<<(QDebug dbg, const Rational &item);
