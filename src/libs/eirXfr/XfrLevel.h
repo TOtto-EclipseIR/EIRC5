@@ -12,9 +12,13 @@ public:
 public:
     XfrLevel();
     XfrLevel(const Level level);
+    bool isNull() const;
+    bool notNull() const;
+    bool isValid() const;
+    bool notValid() const;
     Level level() const { return mLevel; }
     Name name() const { return name(level()); }
-
+    bool operator == (const XfrLevel &other);
 
 private:
     Level mLevel;
@@ -25,6 +29,8 @@ public:
     { return mLevelNameDMap.at(name); }
     static QString name(const Level level)
     { return mLevelNameDMap.at(level); }
+    static bool isValid(const Level level) { return mLevelNameDMap.contains(level); }
+    static bool isValid(const Name name) { return mLevelNameDMap.contains(name); }
     static bool isUser(const Name name)
     { return level(name) >= level("Info") && level(name) < level("Enter"); }
     static bool isDebug(const Name name)

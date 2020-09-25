@@ -19,7 +19,7 @@ typedef XfrLevel::Level XfrLevelLevel;
 
 #define XFRENTRY_DATAPROPS(TND) \
     TND(qint64, TimeStampUtc, 0) \
-    TND(XfrLevelLevel, Level, 0) \
+    TND(XfrLevelLevel, LevelLevel, 0) \
     TND(QString, QFuncInfo, QString()) \
     TND(QString, ClassName, QString()) \
     TND(QString, FunctionName, QString()) \
@@ -46,6 +46,13 @@ class EIRXFR_EXPORT XfrEntry
 public:
     QUuid uid() const { return mUid; }
     bool isNull() const;
+    bool isValidLevel() const;
+    bool notValidLevel() const;
+    XfrLevel::Level getLevel() const;
+    void setLevel(XfrLevel::Level lvl);
+    const XfrLevel toLevel() const;
+
+
 
 private:
     QUuid mUid;

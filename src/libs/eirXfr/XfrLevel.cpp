@@ -13,6 +13,26 @@ XfrLevel::XfrLevel(const Level level)
     staticCtor();
 }
 
+bool XfrLevel::isNull() const
+{
+    return level("NoLevel") == mLevel;
+}
+
+bool XfrLevel::notNull() const
+{
+    return ! isNull();
+}
+
+bool XfrLevel::isValid() const
+{
+    return mLevelNameDMap.contains(mLevel) && ! isNull();
+}
+
+bool XfrLevel::notValid() const
+{
+    return ! isValid();
+}
+
 void XfrLevel::staticCtor()
 {
     if (mLevelNameDMap.isEmpty())

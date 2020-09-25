@@ -10,5 +10,5 @@ include(ourbld.pri)
 include(ourdest.pri)
 include(ipath.pri)
 
-message(OURDEST = $$OURDEST)
-message(LIBS = $$LIBS)
+#message(OURDEST = $$OURDEST)
+#message(LIBS = $$LIBS)

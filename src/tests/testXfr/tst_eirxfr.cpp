@@ -27,9 +27,11 @@ void testXfr::cleanupTestCase() {;}
 
 void testXfr::testEntry()
 {
-    XfrEntry null;
+    XfrEntry nullEntry;
 
-    QVERIFY(null.isNull());
+    QVERIFY(nullEntry.isNull());
+    QVERIFY(nullEntry.notValidLevel());
+    QVERIFY(nullEntry.toLevel().notValid());
 }
 
 QTEST_MAIN(testXfr)

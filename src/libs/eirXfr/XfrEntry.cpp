@@ -18,7 +18,33 @@ void XfrEntry::dtor(void)
 
 bool XfrEntry::isNull() const
 {
-     return uid().isNull() || 0 == getLevel() || 0 == getTimeStampUtc();
+     return uid().isNull() || 0 == getTimeStampUtc()
+             || XfrLevel::level("NoLevel") == getLevel() ;
+}
+
+bool XfrEntry::isValidLevel() const
+{
+    return toLevel().isValid();
+}
+
+bool XfrEntry::notValidLevel() const
+{
+    return ! isValidLevel();
+}
+
+XfrLevel::Level XfrEntry::getLevel() const
+{
+    return XfrLevel::Level(getLevelLevel());
+}
+
+void XfrEntry::setLevel(XfrLevel::Level lvl)
+{
+    setLevelLevel(XfrLevelLevel(lvl));
+}
+
+const XfrLevel XfrEntry::toLevel() const
+{
+    return XfrLevel(getLevel());
 }
 
 XfrEntry XfrEntry::at(const QUuid &uid)
