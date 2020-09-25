@@ -26,7 +26,7 @@ public:
     UInt128 set(const quint8 bytes[8]);
     UInt128 set(const QUuid quid);
     UInt128 toU128(void) const;
-    QString toHex(bool with0x=false) const;
+    QString toHex(bool with0x=true) const;
     QByteArray toByteArray(void)  const;
     bool isNull(void) const;
     void nullify(void);

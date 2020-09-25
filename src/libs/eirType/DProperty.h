@@ -29,6 +29,7 @@ class EIRCORESHARED_EXPORT LogItem
 {
     DECLARE_PARENT_DATAPROPS(LOGITEM_DATAPROPS)
     DECLARE_DATAPROPS(LogItem, LogItemData)
+public:
     LogItem(const int size); // alternate ctor
 };
 @endcode
@@ -51,7 +52,7 @@ void LogItem::ctor(void)
     setTimeStamp(MillisecondTime::current());
 }
 
-void LogItem::dtor(void) {}
+void LogItem::dtor(void) {;}
 @endcode
 
 */
