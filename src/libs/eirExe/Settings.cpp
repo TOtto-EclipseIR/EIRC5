@@ -4,6 +4,7 @@
 #include <QTemporaryDir>
 #include <QTemporaryFile>
 
+#include <APP>
 #include <eirXfr/Debug.h>
 
 #include "ApplicationHelper.h"
@@ -11,26 +12,12 @@
 Settings::Settings(QObject *parent)
     : QObject(parent)
 {
-    TSTALLOC(appHelp);
     TRACEQFI << QOBJNAME(parent);
-    mpTempIniFile = appHelp->tempDirFile("ini", this);
+    mpTempIniFile = new QTemporaryFile(qApp->applicationName()+"XXXXXX.ini", this);
     TSTALLOC(mpTempIniFile);
     mpTempIniFile->setObjectName("SettingsFile:TempIniFile");
-    EXPECT(mpTempIniFile->open(QIODevice::ReadWrite | QIODevice::Text));
+    EXPECT(mpTempIniFile->open());
     mpSettings = new QSettings(mpTempIniFile->fileName(), QSettings::IniFormat, this);
-}
-
-Settings::Settings(const Settings::Map &otherMap, QObject *parent)
-    : QObject(parent ? parent : appHelp)
-{
-    TSTALLOC(appHelp);
-    TRACEQFI << QOBJNAME(parent);
-    mpTempIniFile = appHelp->tempDirFile("ini", this);
-    TSTALLOC(mpTempIniFile);
-    mpTempIniFile->setObjectName("SettingsFile:TempIniFile");
-    EXPECT(mpTempIniFile->open(QIODevice::ReadWrite | QIODevice::Text));
-    mpSettings = new QSettings(mpTempIniFile->fileName(), QSettings::IniFormat, this);
-    import(otherMap);
 }
 
 bool Settings::isNull() const
@@ -42,34 +29,36 @@ bool Settings::isNull() const
             && ! mpTempIniFile->exists() && mLiveMap.isEmpty();
 }
 
-void Settings::import(const QQFileInfo &iniFileInfo)
+void Settings::insert(const QQFileInfo &iniFileInfo)
 {
     TRACEQFI << iniFileInfo;
     QSettings * importSettings = new QSettings(iniFileInfo.absoluteFilePath(),
                                                QSettings::IniFormat, this);
     foreach (Key key, importSettings->allKeys())
-        import(key, importSettings->value(key).toString());
+        insert(key, importSettings->value(key).toString());
 }
 
-void Settings::import(const QStringList &keyValueStrings)
+void Settings::insert(const QStringList &keyValueStrings)
 {
     MUSTDO(it);
-
+    MUSTUSE(keyValueStrings);
 }
 
-void Settings::import(const Settings::Map &keyValueStringMap)
+void Settings::insert(const Settings::Map &keyValueStringMap)
 {
     MUSTDO(it);
+    MUSTUSE(keyValueStringMap);
 
 }
 
-void Settings::import(const QSettings::SettingsMap &keyVariantMap)
+void Settings::insert(const QSettings::SettingsMap &keyVariantMap)
 {
     MUSTDO(it);
+    MUSTUSE(keyVariantMap);
 
 }
 
-void Settings::import(const Settings::Key &key, const Settings::Value &value)
+void Settings::insert(const Settings::Key &key, const Settings::Value &value)
 {
     TRACEQFI << key() << value;
     EMIT(imported(key, value));
@@ -99,18 +88,38 @@ void Settings::set(const Key &key, const Value &valu)
 void Settings::set(const QString &key, const QVariant &vari)
 {
     MUSTDO(it);
+    MUSTUSE(key);
+    MUSTUSE(vari);
 }
 
-void Settings::setDefault(const Key key, const Value &valu)
+void Settings::setDefault(const Key &key, const Value &valu)
 {
     MUSTDO(it);
+    MUSTUSE(key);
+    MUSTUSE(valu);
 
 }
 
-void Settings::setDefault(const Settings::Key key, const QVariant &vari)
+void Settings::setDefault(const Settings::Key& key, const QVariant &vari)
 {
     MUSTDO(it);
+    MUSTUSE(key);
+    MUSTUSE(vari);
 
+}
+
+void Settings::beginGroup(const Settings::Key &key)
+{
+    TRACEQFI << key();
+    mpSettings->beginGroup(key());
+    EMIT(groupChanged(mpSettings->group()));
+}
+
+void Settings::endGroup()
+{
+    TRACEFN;
+    mpSettings->endGroup();
+    EMIT(groupChanged(mpSettings->group()));
 }
 
 Settings::Value Settings::value(const Key &key, const Value &defaultValue) const

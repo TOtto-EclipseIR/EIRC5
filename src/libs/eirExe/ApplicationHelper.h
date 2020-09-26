@@ -43,10 +43,8 @@ signals:
 
 private:
     VersionInfo cmVerInfo;
-    QTemporaryDir const * cmpTempDir=nullptr;
     CommandLine * const cmpCommandLine=nullptr;
     Settings * const cmpSettings=nullptr;
 };
-Q_GLOBAL_STATIC(ApplicationHelper, appHelp);
 
 

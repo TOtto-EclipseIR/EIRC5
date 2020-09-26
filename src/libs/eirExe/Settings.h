@@ -26,18 +26,19 @@ public:
 
 public:
     explicit Settings(QObject *parent=nullptr);
-    explicit Settings(const Map &otherMap, QObject *parent=nullptr);
     bool isNull() const;
 
 public slots:
-    void import(const QQFileInfo &iniFileInfo);
-    void import(const QStringList &keyValueStrings);
-    void import(const Map &keyValueStringMap);
-    void import(const QSettings::SettingsMap &keyVariantMap);
+    void insert(const QQFileInfo &iniFileInfo);
+    void insert(const QStringList &keyValueStrings);
+    void insert(const Map &keyValueStringMap);
+    void insert(const QSettings::SettingsMap &keyVariantMap);
     void set(const Key &key, const Value &valu);
     void set(const QString &key, const QVariant &vari);
-    void setDefault(const Key key, const Value &valu);
-    void setDefault(const Key key, const QVariant &vari);
+    void setDefault(const Key &key, const Value &valu);
+    void setDefault(const Key &key, const QVariant &vari);
+    void beginGroup(const Key &key);
+    void endGroup();
 
 signals:
     void imported(const Key &key, const Value &value);
@@ -45,9 +46,10 @@ signals:
     void defaulted(const Key &key, const Value &value);
     void removed(const Key &key, const Value &oldValue);
     void changed(const Key &key, const Value &newValue, const Value &oldValue);
+    void groupChanged(const Key &key);
 
 private slots:
-    void import(const Key &key, const Value &value);
+    void insert(const Key &key, const Value &value);
 
 public: // access
     bool contains(const Key &key) const;
@@ -77,7 +79,7 @@ public: // values
     */
 
 private:
-    QFile * mpTempIniFile=nullptr;
+    QTemporaryFile * mpTempIniFile=nullptr;
     QSettings * mpSettings=nullptr;
     Map mLiveMap;
 };

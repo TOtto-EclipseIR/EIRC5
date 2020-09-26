@@ -44,6 +44,7 @@ SOURCES += \
 
 HEADERS += \
     ../../version.h \
+    ../APP \
     ApplicationHelper.h \
     ArgumentId.h \
     ArgumentItem.h \

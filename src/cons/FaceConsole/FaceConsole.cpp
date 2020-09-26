@@ -5,6 +5,7 @@
 #include <QCommandLineParser>
 #include <QTimer>
 
+#include <APP>
 #include <eirExe/CommandLine.h>
 #include <eirExe/Settings.h>
 #include <eirImage/HeatmapMarker.h>
@@ -174,17 +175,19 @@ void FaceConsole::initializeResources()
     TRACEFN;
     new ObjectDetector(cvCascade::PreScan, this);
     TSTALLOC(ObjectDetector::p(cvCascade::PreScan));
-    Settings *objDetSettings = new Settings(settings()->extract("ObjectDetector"));
-    objDetSettings->dump();
-    ObjectDetector::p(cvCascade::PreScan)->initialize(objDetSettings);
+//    Settings *objDetSettings = new Settings(settings()->extract("ObjectDetector"));
+  //  objDetSettings->dump();
+    //ObjectDetector::p(cvCascade::PreScan)->initialize(objDetSettings);
+    STG->beginGroup("ObjectDetector");
+    QQDir baseCascadeDir(STG->string("/Resources/RectFinder/BaseDir"));
+    QString cascadeFileName = STG->
+            string("/Resources/RectFinder/PreScan/XmlFile");
+    QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
+    STG->endGroup();
 
-    QQDir baseCascadeDir(settings()->string("/Resources/RectFinder/BaseDir"));
     TRACE << baseCascadeDir << baseCascadeDir.exists() << baseCascadeDir.isReadable();
     EXPECT(baseCascadeDir.exists());
     EXPECT(baseCascadeDir.isReadable());
-    QString cascadeFileName = settings()->
-            string("/Resources/RectFinder/PreScan/XmlFile");
-    QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
     TRACE << cascadeFileInfo.absoluteFilePath() << cascadeFileInfo.exists()
           << cascadeFileInfo.isReadable() << cascadeFileInfo.isFile();
     EXPECTNOT(cascadeFileInfo.notExists());
@@ -259,8 +262,10 @@ void FaceConsole::processCurrentFile()
         writeLine("***Invalid Image File");
         EMIT(processed(QFileInfo(mCurrentFileInfo),0));
     }
-    Settings *preScanSettings = new Settings(settings()->extract("Option/RectFinder"));
-    preScanSettings->import(settings()->extract("PreScan/RectFinder"));
+
+    STG->beginGroup("Option/RectFinder");
+//    Settings *preScanSettings = new Settings(settings()->extract());
+  //  preScanSettings->insert(settings()->extract("PreScan/RectFinder"));
 #if 1
     //QbjectDetector::p(cvCascade::PreScan)->process();
 #else

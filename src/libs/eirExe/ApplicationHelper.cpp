@@ -14,7 +14,6 @@
 
 ApplicationHelper::ApplicationHelper(QObject *parent)
     : QObject(parent)
-    , cmpTempDir(new QTemporaryDir())
     , cmpCommandLine(new CommandLine(this))
     , cmpSettings(new Settings(this))
 {
@@ -22,30 +21,13 @@ ApplicationHelper::ApplicationHelper(QObject *parent)
     setObjectName("ApplicationHelper");
     TSTALLOC(cmpCommandLine);
     TSTALLOC(cmpSettings);
-    TSTALLOC(cmpTempDir);
     cmpCommandLine->setObjectName("ApplicationHelper::CommandLine");
     cmpSettings->setObjectName("ApplicationHelper::Settings");
-    EXPECT(cmpTempDir->isValid())
 }
 
 VersionInfo ApplicationHelper::version() const
 {
     return cmVerInfo;
-}
-
-QFile *ApplicationHelper::tempDirFile(const QString &ext,
-                                   QObject *parent)
-{
-    TRACEQFI << ext << QOBJNAME(parent);
-    QString fileBaseName = Milliseconds::current()
-            .toByteArray().toHex();
-    QFile * f = new QFile(parent ? parent : this);
-    TSTALLOC(f);
-    f->setFileName(cmpTempDir->filePath(fileBaseName + "." + ext));
-    // Returning a closed, unique QFile pointer.
-    // The developer can open them as the apps need,
-    // but is not responsible for deleting the file.
-    return f;
 }
 
 const CommandLine *ApplicationHelper::commandLine() const
