@@ -28,10 +28,15 @@ void testXfr::cleanupTestCase() {;}
 void testXfr::testEntry()
 {
     XfrEntry nullEntry;
-
     QVERIFY(nullEntry.isNull());
     QVERIFY(nullEntry.notValidLevel());
     QVERIFY(nullEntry.toLevel().notValid());
+
+    XfrEntry nonoEntry = XfrEntry::from("", "");
+    QVERIFY(nonoEntry.isNull());
+    QVERIFY(nonoEntry.notValidLevel());
+    QVERIFY(nullEntry.toLevel().notValid());
+
 }
 
 QTEST_MAIN(testXfr)
