@@ -24,11 +24,6 @@ public:
     VersionInfo version() const;
     void set(CommandLineClientInterface const * client) const;
     void set(const VersionInfo & verInfo);
-    QFile * tempDirFile(const QString &ext,
-                     QObject * parent=nullptr);
-    const CommandLine *commandLine() const;
-    CommandLine &rCommandLine(); // non-const
-    Settings *settings() const;
 
 public slots:
     void run();
@@ -43,8 +38,6 @@ signals:
 
 private:
     VersionInfo cmVerInfo;
-    CommandLine * const cmpCommandLine=nullptr;
-    Settings * const cmpSettings=nullptr;
 };
 
 

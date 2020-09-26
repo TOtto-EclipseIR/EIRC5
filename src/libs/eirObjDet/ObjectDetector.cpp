@@ -124,7 +124,7 @@ QQImage ObjectDetector::inputImageForProcess() const
 
 void ObjectDetector::start()
 {
-    Milliseconds pulseMsec(mpObjDetSettings->value("PulseMsec"));
+    Milliseconds pulseMsec(mpObjDetSettings->get("PulseMsec"));
     TRACEQFI << pulseMsec;
     EXPECT(pulseMsec);
     if (pulseMsec > 0)

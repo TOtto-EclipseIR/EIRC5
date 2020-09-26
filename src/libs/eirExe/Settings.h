@@ -16,7 +16,7 @@ class QTemporaryFile;
 
 class ApplicationHelper;
 
-class EIREXE_EXPORT Settings : public QObject
+class EIREXE_EXPORT Settings : public QSettings
 {
     Q_OBJECT
 public:
@@ -26,7 +26,6 @@ public:
 
 public:
     explicit Settings(QObject *parent=nullptr);
-    bool isNull() const;
 
 public slots:
     void insert(const QQFileInfo &iniFileInfo);
@@ -34,32 +33,35 @@ public slots:
     void insert(const Map &keyValueStringMap);
     void insert(const QSettings::SettingsMap &keyVariantMap);
     void set(const Key &key, const Value &valu);
-    void set(const QString &key, const QVariant &vari);
+    void set(const Key &key, const QVariant &vari);
+    virtual void setValue(const QString &key, const QVariant &vari);
+    virtual void remove(const QString &key);
     void setDefault(const Key &key, const Value &valu);
     void setDefault(const Key &key, const QVariant &vari);
     void beginGroup(const Key &key);
     void endGroup();
 
 signals:
-    void imported(const Key &key, const Value &value);
-    void created(const Key &key, const Value &value);
-    void defaulted(const Key &key, const Value &value);
-    void removed(const Key &key, const Value &oldValue);
-    void changed(const Key &key, const Value &newValue, const Value &oldValue);
-    void groupChanged(const Key &key);
+    void getting(const Key &key, const Value &valu) const;
+    void importing(const Key &key, const Value &valu);
+    void creating(const Key &key, const Value &valu);
+    void defaulted(const Key &key, const Value &valu);
+    void removing(const Key &key, const Value &oldValu);
+    void changing(const Key &key, const Value &newValu, const Value &oldValu);
+    void groupChanging(const Key &key);
 
 private slots:
-    void insert(const Key &key, const Value &value);
+    void insert(const Key &key, const Value &valu);
 
 public: // access
     bool contains(const Key &key) const;
-    Value value(const Key &key, const Value &defaultValue=Value()) const;
-    QVariant variant(const Key &key, const QVariant &defaultValue=QVariant()) const;
+    Value get(const Key &key, const Value &defaultValu=Value()) const;
+    virtual QVariant value(const Key &key, const QVariant &defaultVari=QVariant()) const;
+    MultiName::List keys() const;
     Map extract() const;
     Map extract(const Key groupKey, const bool keepKey=false) const;
     QStringList toStringList() const;
     void dump() const;
-    static void dump(const Map map);
 
 public: // values
     bool boolean(const QString &key, const bool &defaultValue=false) const;
@@ -79,8 +81,5 @@ public: // values
     */
 
 private:
-    QTemporaryFile * mpTempIniFile=nullptr;
-    QSettings * mpSettings=nullptr;
-    Map mLiveMap;
 };
 

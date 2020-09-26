@@ -5,13 +5,13 @@
 #include <QDir>
 #include <QTimer>
 
+#include <APP>
 #include <eirXfr/Debug.h>
 #include <eirType/QQFileInfo.h>
 #include <eirType/QQFileInfoList.h>
 #include <eirType/QQString.h>
 
 #include "CommandLineClientInterface.h"
-#include "Settings.h"
 
 CommandLine::CommandLine(QObject *parent)
     : QObject(parent)
@@ -84,11 +84,6 @@ const QQFileInfo CommandLine::exeFileInfo() const
     return mExeFileInfo;
 }
 
-Settings *CommandLine::settings() const
-{
-    return mpSettings;
-}
-
 void CommandLine::process()
 {
     TRACEQFI << "ExeArgs:" << cmExeArgumentList;
@@ -96,9 +91,9 @@ void CommandLine::process()
     mExeFileInfo = QQFileInfo(QQString(cmExeArgumentList.first()));
     arguments = expandFileArguments(cmExeArgumentList.mid(1), '@');
     TRACE << "Expanded:" << arguments;
-    arguments = stripConfiguration(arguments);
+    arguments = stripSettings(arguments);
     TRACE << "Settings:";
-    DUMP << settings()->toStringList();
+    DUMP << STG->toStringList();
     TRACE << "Post Configuration:" << arguments;
     arguments = extractDirectiveArguments(arguments);
     TRACE << "Post Extract:" << arguments;
@@ -163,7 +158,7 @@ void CommandLine::dump()
     DUMP << "---positionalArgumentList:";
     dumpPositionalArgs();
     DUMP << "---Settings:";
-    DUMP << settings()->toStringList();
+    STG->dump();
 }
 
 
@@ -209,9 +204,9 @@ QStringList CommandLine::parseQtOptions(
     return currentArgs;
 }
 
-QStringList CommandLine::stripConfiguration(
+QStringList CommandLine::stripSettings(
         const QStringList &expandedArgs,
-        const MultiName &prefix,
+        const Settings::Key &prefix,
         const QChar &trigger)
 {
     TRACEQFI << expandedArgs << prefix() << trigger;
@@ -227,18 +222,18 @@ QStringList CommandLine::stripConfiguration(
 
 
 void CommandLine::parseSettingArgument(const QString &arg,
-                                      const MultiName &prefix)
+                                      const Settings::Key &prefix)
 {
     TRACEQFI << arg << prefix();
     QStringList qsl = arg.split('=');
-    MultiName key = qsl[0].mid(1);
+    Settings::Key key = qsl[0].mid(1);
     key.prependName(prefix);
-    QString value = (qsl.size() > 1) ? qsl[1] : "true";
-    settings()->set(key, value);
-    TRACE << key() << "=" << value;
+    Settings::Value valu = (qsl.size() > 1) ? qsl[1] : "true";
+    STG->set(key, valu);
+    TRACE << key() << "=" << valu;
 }
-
 QStringList CommandLine::readTxtFileArguments(const QFileInfo &argFileInfo)
+
 {
     TRACEQFI << argFileInfo.absoluteFilePath();
     QStringList newArgs;

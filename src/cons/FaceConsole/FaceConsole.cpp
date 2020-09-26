@@ -24,17 +24,10 @@ FaceConsole::FaceConsole(QObject *parent)
     QTimer::singleShot(500, this, &FaceConsole::initializeApplication);
     TRACERTV();
 }
-/*
-SettingsFile *FaceConsole::settings() const
-{
-    return commandLine()->settings();
-}
-*/
+
 void FaceConsole::initializeApplication()
 {
     TRACEFN;
-    TSTALLOC(settings());
-    TRACE << QOBJNAME(settings());
 
     QLocale locale;
     cvVersion cvv;
@@ -54,22 +47,36 @@ void FaceConsole::initializeApplication()
             qApp, &QCoreApplication::quit);
     CONNECT(this, &FaceConsole::resourseInitFailed,
             this, &FaceConsole::failedExit);
+    CONNECT(STG, &Settings::getting,
+            this, &FaceConsole::catchSettingsGet);
+    CONNECT(STG, &Settings::importing,
+            this, &FaceConsole::catchSettingsImport);
+    CONNECT(STG, &Settings::creating,
+            this, &FaceConsole::catchSettingsCreate);
+    CONNECT(STG, &Settings::defaulted,
+            this, &FaceConsole::catchSettingsDefault);
+    CONNECT(STG, &Settings::removing,
+            this, &FaceConsole::catchSettingsRemove);
+    CONNECT(STG, &Settings::changing,
+            this, &FaceConsole::catchSettingsChange);
+    CONNECT(STG, &Settings::groupChanging,
+            this, &FaceConsole::catchSettingsGroup);
     EMIT(applicationInitd());
     QTimer::singleShot(100, this, &FaceConsole::processCommandLine);
 }
 /*
 void FaceConsole::enqueueNext()
 {
-    TRACEQFI << commandLine()->firstPositionalArgument();
-    QString fileNameArgument = commandLine()->firstPositionalArgument();
+    TRACEQFI << CMD->firstPositionalArgument();
+    QString fileNameArgument = CMD->firstPositionalArgument();
 }
 */
 void FaceConsole::processCommandLine()
 {
     TRACEFN;
-    rCommandLine().process();
-    rCommandLine().expandDirectories();
-    CommandLine::ExpandDirResultList xdrl = commandLine()->expandDirResults();
+    CMD->process();
+    CMD->expandDirectories();
+    CommandLine::ExpandDirResultList xdrl = CMD->expandDirResults();
     writeLine("---Directories:");
     int k = 0;
     foreach (CommandLine::ExpandDirResult xdr, xdrl)
@@ -83,7 +90,7 @@ void FaceConsole::setConfiguration()
 {
     TRACEFN;
     writeLine("---Configuration:");
-    writeLines(settings()->toStringList());
+    writeLines(STG->toStringList());
     EMIT(configurationSet());
     QTimer::singleShot(100, this, &FaceConsole::setBaseOutputDir);
 }
@@ -91,7 +98,7 @@ void FaceConsole::setConfiguration()
 void FaceConsole::setBaseOutputDir()
 {
     TRACEFN;
-    QString baseDirString(settings()->string("/Output/BaseDir"));
+    QString baseDirString(STG->string("/Output/BaseDir"));
     baseDirString.replace("@", QDateTime::currentDateTime()
         .toString("DyyyyMMdd-Thhmm"));
     DUMPVAL(baseDirString);
@@ -111,7 +118,7 @@ void FaceConsole::setOutputDirs()
     TRACEFN;
     bool created = false;
     mMarkedRectOutputDir.setNull(true);
-    QString markedRectDirString(settings()->string("Output/Dirs/MarkedRect"));
+    QString markedRectDirString(STG->string("Output/Dirs/MarkedRect"));
     DUMPVAL(markedRectDirString);
     if (markedRectDirString.isEmpty())
     {
@@ -175,9 +182,6 @@ void FaceConsole::initializeResources()
     TRACEFN;
     new ObjectDetector(cvCascade::PreScan, this);
     TSTALLOC(ObjectDetector::p(cvCascade::PreScan));
-//    Settings *objDetSettings = new Settings(settings()->extract("ObjectDetector"));
-  //  objDetSettings->dump();
-    //ObjectDetector::p(cvCascade::PreScan)->initialize(objDetSettings);
     STG->beginGroup("ObjectDetector");
     QQDir baseCascadeDir(STG->string("/Resources/RectFinder/BaseDir"));
     QString cascadeFileName = STG->
@@ -235,10 +239,10 @@ void FaceConsole::startProcessing()
 
 void FaceConsole::nextFile()
 {
-    TRACEQFI << commandLine()->positionalArgumentSize();
-    if (commandLine()->positionalArgumentSize() > 0)
+    TRACEQFI << CMD->positionalArgumentSize();
+    if (CMD->positionalArgumentSize() > 0)
     {
-        mCurrentFileInfo = QFileInfo(rCommandLine().takePositionalArgument());
+        mCurrentFileInfo = QFileInfo(CMD->takePositionalArgument());
         DUMPVAL(mCurrentFileInfo);
         QTimer::singleShot(100, this, &FaceConsole::processCurrentFile);
     }
@@ -264,8 +268,6 @@ void FaceConsole::processCurrentFile()
     }
 
     STG->beginGroup("Option/RectFinder");
-//    Settings *preScanSettings = new Settings(settings()->extract());
-  //  preScanSettings->insert(settings()->extract("PreScan/RectFinder"));
 #if 1
     //QbjectDetector::p(cvCascade::PreScan)->process();
 #else
@@ -346,4 +348,39 @@ void FaceConsole::failedExit(const qint8 retcode, const QString &errmsg)
     TRACEQFI << retcode << errmsg;
     writeErr(QString("@@@Failure Code=%1: %2").arg(retcode).arg(errmsg));
     qApp->exit(retcode);
+}
+
+void FaceConsole::catchSettingsGet(const Settings::Key key, const Settings::Value valu)
+{
+    TRACEQFI << key() << valu;
+}
+
+void FaceConsole::catchSettingsImport(const Settings::Key key, const Settings::Value valu)
+{
+    TRACEQFI << key() << valu;
+}
+
+void FaceConsole::catchSettingsCreate(const Settings::Key key, const Settings::Value valu)
+{
+    TRACEQFI << key() << valu;
+}
+
+void FaceConsole::catchSettingsDefault(const Settings::Key key, const Settings::Value valu)
+{
+    TRACEQFI << key() << valu;
+}
+
+void FaceConsole::catchSettingsRemove(const Settings::Key key, const Settings::Value valu)
+{
+    TRACEQFI << key() << valu;
+}
+
+void FaceConsole::catchSettingsChange(const Settings::Key key, const Settings::Value newValu, const Settings::Value oldValu)
+{
+    TRACEQFI << key() << newValu << oldValu;
+}
+
+void FaceConsole::catchSettingsGroup(const Settings::Key key)
+{
+    TRACEQFI << key();
 }
