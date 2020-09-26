@@ -62,9 +62,10 @@ private:
 public:
     static XfrEntry at(const QUuid &uid);
     static XfrEntry from(const char *qFuncInfo, const char *levelName,
-                              const QStringList names, const QVariantList &vars);
+                              const QStringList names=QStringList(),
+                         const QVariantList &vars=QVariantList());
     static XfrEntry from(const char *qFuncInfo, const char *levelName,
-                              const QString name1=QString(), const QVariant &var1=QVariant(),
+                              const QString name1, const QVariant &var1,
                               const QString name2=QString(), const QVariant &var2=QVariant(),
                               const QString name3=QString(), const QVariant &var3=QVariant(),
                               const QString name4=QString(), const QVariant &var4=QVariant());

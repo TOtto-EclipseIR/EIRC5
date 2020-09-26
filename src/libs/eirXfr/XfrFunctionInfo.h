@@ -3,6 +3,7 @@
 
 #include <QSharedDataPointer>
 
+#include <QFlags>
 #include <QString>
 #include <QStringList>
 
@@ -17,6 +18,7 @@
     TND(QStringList, ArgumentTypeNames, QStringList()) \
     TND(QStringList, ArgumentNames, QStringList()) \
     TND(QStringList, Suffixes, QStringList()) \
+    TND(QStringList, TemplateArgs, QStringList()) \
 
 class XfrFunctionInfoData : public QSharedData
 {
@@ -33,4 +35,21 @@ class EIRXFR_EXPORT XfrFunctionInfo
     DECLARE_PARENT_DATAPROPS(XFRFUNCTIONINFO_DATAPROPS)
     DECLARE_DATAPROPS(XfrFunctionInfo, XfrFunctionInfoData)
 public:
+    enum Flag
+    {
+        NoFlag          = 0,
+        PrefixConst     = 0x00000001,
+        Static          = 0x00000002,
+        Volatile        = 0x00000004,
+    };
+    Q_DECLARE_FLAGS(Flaga, Flag);
+
+public:
+    XfrFunctionInfo(const char * qFuncInfo);
+    void parse();
+    void set(const char * qFuncInfo);
+
+private:
+    const QString cmQfiString;
+    QStringList mElements;
 };
