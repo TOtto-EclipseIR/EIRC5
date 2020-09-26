@@ -37,7 +37,7 @@ SOURCES += \
     FileName.cpp \
     FileWriteQueue.cpp \
     QQDirIterator.cpp \
-    SettingsFile.cpp \
+    Settings.cpp \
     StdStreams.cpp \
     XmlFile.cpp \
     eirExe.cpp
@@ -58,7 +58,7 @@ HEADERS += \
     FileName.h \
     FileWriteQueue.h \
     QQDirIterator.h \
-    SettingsFile.h \
+    Settings.h \
     StdStreams.h \
     XmlFile.h \
     eirExe_global.h \

@@ -14,7 +14,7 @@ class ErrorHandler;
 
 class CommandLine;
 class CommandLineClientInterface;
-class SettingsFile;
+class Settings;
 
 class EIREXE_EXPORT ApplicationHelper : public QObject
 {
@@ -28,7 +28,7 @@ public:
                      QObject * parent=nullptr);
     const CommandLine *commandLine() const;
     CommandLine &rCommandLine(); // non-const
-    SettingsFile *settings() const;
+    Settings *settings() const;
 
 public slots:
     void run();
@@ -45,6 +45,8 @@ private:
     VersionInfo cmVerInfo;
     QTemporaryDir const * cmpTempDir=nullptr;
     CommandLine * const cmpCommandLine=nullptr;
-    SettingsFile * const cmpSettings=nullptr;
+    Settings * const cmpSettings=nullptr;
 };
+Q_GLOBAL_STATIC(ApplicationHelper, appHelp);
+
 

@@ -11,7 +11,7 @@
 #include <eirType/QQString.h>
 
 #include "CommandLineClientInterface.h"
-#include "SettingsFile.h"
+#include "Settings.h"
 
 CommandLine::CommandLine(QObject *parent)
     : QObject(parent)
@@ -84,7 +84,7 @@ const QQFileInfo CommandLine::exeFileInfo() const
     return mExeFileInfo;
 }
 
-SettingsFile *CommandLine::settings() const
+Settings *CommandLine::settings() const
 {
     return mpSettings;
 }
@@ -98,7 +98,7 @@ void CommandLine::process()
     TRACE << "Expanded:" << arguments;
     arguments = stripConfiguration(arguments);
     TRACE << "Settings:";
-    DUMP << settings()->map().toStringList();
+    DUMP << settings()->toStringList();
     TRACE << "Post Configuration:" << arguments;
     arguments = extractDirectiveArguments(arguments);
     TRACE << "Post Extract:" << arguments;
@@ -163,7 +163,7 @@ void CommandLine::dump()
     DUMP << "---positionalArgumentList:";
     dumpPositionalArgs();
     DUMP << "---Settings:";
-    DUMP << settings()->map().toStringList();
+    DUMP << settings()->toStringList();
 }
 
 

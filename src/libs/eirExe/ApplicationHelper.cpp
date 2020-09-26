@@ -8,7 +8,7 @@
 #include <eirType/VersionInfo.h>
 
 #include "CommandLine.h"
-#include "SettingsFile.h"
+#include "Settings.h"
 
 #include "../../version.h"
 
@@ -16,7 +16,7 @@ ApplicationHelper::ApplicationHelper(QObject *parent)
     : QObject(parent)
     , cmpTempDir(new QTemporaryDir())
     , cmpCommandLine(new CommandLine(this))
-    , cmpSettings(new SettingsFile(this))
+    , cmpSettings(new Settings(this))
 {
     TRACEFN
     setObjectName("ApplicationHelper");
@@ -60,7 +60,7 @@ CommandLine &ApplicationHelper::rCommandLine()
     return *cmpCommandLine;
 }
 
-SettingsFile *ApplicationHelper::settings() const
+Settings *ApplicationHelper::settings() const
 {
     TSTALLOC(cmpSettings);
     return cmpSettings;

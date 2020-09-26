@@ -9,6 +9,7 @@ SUBDIRS += \
         ../../libs/eirImage \
         ../../libs/eirQtCV \
         ../../libs/eirObjDet \
+        ../../tests/testXfr \
         ../FaceConsole \
 
 
@@ -19,5 +20,5 @@ eirExe.depends      = eirType eirBase ierXfr
 eirQtCV.depends     = eirExe eirType eirBase eirXfr
 eirObjDet.depends   = eirQtCV eirExe eirType eirBase eirXfr
 eirImage.depends    = eirObjDet eirQtCV eirExe eirType eirXfr
-FaceConsole.depends = eirImage eirQtCV eirExe eirType eirBase eirXfr
+FaceConsole.depends = eirImage eirObjDet eirQtCV eirExe eirType eirBase eirXfr
 

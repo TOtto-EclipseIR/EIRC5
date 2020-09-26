@@ -14,7 +14,7 @@ class EIRTYPE_EXPORT VarMap
 public:
     typedef QList<VarMap> List;
     typedef QStack<VarMap> Stack;
-    typedef QMap<QString /*MultiName::sortable()*/, VarMap> Map;
+    typedef QMap<MultiName, VarMap> Map;
 
 public:
     VarMap(const MultiName &name=MultiName());

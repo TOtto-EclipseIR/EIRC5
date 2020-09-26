@@ -15,11 +15,11 @@ class FaceConsole : public Console
     Q_OBJECT
 public:
     explicit FaceConsole(QObject *parent = nullptr);
-    SettingsFile *settings() const;
+    //SettingsFile *settings() const;
 
 public slots:
     void initializeApplication();
-    void enqueueNext();
+//    void enqueueNext();
 
 private slots:
     void processCommandLine();
