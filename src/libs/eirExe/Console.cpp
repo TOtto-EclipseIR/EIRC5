@@ -82,10 +82,12 @@ void Console::writeLine(const QString &qs,
     if (m_ForkQtDebug) qInfo() << qs;
 }
 
-void Console::writeLines(const QStringList &qsl)
+void Console::writeLines(const QStringList &qsl,
+                         const bool andFlush,
+                         const QString prefix)
 {
-    foreach (QString qs, qsl) writeLine(qs, false);
-    mpOut->flush();
+    foreach (QString qs, qsl) writeLine(prefix + qs, false);
+    if (andFlush) mpOut->flush();
 }
 
 void Console::writeErr(const QString &qs, const bool andFlush)

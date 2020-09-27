@@ -6,6 +6,7 @@
 
 #include <QDateTime>
 #include <QFile>
+#include <QFlags>
 #include <QTemporaryDir>
 
 #include <eirType/Var.h>
@@ -14,21 +15,26 @@ class ErrorHandler;
 
 class CommandLine;
 class CommandLineClientInterface;
-class SettingsFile;
+class Settings;
 
 class EIREXE_EXPORT ApplicationHelper : public QObject
 {
     Q_OBJECT
 public:
+    enum Flag
+    {
+        NoFLag                  = 0,
+        ExpandCommandLineDirs   = 0x00000001,
+    };
+    Q_DECLARE_FLAGS(Flags, Flag)
+
+public:
     explicit ApplicationHelper(QObject *parent = nullptr);
+    explicit ApplicationHelper(const Flags, QObject *parent = nullptr);
     VersionInfo version() const;
+    QStringList arguments() const;
     void set(CommandLineClientInterface const * client) const;
     void set(const VersionInfo & verInfo);
-    QFile * tempDirFile(const QString &ext,
-                     QObject * parent=nullptr);
-    const CommandLine *commandLine() const;
-    CommandLine &rCommandLine(); // non-const
-    SettingsFile *settings() const;
 
 public slots:
     void run();
@@ -42,9 +48,8 @@ signals:
     void commandLineInitd();
 
 private:
+    const Flags cmFlags=NoFLag;
     VersionInfo cmVerInfo;
-    QTemporaryDir const * cmpTempDir=nullptr;
-    CommandLine * const cmpCommandLine=nullptr;
-    SettingsFile * const cmpSettings=nullptr;
 };
+
 

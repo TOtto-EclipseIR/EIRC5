@@ -3,7 +3,7 @@
 #include <QTimer>
 
 #include <eirBase/Uuid.h>
-#include <eirExe/SettingsFile.h>
+#include <eirExe/Settings.h>
 #include <eirXfr/Debug.h>
 
 #include "ObjDetResultItem.h"
@@ -62,18 +62,18 @@ bool ObjectDetector::isLoaded()
     return ! cascade()->isNull();
 }
 
-ObjDetResultList ObjectDetector::process(const SettingsFile::Map &settingsMap,
+ObjDetResultList ObjectDetector::process(Settings *settings,
                                    const QFileInfo &inputFileInfo,
                                    bool showDetect)
 {
     TRACEQFI << inputFileInfo << showDetect;
-    settingsMap.dump();
+    settings->dump();
     QQImage inputImage(inputFileInfo.absoluteFilePath());
-    cascade()->detectRectangles(settingsMap, inputImage, showDetect);
+    cascade()->detectRectangles(settings, inputImage, showDetect);
     DUMP << cascade()->parameters();
     QQRectList rectList = cascade()->rectList();
-    qreal unionGroupOverlap = settingsMap.realPerMille("UnionGroupOverlap", 500);
-    qreal unionGroupOrphan = settingsMap.unsignedInt("UnionGroupOrphan", 1);
+    qreal unionGroupOverlap = settings->realPerMille("UnionGroupOverlap", 500);
+    qreal unionGroupOrphan = settings->unsignedInt("UnionGroupOrphan", 1);
     ObjDetResultList resultList = groupByUnion(rectList, unionGroupOverlap, unionGroupOrphan);
     return resultList;
 }
@@ -122,7 +122,7 @@ QQImage ObjectDetector::inputImageForProcess() const
 
 void ObjectDetector::start()
 {
-    Milliseconds pulseMsec( mObjDetSettings.value("PulseMsec"));
+    Milliseconds pulseMsec(mpObjDetSettings->get("PulseMsec"));
     TRACEQFI << pulseMsec;
     EXPECT(pulseMsec);
     if (pulseMsec > 0)
@@ -166,11 +166,11 @@ void ObjectDetector::stop()
     EMIT(stopped());
 }
 
-void ObjectDetector::initialize(const SettingsFile::Map map)
+void ObjectDetector::initialize(Settings *settings)
 {
     TRACEFN;
     NEEDDO(anyConnect);
-    mObjDetSettings = map;
+    mpObjDetSettings = settings;
     EMIT(initialized());
     QTimer::singleShot(100, this, &ObjectDetector::configure);
 }
@@ -178,7 +178,7 @@ void ObjectDetector::initialize(const SettingsFile::Map map)
 void ObjectDetector::configure()
 {
     TRACEFN;
-    mObjDetSettings.dump();
+    mpObjDetSettings->dump();
     EMIT(configured());
     QTimer::singleShot(100, this, &ObjectDetector::setDefaults);
 }
@@ -186,10 +186,10 @@ void ObjectDetector::configure()
 void ObjectDetector::setDefaults()
 {
     TRACEFN;
-    mObjDetSettings.setDefault("PulseMsec", 64);
-    mObjDetSettings.setDefault("ProcessedHoldCount", 32);
-    mObjDetSettings.setDefault("HoldMaxIntervals", 4);
-    mObjDetSettings.setDefault("ReleasedRemoveCount", 32);
+    mpObjDetSettings->setDefault("PulseMsec", 64);
+    mpObjDetSettings->setDefault("ProcessedHoldCount", 32);
+    mpObjDetSettings->setDefault("HoldMaxIntervals", 4);
+    mpObjDetSettings->setDefault("ReleasedRemoveCount", 32);
     TODO(RectFinder/TBD);
     TODO(RectGrouper/TBD);
     EMIT(defaultsSet());

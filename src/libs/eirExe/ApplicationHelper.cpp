@@ -3,29 +3,29 @@
 
 #include <QTimer>
 
+#include <APP>
 #include <eirXfr/Debug.h>
 #include <eirType/Milliseconds.h>
 #include <eirType/VersionInfo.h>
 
 #include "CommandLine.h"
-#include "SettingsFile.h"
+#include "Settings.h"
 
 #include "../../version.h"
 
 ApplicationHelper::ApplicationHelper(QObject *parent)
     : QObject(parent)
-    , cmpTempDir(new QTemporaryDir())
-    , cmpCommandLine(new CommandLine(this))
-    , cmpSettings(new SettingsFile(this))
 {
-    TRACEFN
+    TRACEQFI << QOBJNAME(parent);
     setObjectName("ApplicationHelper");
-    TSTALLOC(cmpCommandLine);
-    TSTALLOC(cmpSettings);
-    TSTALLOC(cmpTempDir);
-    cmpCommandLine->setObjectName("ApplicationHelper::CommandLine");
-    cmpSettings->setObjectName("ApplicationHelper::Settings");
-    EXPECT(cmpTempDir->isValid())
+}
+
+ApplicationHelper::ApplicationHelper(const Flags flags, QObject *parent)
+    : QObject(parent)
+    , cmFlags(flags)
+{
+    TRACEQFI << flags << QOBJNAME(parent);
+    setObjectName("ApplicationHelper");
 }
 
 VersionInfo ApplicationHelper::version() const
@@ -33,37 +33,9 @@ VersionInfo ApplicationHelper::version() const
     return cmVerInfo;
 }
 
-QFile *ApplicationHelper::tempDirFile(const QString &ext,
-                                   QObject *parent)
+QStringList ApplicationHelper::arguments() const
 {
-    TRACEQFI << ext << QOBJNAME(parent);
-    QString fileBaseName = Milliseconds::current()
-            .toByteArray().toHex();
-    QFile * f = new QFile(parent ? parent : this);
-    TSTALLOC(f);
-    f->setFileName(cmpTempDir->filePath(fileBaseName + "." + ext));
-    // Returning a closed, unique QFile pointer.
-    // The developer can open them as the apps need,
-    // but is not responsible for deleting the file.
-    return f;
-}
-
-const CommandLine *ApplicationHelper::commandLine() const
-{
-    TSTALLOC(cmpCommandLine);
-    return cmpCommandLine;
-}
-
-CommandLine &ApplicationHelper::rCommandLine()
-{
-    TSTALLOC(cmpCommandLine);
-    return *cmpCommandLine;
-}
-
-SettingsFile *ApplicationHelper::settings() const
-{
-    TSTALLOC(cmpSettings);
-    return cmpSettings;
+    return qApp->arguments();
 }
 
 void ApplicationHelper::run()
@@ -77,7 +49,6 @@ void ApplicationHelper::run()
 void ApplicationHelper::initCommandLine()
 {
     TRACEFN
-    TSTALLOC(cmpCommandLine)
-    cmpCommandLine->process();
+    CMD->process(cmFlags & ExpandCommandLineDirs);
     EMIT(commandLineInitd());
 }

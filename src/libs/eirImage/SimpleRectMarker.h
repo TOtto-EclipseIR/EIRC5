@@ -1,7 +1,7 @@
 #pragma once
 #include "eirImage.h"
 
-#include <eirExe/SettingsFile.h>
+#include <eirExe/Settings.h>
 #include <eirType/QQImage.h>
 #include <eirType/QQRectList.h>
 #include <eirObjDet/ObjDetResultList.h>
@@ -12,9 +12,9 @@ class EIRIMAGE_EXPORT SimpleRectMarker : public QQImage
 {
 public:
     SimpleRectMarker(const QQImage &inputImage);
-    void markAll(const SettingsFile::Map &markRectSettings,
+    void markAll(const Settings &markRectSettings,
                  const QQRectList &rectList);
-    void mark(const SettingsFile::Map &markRectSettings,
+    void mark(const Settings &markRectSettings,
               const ObjDetResultList &resultList,
               const ColorWheel &wheel,
               const bool markAll=false);

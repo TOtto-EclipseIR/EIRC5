@@ -32,7 +32,7 @@ public slots:
     void readLine();
     void write(const QString &qs, const bool andFlush=true);
     void writeLine(const QString &qs, const bool andFlush=true);
-    void writeLines(const QStringList &qsl);
+    void writeLines(const QStringList &qsl, const bool andFlush=true, const QString prefix=QString());
     void writeErr(const QString &qs,
                   const bool andFlush=true);
     void writeErrs(const QStringList &qsl);

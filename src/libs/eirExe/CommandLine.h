@@ -17,8 +17,12 @@ class QCommandLineParser;
 #include <eirType/Sortable.h>
 #include <eirType/QQFileInfo.h>
 #include <eirType/QQFileInfoList.h>
+#include <eirType/QQString.h>
+#include <eirType/QQStringList.h>
+
 class CommandLineClientInterface;
-class SettingsFile;
+
+#include "Settings.h"
 
 #include "../../version.h"
 
@@ -39,45 +43,41 @@ public:
     void set(CommandLineClientInterface * interface);
     ExpandDirResultList expandDirResults() const;
     int positionalArgumentSize() const;
-    QStringList positionalArgumentList() const;
-    QString firstPositionalArgument() const;
-    QString takePositionalArgument();
-    int takePositionalArgumentCount() const;
-    const QStringList exeArguments(bool withNumbers=false) const;
+    QQStringList positionalArgumentList() const;
+    QQString firstPositionalArgument() const;
+    QQString takePositionalArgument();
+    int positionalArgumentsTaken() const;
+    const QQStringList exeArguments(bool withNumbers=false) const;
     const QQFileInfo exeFileInfo() const;
-    SettingsFile *settings() const;
 
 public slots:
-    void process();
-    void expandDirectories(const int recurseDepth=-1);
+    void process(const bool expandDirs);
     void dump();
+    void dumpPositionalArgs() const;
 
 signals:
     void constructed(void);
+    void warning(const QString what, const QString why);
+
+protected slots:
+    void extractDirectiveArguments();
+    void stripSettings(const Settings::Key &prefix=Settings::Key(), const QChar &trigger=QChar('/'));
+    void expandDirectories(const int recurseDepth=-1);
 
 protected:
-    // processing
-    QStringList expandFileArguments(const QStringList qsl,
-                                    const QChar trigger=QChar('@'));
-    QStringList extractDirectiveArguments(const QStringList &currentArgs);
-    QStringList parseQtOptions(const QStringList &currentArgs);
-    QStringList stripConfiguration(const QStringList &expandedArgs,
-                                   const MultiName &prefix=MultiName(),
-                                   const QChar &trigger=QChar('/'));
-    // utility
-    void parseSettingArgument(const QString &arg,
-                             const MultiName &prefix=MultiName());
-    QStringList readTxtFileArguments(const QFileInfo &argFileInfo);
+    void expandFileArguments(const QChar trigger=QChar('@'));
+    void parseQtOptions();
+    void parseSettingArgument(const QString &arg, const Settings::Key &prefix=Settings::Key());
+    QQStringList readTxtFileArguments(const QQFileInfo &argFileInfo);
 
 private slots:
-    void dumpPositionalArgs() const;
 
 private:
-    const QStringList cmExeArgumentList;
+    const QQStringList cmExeArgumentList;
     QQFileInfo mExeFileInfo;
+    QQStringList mRemainingArgumentList;
     CommandLineClientInterface * mpInterface=nullptr;
     ExpandDirResultList mExpandDirResultList;
-    QStringList mPositionalArgumentList;
+    QQStringList mPositionalArgumentList;
     int mPositionalArgumentsTaken=0;
-    SettingsFile * mpSettings;
 };

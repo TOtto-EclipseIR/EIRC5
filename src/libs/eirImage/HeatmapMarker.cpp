@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QPen>
 
+#include <eirExe/Settings.h>
 #include <eirObjDet/ObjectDetector.h>
 #include <eirObjDet/ObjDetResultItem.h>
 #include <eirObjDet/ObjDetResultList.h>
@@ -21,7 +22,7 @@ HeatmapMarker::HeatmapMarker(const QQImage &inputImage)
     TRACEQFI << inputImage << format();
 }
 
-void HeatmapMarker::mark(const SettingsFile::Map &markHeatSettings, const ObjDetResultList &resultList)
+void HeatmapMarker::mark(const Settings &markHeatSettings, const ObjDetResultList &resultList)
 {
     TRACEFN;
     markHeatSettings.dump();

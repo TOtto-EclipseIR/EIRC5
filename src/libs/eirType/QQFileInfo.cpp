@@ -6,6 +6,7 @@
 #include <eirXfr/Debug.h>
 
 #include "Milliseconds.h"
+#include "QQStringList.h"
 
 QQFileInfo::QQFileInfo() {;}
 QQFileInfo::QQFileInfo(const QQString &filePathName, const QQString::Flags flags)
@@ -114,6 +115,11 @@ bool QQFileInfo::tryIsFile(const QIODevice::OpenMode mode) const
 
 bool QQFileInfo::tryIsDir() const
 {
+    return tryHasDir() && ! tryIsFile();
+}
+
+bool QQFileInfo::tryHasDir() const
+{
     QQString absolutePath = dir().absolutePath();
     TRACEQFI << absolutePath;
     bool canCdDir = tryIsDir(absolutePath);
@@ -124,22 +130,24 @@ bool QQFileInfo::tryIsDir() const
 QQString QQFileInfo::attributes() const
 {
     if (isNull()) return "isNull ";
-    QQString attribString;
-    if (isAbsolute())       attribString += "Absolute ";
-    if (tryIsDir())         attribString += "Dir ";
-    if (isExecutable())     attribString += "Executable ";
-    if (tryIsFile())        attribString += "File ";
-    if (isReadable())       attribString += "Readable ";
-    if (isRoot())           attribString += "Root ";
-    if (isWritable())       attribString += "Writable ";
-    return attribString.simplified();
+    QQStringList attribs;
+    if (exists())           attribs << "Exists";
+    if (isAbsolute())       attribs << "Absolute";
+    if (tryHasDir())        attribs << "HasDir";
+    if (tryIsDir())         attribs << "Dir";
+    if (isExecutable())     attribs << "Executable";
+    if (tryIsFile())        attribs << "File";
+    if (isReadable())       attribs << "Readable";
+    if (isRoot())           attribs << "Root";
+    if (isWritable())       attribs << "Writable";
+    return attribs.join(",");
 }
 
 QQString QQFileInfo::toString() const
 {
-    if (tryIsDir())     return absolutePath();
+    if (tryHasDir())     return absolutePath();
     if (tryIsFile())    return absoluteFilePath();
-    return fileName();
+    return absoluteFilePath();
 }
 
 QVariant QQFileInfo::toVariant() const
@@ -180,7 +188,7 @@ bool QQFileInfo::tryIsDir(const QQString &pathName)
     QDir tryDir;
     bool canCdDir = tryDir.cd(pathName);
     TRACERTN(canCdDir)
-    return canCdDir;
+    return canCdDir && ! tryIsFile(pathName);
 }
 
 

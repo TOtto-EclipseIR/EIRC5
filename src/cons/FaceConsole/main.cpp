@@ -16,13 +16,8 @@
 #include <eirXfr/StartupDebug.h>
 Q_GLOBAL_STATIC(StartupDebug, sdo)
 
-#include <eirBase/UInt128.h>
-
 int main(int argc, char *argv[])
 {
-    UInt128 u128;
-    UInt128 u2(1,0x0123456789ABCDEF);
-
     QCoreApplication a(argc, argv);
     a.setApplicationName("INDI5faceConsole");
     a.setApplicationVersion(VER_STRING " " VER_TRUNKNAME);

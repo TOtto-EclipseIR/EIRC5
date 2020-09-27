@@ -10,7 +10,7 @@
 
 #include <eirBase/Typedefs.h>
 #include <eirBase/Uuid.h>
-#include <eirExe/SettingsFile.h>
+#include <eirExe/Settings.h>
 #include <eirType/BasicName.h>
 #include <eirType/Boolean.h>
 #include <eirType/QQFileInfo.h>
@@ -40,10 +40,10 @@ public:
     {
     public:
         Parameters();
-        Parameters(const QVariant &variant);
-        Parameters(const SettingsFile::Map &cascadeSettingsMap);
-        SettingsFile::Map &cascadeSettingsMap();
-        void set(const SettingsFile::Map &cascadeSettingsMap);
+//        Parameters(const QVariant &variant);
+        Parameters(Settings *cascadeSettings);
+        Settings *cascadeSettings();
+        void set(Settings *cascadeSettings);
         void calculate(const Type type,
                        const QQSize imageSize,
                        const QQSize coreSize);
@@ -60,7 +60,7 @@ public:
         double parseFactor();
 
     private:
-        SettingsFile::Map mSettingsMap;
+        Settings * mpCascadeSettings;
         double mFactor=Q_QNAN;
         int mNeighbors=0;
         int mFlags=0;
@@ -80,7 +80,7 @@ public:
     QQFileInfo cascadeFileInfo() const;
     cv::CascadeClassifier *classifier();
 
-    int detectRectangles(const SettingsFile::Map &rectFinderConfig,
+    int detectRectangles(Settings *rectFinderSettings,
                          const QQImage &inputImage,
                          const bool showDetect=false,
                          const QQRect &region=QQRect());

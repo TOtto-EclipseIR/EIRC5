@@ -8,7 +8,7 @@ class QTimer;
 
 #include <eirBase/Uuid.h>
 #include <eirType/Milliseconds.h>
-#include <eirExe/SettingsFile.h>
+#include <eirExe/Settings.h>
 #include <eirQtCV/cvCascade.h>
 
 #include "ObjDetResultItem.h"
@@ -29,7 +29,7 @@ public:
     // single-threaded execution
     bool load(const QQFileInfo cascadeFInfo);
     bool isLoaded();
-    ObjDetResultList process(const SettingsFile::Map &settingsMap,
+    ObjDetResultList process(Settings *settings,
                        const QFileInfo &inputFileInfo,
                        bool showDetect=false);
     QQImage inputImageForProcess() const;
@@ -42,7 +42,7 @@ private:
 
 public slots:
     // setup
-    void initialize(const SettingsFile::Map map);
+    void initialize(Settings *settings);
     void start();
 
     // running
@@ -90,7 +90,7 @@ private slots:
 private:
     cvCascade mCascade;
     QTimer  * const cmpTimer=nullptr;
-    SettingsFile::Map mObjDetSettings;
+    Settings *mpObjDetSettings;
     QQImage mProcessInputImage;
     Uuid::Queue mInputQueue;
     Uuid::Queue mFinderQueue;

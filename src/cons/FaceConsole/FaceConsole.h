@@ -5,8 +5,6 @@
 
 #include <eirType/QQDir.h>
 #include <eirObjDet/ObjDetResultList.h>
-//#include <eirQtCV/cvCascade.h>
-//#include <eirObjDet/ObjectDetector.h>
 
 class QCommandLineParser;
 
@@ -15,11 +13,9 @@ class FaceConsole : public Console
     Q_OBJECT
 public:
     explicit FaceConsole(QObject *parent = nullptr);
-    SettingsFile *settings() const;
 
 public slots:
     void initializeApplication();
-    void enqueueNext();
 
 private slots:
     void processCommandLine();
@@ -32,6 +28,15 @@ private slots:
     void processCurrentFile();
     void finishProcessing();
     void failedExit(const qint8 retcode, const QString &errmsg);
+    void catchSettingsGet(const Settings::Key key, const Settings::Value valu);
+    void catchSettingsImport(const Settings::Key key, const Settings::Value valu);
+    void catchSettingsCreate(const Settings::Key key, const Settings::Value valu);
+    void catchSettingsDefault(const Settings::Key key, const Settings::Value valu);
+    void catchSettingsRemove(const Settings::Key key, const Settings::Value valu);
+    void catchSettingsChange(const Settings::Key key, const Settings::Value newValu, const Settings::Value oldValu);
+    void catchSettingsGroup(const Settings::Key key);
+    void catchCommandLineWarning(const QString what, const QString why);
+
 
 signals:
     void applicationInitd();

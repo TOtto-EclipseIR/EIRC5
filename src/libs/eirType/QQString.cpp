@@ -1,17 +1,25 @@
 #include "QQString.h"
 
-QQString::QQString() {;}
-
+QQString::QQString(const Flags flags) : mFlags(flags) {;}
+QQString::QQString(const QQString &other)
+    : QString(other), mFlags(NoFlag) { ctor(); }
 QQString::QQString(const QString &other, const Flags flags)
-    : QString(other), cmFlags(flags) { ctor(); }
-
+    : QString(other), mFlags(flags) { ctor(); }
 QQString::QQString(const char *pch, const Flags flags)
-    : QString(pch), cmFlags(flags) { ctor(); }
+    : QString(pch), mFlags(flags) { ctor(); }
+QQString::QQString(const QByteArray ba, const Flags flags)
+    : QString(ba), mFlags(flags) { ctor(); }
+
+QQString &QQString::operator =(const QQString &other)
+{
+    set(other.string()), mFlags = other.mFlags;
+    return *this;
+}
 
 void QQString::ctor()
 {
-    if (cmFlags & Simplify) set(string().simplified());
-    if (cmFlags & Squeeze)  set(string().squeezed());
+    if (mFlags & Simplify) set(string().simplified());
+    if (mFlags & Squeeze)  set(string().squeezed());
 }
 
 QQString QQString::string() const

@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QPen>
 
+#include <eirExe/Settings.h>
 #include <eirObjDet/ObjectDetector.h>
 #include <eirObjDet/ObjDetResultItem.h>
 #include <eirObjDet/ObjDetResultList.h>
@@ -18,7 +19,7 @@ SimpleRectMarker::SimpleRectMarker(const QQImage &inputImage)
     TRACEQFI << inputImage << format();
 }
 
-void SimpleRectMarker::markAll(const SettingsFile::Map &markRectSettings,
+void SimpleRectMarker::markAll(const Settings &markRectSettings,
                                const QQRectList &rectList)
 {
     TRACEQFI << rectList.size();
@@ -34,7 +35,7 @@ void SimpleRectMarker::markAll(const SettingsFile::Map &markRectSettings,
     painter.end();
 }
 
-void SimpleRectMarker::mark(const SettingsFile::Map &markRectSettings,
+void SimpleRectMarker::mark(const Settings &markRectSettings,
                             const ObjDetResultList &resultList,
                             const ColorWheel &wheel,
                             const bool markAll)

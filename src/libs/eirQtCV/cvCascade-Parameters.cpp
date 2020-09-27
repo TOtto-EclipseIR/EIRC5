@@ -6,29 +6,29 @@
 #include <eirXfr/Debug.h>
 
 cvCascade::Parameters::Parameters() { TRACEFN; }
-
+/*
 cvCascade::Parameters::Parameters(const QVariant &variant)
 {
     TRACEQFI << variant;
     *this = variant.value<cvCascade::Parameters>();
 }
-
-cvCascade::Parameters::Parameters(const SettingsFile::Map &cascadeSettingsMap)
+*/
+cvCascade::Parameters::Parameters(Settings *cascadeSettings)
 {
     TRACEFN;
-    set(cascadeSettingsMap);
+    set(cascadeSettings);
 }
 
-SettingsFile::Map &cvCascade::Parameters::cascadeSettingsMap()
+Settings *cvCascade::Parameters::cascadeSettings()
 {
-    return mSettingsMap;
+    return mpCascadeSettings;
 }
 
-void cvCascade::Parameters::set(const SettingsFile::Map &cascadeSettingsMap)
+void cvCascade::Parameters::set(Settings *cascadeSettings)
 {
     TRACEFN;
-    cascadeSettingsMap.dump();
-    mSettingsMap = cascadeSettingsMap;
+    cascadeSettings->dump();
+    mpCascadeSettings = cascadeSettings;
 }
 
 void cvCascade::Parameters::calculate(const cvCascade::Type type,
@@ -83,7 +83,7 @@ void cvCascade::Parameters::calculate(const cvCascade::Type type,
     mFactor = qIsNull(fac) ? 1.160 : fac;
     NEEDDO("Default Based on Image/Core size & MaxDetectors, etc.");
 
-    int neigh = mSettingsMap.signedInt("Neighbors");
+    int neigh = mpCascadeSettings->signedInt("Neighbors", 2);
     mNeighbors = (neigh >= 0) ? neigh : 2;
 
     DUMP << dumpList();
@@ -131,7 +131,7 @@ QVariant cvCascade::Parameters::toVariant() const
 double cvCascade::Parameters::parseFactor()
 {
     double result=qQNaN();
-    double f = mSettingsMap.real("Factor");
+    double f = mpCascadeSettings->realPerMille("Factor");
     if (f >= 1.001 && f <= 2.000)
         result = 0.0;
     else if (f > 1.0 && f < 999.0)

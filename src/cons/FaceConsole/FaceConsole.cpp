@@ -5,8 +5,9 @@
 #include <QCommandLineParser>
 #include <QTimer>
 
+#include <APP>
 #include <eirExe/CommandLine.h>
-#include <eirExe/SettingsFile.h>
+#include <eirExe/Settings.h>
 #include <eirImage/HeatmapMarker.h>
 #include <eirImage/SimpleRectMarker.h>
 #include <eirObjDet/ObjectDetector.h>
@@ -24,14 +25,10 @@ FaceConsole::FaceConsole(QObject *parent)
     TRACERTV();
 }
 
-SettingsFile *FaceConsole::settings() const
-{
-    return commandLine()->settings();
-}
-
 void FaceConsole::initializeApplication()
 {
     TRACEFN;
+
     QLocale locale;
     cvVersion cvv;
     TODO(WhyZero);
@@ -40,6 +37,8 @@ void FaceConsole::initializeApplication()
               .arg(qApp->applicationVersion())
               .arg(locale.toString(QDateTime::currentDateTime())));
     writeLine("   with Open Source Computer Vision library (OpenCV) " + cvv.getString());
+    writeLine("---Arguments:");
+    writeLines(arguments(), true, "   ");
     CONNECT(this, &FaceConsole::resourseInitFailed,
             qApp, &QCoreApplication::quit);
     CONNECT(this, &FaceConsole::processingStarted,
@@ -50,29 +49,37 @@ void FaceConsole::initializeApplication()
             qApp, &QCoreApplication::quit);
     CONNECT(this, &FaceConsole::resourseInitFailed,
             this, &FaceConsole::failedExit);
-    TSTALLOC(settings());
-    TRACE << QOBJNAME(settings());
-    new ObjectDetector(cvCascade::PreScan, this);
-    TSTALLOC(ObjectDetector::p(cvCascade::PreScan));
-    SettingsFile::Map objDetMap = settings()->extract("ObjectDetector");
-    objDetMap.dump();
-    ObjectDetector::p(cvCascade::PreScan)->initialize(objDetMap);
+    CONNECT(STG, &Settings::getting,
+            this, &FaceConsole::catchSettingsGet);
+    CONNECT(STG, &Settings::importing,
+            this, &FaceConsole::catchSettingsImport);
+    CONNECT(STG, &Settings::creating,
+            this, &FaceConsole::catchSettingsCreate);
+    CONNECT(STG, &Settings::defaulted,
+            this, &FaceConsole::catchSettingsDefault);
+    CONNECT(STG, &Settings::removing,
+            this, &FaceConsole::catchSettingsRemove);
+    CONNECT(STG, &Settings::changing,
+            this, &FaceConsole::catchSettingsChange);
+    CONNECT(STG, &Settings::groupChanging,
+            this, &FaceConsole::catchSettingsGroup);
+    CONNECT(CMD, &CommandLine::warning,
+            this, &FaceConsole::catchCommandLineWarning);
     EMIT(applicationInitd());
     QTimer::singleShot(100, this, &FaceConsole::processCommandLine);
 }
-
+/*
 void FaceConsole::enqueueNext()
 {
-    TRACEQFI << commandLine()->firstPositionalArgument();
-    QString fileNameArgument = commandLine()->firstPositionalArgument();
+    TRACEQFI << CMD->firstPositionalArgument();
+    QString fileNameArgument = CMD->firstPositionalArgument();
 }
-
+*/
 void FaceConsole::processCommandLine()
 {
     TRACEFN;
-    rCommandLine().process();
-    rCommandLine().expandDirectories();
-    CommandLine::ExpandDirResultList xdrl = commandLine()->expandDirResults();
+    CMD->process(true);
+    CommandLine::ExpandDirResultList xdrl = CMD->expandDirResults();
     writeLine("---Directories:");
     int k = 0;
     foreach (CommandLine::ExpandDirResult xdr, xdrl)
@@ -86,7 +93,7 @@ void FaceConsole::setConfiguration()
 {
     TRACEFN;
     writeLine("---Configuration:");
-    writeLines(commandLine()->settings()->map().toStringList());
+    writeLines(STG->toStringList());
     EMIT(configurationSet());
     QTimer::singleShot(100, this, &FaceConsole::setBaseOutputDir);
 }
@@ -94,7 +101,7 @@ void FaceConsole::setConfiguration()
 void FaceConsole::setBaseOutputDir()
 {
     TRACEFN;
-    QString baseDirString(settings()->map().string("/Output/BaseDir"));
+    QString baseDirString(STG->string("/Output/BaseDir"));
     baseDirString.replace("@", QDateTime::currentDateTime()
         .toString("DyyyyMMdd-Thhmm"));
     DUMPVAL(baseDirString);
@@ -114,7 +121,7 @@ void FaceConsole::setOutputDirs()
     TRACEFN;
     bool created = false;
     mMarkedRectOutputDir.setNull(true);
-    QString markedRectDirString(settings()->map().string("Output/Dirs/MarkedRect"));
+    QString markedRectDirString(STG->string("Output/Dirs/MarkedRect"));
     DUMPVAL(markedRectDirString);
     if (markedRectDirString.isEmpty())
     {
@@ -160,10 +167,9 @@ void FaceConsole::setOutputDirs()
             QString q00Name = QString("Q%1").arg(q00 * 100, 3, 10, QChar('0'));
             q00Dir.mkpath(q00Name);
             if (q00Dir.cd(q00Name))
-            {
                 mMarkedFaceQualityDirs.append(q00Dir);
-                writeLine("   "+q00Dir.absolutePath()+" created");
-            }
+            else
+                writeErr("***"+q00Dir.absolutePath()+" cannot be created");
         }
     }
 
@@ -176,13 +182,18 @@ void FaceConsole::setOutputDirs()
 void FaceConsole::initializeResources()
 {
     TRACEFN;
-    QQDir baseCascadeDir(settings()->map().string("/Resources/RectFinder/BaseDir"));
+    new ObjectDetector(cvCascade::PreScan, this);
+    TSTALLOC(ObjectDetector::p(cvCascade::PreScan));
+    STG->beginGroup("ObjectDetector");
+    QQDir baseCascadeDir(STG->string("/Resources/RectFinder/BaseDir"));
+    QString cascadeFileName = STG->
+            string("/Resources/RectFinder/PreScan/XmlFile");
+    QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
+    STG->endGroup();
+
     TRACE << baseCascadeDir << baseCascadeDir.exists() << baseCascadeDir.isReadable();
     EXPECT(baseCascadeDir.exists());
     EXPECT(baseCascadeDir.isReadable());
-    QString cascadeFileName = settings()->map().
-            string("/Resources/RectFinder/PreScan/XmlFile");
-    QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
     TRACE << cascadeFileInfo.absoluteFilePath() << cascadeFileInfo.exists()
           << cascadeFileInfo.isReadable() << cascadeFileInfo.isFile();
     EXPECTNOT(cascadeFileInfo.notExists());
@@ -230,10 +241,10 @@ void FaceConsole::startProcessing()
 
 void FaceConsole::nextFile()
 {
-    TRACEQFI << commandLine()->positionalArgumentSize();
-    if (commandLine()->positionalArgumentSize() > 0)
+    TRACEQFI << CMD->positionalArgumentSize();
+    if (CMD->positionalArgumentSize() > 0)
     {
-        mCurrentFileInfo = QFileInfo(rCommandLine().takePositionalArgument());
+        mCurrentFileInfo = QFileInfo(CMD->takePositionalArgument());
         DUMPVAL(mCurrentFileInfo);
         QTimer::singleShot(100, this, &FaceConsole::processCurrentFile);
     }
@@ -257,8 +268,8 @@ void FaceConsole::processCurrentFile()
         writeLine("***Invalid Image File");
         EMIT(processed(QFileInfo(mCurrentFileInfo),0));
     }
-    SettingsFile::Map preScanSettings = settings()->extract("Option/RectFinder");
-    preScanSettings += settings()->extract("PreScan/RectFinder");
+
+    STG->beginGroup("Option/RectFinder");
 #if 1
     //QbjectDetector::p(cvCascade::PreScan)->process();
 #else
@@ -339,4 +350,45 @@ void FaceConsole::failedExit(const qint8 retcode, const QString &errmsg)
     TRACEQFI << retcode << errmsg;
     writeErr(QString("@@@Failure Code=%1: %2").arg(retcode).arg(errmsg));
     qApp->exit(retcode);
+}
+
+void FaceConsole::catchSettingsGet(const Settings::Key key, const Settings::Value valu)
+{
+    TRACEQFI << key() << valu;
+}
+
+void FaceConsole::catchSettingsImport(const Settings::Key key, const Settings::Value valu)
+{
+    TRACEQFI << key() << valu;
+}
+
+void FaceConsole::catchSettingsCreate(const Settings::Key key, const Settings::Value valu)
+{
+    TRACEQFI << key() << valu;
+}
+
+void FaceConsole::catchSettingsDefault(const Settings::Key key, const Settings::Value valu)
+{
+    TRACEQFI << key() << valu;
+}
+
+void FaceConsole::catchSettingsRemove(const Settings::Key key, const Settings::Value valu)
+{
+    TRACEQFI << key() << valu;
+}
+
+void FaceConsole::catchSettingsChange(const Settings::Key key, const Settings::Value newValu, const Settings::Value oldValu)
+{
+    TRACEQFI << key() << newValu << oldValu;
+}
+
+void FaceConsole::catchSettingsGroup(const Settings::Key key)
+{
+    TRACEQFI << key();
+}
+
+void FaceConsole::catchCommandLineWarning(const QString what, const QString why)
+{
+    TRACEQFI << what << why;
+    writeErr(QString("***%1 is %2").arg(what).arg(why));
 }
