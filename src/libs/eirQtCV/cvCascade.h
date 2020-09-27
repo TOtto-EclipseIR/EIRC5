@@ -35,6 +35,7 @@ public:
         BothEyes, Nose, Mouth, LeftProfile, RightProfile,
         sizeType
     };
+
     class EIRQTCV_EXPORT Parameters
     {
     public:
@@ -69,15 +70,12 @@ public:
 
 
 public:
-    cvCascade(const Type &type=Type::nullType);
+    cvCascade(const Type &type);
     Type type() const;
     BasicName typeName() const;
     bool isNull() const;
     bool loadCascade(const QQFileInfo &cascadeXmlInfo);
-    bool loadCoreSize(const QFileInfo &cascadeXmlInfo);
-    bool notLoaded() const;
     bool isLoaded() const;
-    void unload();
     QSize coreSize() const;
     QQFileInfo cascadeFileInfo() const;
     cv::CascadeClassifier *classifier();
@@ -104,7 +102,6 @@ private:
     Type cmType=nullType;
     QQFileInfo mCascadeXmlInfo;
     cv::CascadeClassifier *mpClassifier=nullptr;
-    QSize mCoreSize;
     // side-effects of detectRectangles()
     cvMat mDetectMat;
     QQRectList mRectList;

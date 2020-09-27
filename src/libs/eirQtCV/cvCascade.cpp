@@ -9,6 +9,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/objdetect.hpp>
+#include <opencv2/core/types.hpp>
 
 #include <eirExe/XmlFile.h>
 #include <eirXfr/Debug.h>
@@ -17,8 +18,10 @@
 
 cvCascade::cvCascade(const cvCascade::Type &type)
     : cmType(type)
+    , mpClassifier(new cv::CascadeClassifier())
 {
     TRACEQFI << type;
+    TSTALLOC(mpClassifier);
     TODO(cv::redirectError);
 }
 
@@ -40,80 +43,21 @@ bool cvCascade::isNull() const
 bool cvCascade::loadCascade(const QQFileInfo &cascadeXmlInfo)
 {
     TRACEQFI << typeName()() << cascadeXmlInfo.absoluteFilePath();
-    unload();
     EXPECT(cascadeFileInfo().exists());
     EXPECT(cascadeFileInfo().isFile());
     EXPECT(cascadeFileInfo().isReadable());
-    if (cascadeFileInfo().notExists()
-            || cascadeFileInfo().notFile()
-            || cascadeFileInfo().notReadable())
-        return false;                                               /* /========\ */
-    cv::CascadeClassifier * pcvcc = new cv::CascadeClassifier;
-    if (pcvcc->load(cvString(cascadeXmlInfo.absoluteFilePath())))
-    {
-        mpClassifier = pcvcc;
+    if (mpClassifier->load(cvString(cascadeXmlInfo.absoluteFilePath())))
         mCascadeXmlInfo = cascadeXmlInfo;
-        EXPECTNOT(mpClassifier->empty());
-        EXPECTNOT(mpClassifier->empty());
-    }
-    return nullptr != mpClassifier;
-}
-
-bool cvCascade::loadCoreSize(const QFileInfo &cascadeXmlInfo)
-{
-    TRACEQFI << cmType << cascadeXmlInfo;
-    mCoreSize = QSize();
-
-    XmlFile xmlFile(cascadeXmlInfo.absoluteFilePath());
-    bool loaded = xmlFile.load();
-    EXPECT(loaded);
-    if ( ! loaded) return loaded;
-
-    QDomElement rootDE = xmlFile.rootElement();
-    DUMPVAL(rootDE.tagName());
-    QDomElement topDE = rootDE.firstChildElement();
-    DUMPVAL(topDE.tagName());
-    DUMPVAL(topDE.attribute("type_id"));
-
-    int cascadeVersion = determineVersion(topDE);
-    QSize sz;
-    switch (cascadeVersion)
-    {
-    case 2:     sz = getSize2(topDE);       break;
-    case 4:     sz = getSize2(topDE);       break;
-    default:    return false;
-    }
-
-    DUMPVAL(sz);
-    if (sz.isValid()) mCoreSize = sz;
-    return mCoreSize.isValid();
-}
-
-bool cvCascade::notLoaded() const
-{
-    return mpClassifier ? mpClassifier->empty() : true;
-}
-
-bool cvCascade::isLoaded() const
-{
-    return mpClassifier ? ( ! mpClassifier->empty()) : false;
-}
-
-void cvCascade::unload()
-{
-    if (mpClassifier)
-    {
-        delete mpClassifier;
-        mpClassifier = nullptr;
-    }
-    mCascadeXmlInfo = QFileInfo();
-    mCoreSize = QSize();
+    return ! mpClassifier->empty();
 }
 
 QSize cvCascade::coreSize() const
 {
-    TRACEQFI << mCoreSize;
-    return mCoreSize;
+    TSTALLOC(mpClassifier);
+    cv::Size cvsz = mpClassifier->getOriginalWindowSize();
+    QSize qsz(cvsz.width, cvsz.height);
+    TRACEQFI << qsz;
+    return qsz;
 }
 
 QQFileInfo cvCascade::cascadeFileInfo() const
@@ -212,10 +156,41 @@ BasicName cvCascade::typeName(cvCascade::Type type)
         case nullType:      return "{null}";
         case PreScan:       return "PreScan";
         default:
-            MUSTDO(handle);
+            MUSTDO(type);
             break;
     }
     return "{unknown}";
+}
+
+#if 0
+bool cvCascade::loadCoreSize(const QFileInfo &cascadeXmlInfo)
+{
+    TRACEQFI << cmType << cascadeXmlInfo;
+    mCoreSize = QSize();
+
+    XmlFile xmlFile(cascadeXmlInfo.absoluteFilePath());
+    bool loaded = xmlFile.load();
+    EXPECT(loaded);
+    if ( ! loaded) return loaded;
+
+    QDomElement rootDE = xmlFile.rootElement();
+    DUMPVAL(rootDE.tagName());
+    QDomElement topDE = rootDE.firstChildElement();
+    DUMPVAL(topDE.tagName());
+    DUMPVAL(topDE.attribute("type_id"));
+
+    int cascadeVersion = determineVersion(topDE);
+    QSize sz;
+    switch (cascadeVersion)
+    {
+    case 2:     sz = getSize2(topDE);       break;
+    case 4:     sz = getSize2(topDE);       break;
+    default:    return false;
+    }
+
+    DUMPVAL(sz);
+    if (sz.isValid()) mCoreSize = sz;
+    return mCoreSize.isValid();
 }
 
 int cvCascade::determineVersion(const QDomElement topDE)
@@ -252,3 +227,4 @@ QQSize cvCascade::getSize4(const QDomElement topDE)
     width  = widthDE.text().toInt();
     return QQSize(width, height);
 }
+#endif

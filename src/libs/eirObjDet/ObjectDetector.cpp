@@ -52,16 +52,14 @@ cvCascade *ObjectDetector::cascade()
 bool ObjectDetector::load(const QQFileInfo cascadeFInfo)
 {
     TRACEQFI << cascadeFInfo << cascadeFInfo.isReadableFile();
-    bool coreok = cascade()->loadCoreSize(cascadeFInfo);
     bool loaded = cascade()->loadCascade(cascadeFInfo);
-    EXPECT(coreok);
     EXPECT(loaded);
-    return loaded && coreok;
+    return loaded;
 }
 
 bool ObjectDetector::isLoaded()
 {
-    return cascade()->isLoaded();
+    return ! cascade()->isNull();
 }
 
 ObjDetResultList ObjectDetector::process(const SettingsFile::Map &settingsMap,
