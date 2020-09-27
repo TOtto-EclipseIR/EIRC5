@@ -47,7 +47,6 @@ public:
 public:
     XfrFunctionInfo(const char * qFuncInfo);
     void parse();
-    void set(const char * qFuncInfo);
 
 private:
     const QString cmQfiString;

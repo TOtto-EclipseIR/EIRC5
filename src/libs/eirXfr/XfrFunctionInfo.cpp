@@ -15,6 +15,8 @@ void XfrFunctionInfo::parse()
     qDebug() << Q_FUNC_INFO << cmQfiString;
     setPrettyFunction(cmQfiString);
     // ex: const TInputType& myMin(const TInputType&, const TInputType&) [with TInputType = int]
+    int funcArgBeginParen = cmQfiString.indexOf('(');
+    int funcArgEndParen = cmQfiString.lastIndexOf(')');
     mElements = cmQfiString.simplified().split(" ", Qt::SkipEmptyParts);
 
 }

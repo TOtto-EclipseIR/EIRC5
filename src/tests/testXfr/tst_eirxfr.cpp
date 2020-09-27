@@ -37,6 +37,8 @@ void testXfr::testEntry()
     QVERIFY(nonoEntry.notValidLevel());
     QVERIFY(nullEntry.toLevel().notValid());
 
+    XfrEntry qfiEntry = XfrEntry::from(Q_FUNC_INFO, "");
+    QCOMPARE(Q_FUNC_INFO, qfiEntry.getQFuncInfo());
 }
 
 QTEST_MAIN(testXfr)
