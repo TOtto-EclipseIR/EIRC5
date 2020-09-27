@@ -64,12 +64,12 @@ public: // access
     void dump() const;
 
 public: // values
-    bool boolean(const QString &key, const bool &defaultValue=false) const;
-    int signedInt(const QString &key, const signed &defaultValue=0) const;
-    unsigned unsignedInt(const QString &key, const unsigned &defaultValue=0) const;
-    qreal real(const QString &key, const qreal &defaultValue=0) const;
-    qreal realPerMille(const QString &key, const int &defaultValue=0) const;
-    QString string(const QString &key, const QString &defaultValue=QString()) const;
+    bool boolean(const Key &key, const bool &defaultValue=false) const;
+    int signedInt(const Key &key, const signed &defaultValue=0) const;
+    unsigned unsignedInt(const Key &key, const unsigned &defaultValue=0) const;
+    qreal real(const Key &key, const qreal &defaultValue=0) const;
+    qreal realPerMille(const Key &key, const int &defaultValue=0) const;
+    QString string(const Key &key, const QString &defaultValu=QString()) const;
 
 
     /*

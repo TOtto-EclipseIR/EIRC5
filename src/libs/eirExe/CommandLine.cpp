@@ -134,13 +134,14 @@ void CommandLine::expandDirectories(const int recurseDepth)
             }
             foreach (QString fileName, fileNames)
             {
-                QFileInfo fi(dir, fileName);
+                QQFileInfo fi(dir, fileName);
                 expandedArgs << fi.absoluteFilePath();
             }
         }
         else
         {
             WARN << argIn << "not file or dir";
+            EMIT(warning(argIn, "Not Recognized"));
         }
     }
     mPositionalArgumentList = expandedArgs;
@@ -152,8 +153,7 @@ void CommandLine::dump()
 {
     DUMP << ">>>CommandLine:";
     DUMP << "===exeArgumentList:";
-    foreach (QString exeArg, cmExeArgumentList)
-        DUMP << "  " << exeArg;
+    foreach (QString exeArg, cmExeArgumentList) DUMP << "  " << exeArg;
     DUMP << "---exeFileInfo:" << mExeFileInfo;
     DUMP << "---positionalArgumentList:";
     dumpPositionalArgs();
@@ -172,18 +172,19 @@ QStringList CommandLine::expandFileArguments(const QStringList arguments,
         if (arg.startsWith(trigger))
         {
             QQFileInfo argFileInfo(arg.mid(1), QQString::NoFlag);
-            TRACE << "Expanding" << argFileInfo.absoluteFilePath();
-            TEXPECT(argFileInfo.exists());
-            TEXPECT(argFileInfo.isReadable());
-            TEXPECT(argFileInfo.isFile());
-            expanded << readTxtFileArguments(argFileInfo);
+            TRACE << "Expanding" << argFileInfo.absoluteFilePath() << argFileInfo.attributes();
+            WEXPECT(argFileInfo.exists());
+            WEXPECT(argFileInfo.isReadable());
+            WEXPECT(argFileInfo.isFile());
+            if (argFileInfo.tryIsFile())
+                expanded << readTxtFileArguments(argFileInfo);
         }
         else
         {
             expanded << arg;
         }
-        TRACE << expanded;
     }
+    TRACE << expanded;
     return expanded;
 }
 
@@ -216,7 +217,7 @@ QStringList CommandLine::stripSettings(
             parseSettingArgument(arg, prefix);
         else
             remainingArgs << arg;
-    TRACEQFI << remainingArgs;
+    TRACE << remainingArgs;
     return remainingArgs;
 }
 
@@ -232,18 +233,21 @@ void CommandLine::parseSettingArgument(const QString &arg,
     STG->set(key, valu);
     TRACE << key() << "=" << valu;
 }
-QStringList CommandLine::readTxtFileArguments(const QFileInfo &argFileInfo)
 
+QStringList CommandLine::readTxtFileArguments(const QQFileInfo &argFileInfo)
 {
-    TRACEQFI << argFileInfo.absoluteFilePath();
+    TRACEQFI << argFileInfo.absoluteFilePath() << argFileInfo.attributes();
     QStringList newArgs;
     QFile file(argFileInfo.absoluteFilePath(), this);
-    WEXPECT(file.open(QIODevice::ReadOnly | QIODevice::Text))
-    WEXPECT(file.exists() && file.isReadable())
+    EXPECT(file.open(QIODevice::ReadOnly | QIODevice::Text));
+    if ( ! file.isReadable())
+        EMIT(warning(file.fileName() + " "
+                     + argFileInfo.attributes(), "Not a Readable File"));
+
     while ( ! file.atEnd())
     {
         QByteArray fileLine = file.readLine().simplified();
-        //TRACE << "fileLine: {>" << fileLine << "<}";
+        TRACE << "fileLine: {>" << fileLine << "<}";
         if (fileLine.isEmpty() || fileLine.startsWith('#'))
             continue;
         newArgs << fileLine;

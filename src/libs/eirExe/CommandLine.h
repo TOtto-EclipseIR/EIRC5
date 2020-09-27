@@ -55,6 +55,7 @@ public slots:
 
 signals:
     void constructed(void);
+    void warning(const QString what, const QString why);
 
 protected:
     // processing
@@ -68,7 +69,7 @@ protected:
     // utility
     void parseSettingArgument(const QString &arg,
                              const Settings::Key &prefix=Settings::Key());
-    QStringList readTxtFileArguments(const QFileInfo &argFileInfo);
+    QStringList readTxtFileArguments(const QQFileInfo &argFileInfo);
 
 private slots:
     void dumpPositionalArgs() const;

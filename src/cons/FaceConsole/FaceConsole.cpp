@@ -37,6 +37,8 @@ void FaceConsole::initializeApplication()
               .arg(qApp->applicationVersion())
               .arg(locale.toString(QDateTime::currentDateTime())));
     writeLine("   with Open Source Computer Vision library (OpenCV) " + cvv.getString());
+    writeLine("---Arguments:");
+    writeLines(arguments(), true, "   ");
     CONNECT(this, &FaceConsole::resourseInitFailed,
             qApp, &QCoreApplication::quit);
     CONNECT(this, &FaceConsole::processingStarted,
@@ -61,6 +63,8 @@ void FaceConsole::initializeApplication()
             this, &FaceConsole::catchSettingsChange);
     CONNECT(STG, &Settings::groupChanging,
             this, &FaceConsole::catchSettingsGroup);
+    CONNECT(CMD, &CommandLine::warning,
+            this, &FaceConsole::catchCommandLineWarning);
     EMIT(applicationInitd());
     QTimer::singleShot(100, this, &FaceConsole::processCommandLine);
 }
@@ -164,10 +168,9 @@ void FaceConsole::setOutputDirs()
             QString q00Name = QString("Q%1").arg(q00 * 100, 3, 10, QChar('0'));
             q00Dir.mkpath(q00Name);
             if (q00Dir.cd(q00Name))
-            {
                 mMarkedFaceQualityDirs.append(q00Dir);
-                writeLine("   "+q00Dir.absolutePath()+" created");
-            }
+            else
+                writeErr("***"+q00Dir.absolutePath()+" cannot be created");
         }
     }
 
@@ -383,4 +386,10 @@ void FaceConsole::catchSettingsChange(const Settings::Key key, const Settings::V
 void FaceConsole::catchSettingsGroup(const Settings::Key key)
 {
     TRACEQFI << key();
+}
+
+void FaceConsole::catchCommandLineWarning(const QString what, const QString why)
+{
+    TRACEQFI << what << why;
+    writeErr(QString("***%1 is %2").arg(what).arg(why));
 }

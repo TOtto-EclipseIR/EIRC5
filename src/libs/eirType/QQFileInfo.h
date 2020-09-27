@@ -43,6 +43,7 @@ public:
     bool notReadable() const;
     bool tryIsFile(const QIODevice::OpenMode mode=QIODevice::ReadOnly) const;
     bool tryIsDir() const;
+    bool tryHasDir() const;
     QQString attributes() const;
     QQString toString() const;
     QVariant toVariant() const;

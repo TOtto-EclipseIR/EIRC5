@@ -2,6 +2,7 @@
 #pragma once
 #include "eirType.h"
 
+#include <QList>
 #include <QString>
 #include <QVariant>
 

@@ -25,6 +25,11 @@ VersionInfo ApplicationHelper::version() const
     return cmVerInfo;
 }
 
+QStringList ApplicationHelper::arguments() const
+{
+    return qApp->arguments();
+}
+
 void ApplicationHelper::run()
 {
     TRACEFN

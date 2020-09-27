@@ -173,7 +173,7 @@ QStringList Settings::toStringList() const
 {
     QStringList qsl;
     foreach (Key key, keys())
-        qsl << QString("%1={%2}").arg(key).arg(get(key).toLongLong());
+        qsl << QString("%1={%2}").arg(key).arg(get(key));
     return qsl;
 }
 
@@ -182,36 +182,37 @@ void Settings::dump() const
     foreach (QString s, toStringList()) DUMP << s;
 }
 
-int Settings::signedInt(const QString &key, const signed &defaultValue) const
+int Settings::signedInt(const Key &key, const signed &defaultValue) const
 {
     bool ok = contains(key);
     signed result = get(key).toInt(&ok);
     return ok ? result : defaultValue;
 }
 
-unsigned Settings::unsignedInt(const QString &key, const unsigned &defaultValue) const
+unsigned Settings::unsignedInt(const Key &key, const unsigned &defaultValue) const
 {
     bool ok = contains(key);
     unsigned result = get(key).toUInt(&ok);
     return ok ? result : defaultValue;
 }
 
-qreal Settings::real(const QString &key, const qreal &defaultValue) const
+qreal Settings::real(const Key &key, const qreal &defaultValue) const
 {
     bool ok = contains(key);
     qreal result = get(key).toDouble(&ok);
     return ok ? result : defaultValue;
 }
 
-qreal Settings::realPerMille(const QString &key, const int &defaultValue) const
+qreal Settings::realPerMille(const Key &key, const int &defaultValue) const
 {
     bool ok = contains(key);
     qreal result = get(key).toInt(&ok);
     return qreal(ok ? result : defaultValue) / 1000.0;
 }
 
-QString Settings::string(const QString &key, const QString &defaultValue) const
+QString Settings::string(const Key &key, const Value &defaultValue) const
 {
+    TRACEQFI << key() << defaultValue << get(key, defaultValue);
     return get(key, defaultValue);
 }
 

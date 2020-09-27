@@ -22,6 +22,7 @@ class EIREXE_EXPORT ApplicationHelper : public QObject
 public:
     explicit ApplicationHelper(QObject *parent = nullptr);
     VersionInfo version() const;
+    QStringList arguments() const;
     void set(CommandLineClientInterface const * client) const;
     void set(const VersionInfo & verInfo);
 
