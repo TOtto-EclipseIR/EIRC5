@@ -1,10 +1,16 @@
+// file: {repo: EIRC2}./src/libs/eirType/QQString.h
 #pragma once
+#include "eirType.h"
 
-#include <QStringList>
+#include <QList>
+#include "QQString.h"
 
-class QQStringList : public QStringList
+class EIRTYPE_EXPORT QQStringList : public QQString::List
 {
 public:
     QQStringList();
+    QQStringList(const QStringList &other);
+    void prepend(const QQStringList &other);
+    QQString join(const QQString &separator) const;
 };
 

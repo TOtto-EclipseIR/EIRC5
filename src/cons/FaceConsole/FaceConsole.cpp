@@ -78,8 +78,7 @@ void FaceConsole::enqueueNext()
 void FaceConsole::processCommandLine()
 {
     TRACEFN;
-    CMD->process();
-    CMD->expandDirectories();
+    CMD->process(true);
     CommandLine::ExpandDirResultList xdrl = CMD->expandDirResults();
     writeLine("---Directories:");
     int k = 0;

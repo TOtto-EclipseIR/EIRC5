@@ -16,7 +16,15 @@
 ApplicationHelper::ApplicationHelper(QObject *parent)
     : QObject(parent)
 {
-    TRACEFN
+    TRACEQFI << QOBJNAME(parent);
+    setObjectName("ApplicationHelper");
+}
+
+ApplicationHelper::ApplicationHelper(const Flags flags, QObject *parent)
+    : QObject(parent)
+    , cmFlags(flags)
+{
+    TRACEQFI << flags << QOBJNAME(parent);
     setObjectName("ApplicationHelper");
 }
 
@@ -41,6 +49,6 @@ void ApplicationHelper::run()
 void ApplicationHelper::initCommandLine()
 {
     TRACEFN
-    CMD->process();
+    CMD->process(cmFlags & ExpandCommandLineDirs);
     EMIT(commandLineInitd());
 }
