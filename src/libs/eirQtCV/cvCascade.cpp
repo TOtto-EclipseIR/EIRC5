@@ -69,7 +69,60 @@ cv::CascadeClassifier *cvCascade::classifier()
 {
     return mpClassifier;
 }
+#if 1
+int cvCascade::detectRectangles(const Settings::Key &groupKey,
+                                const QQImage &inputImage,
+                                const bool showDetect,
+                                const QQRect &region)
+{
+    TRACEQFI << inputImage << region;
+    TSTALLOC(mpClassifier);
 
+    EXPECTNOT(inputImage.isNull());
+    if (inputImage.isNull()) return -1; // null image       /* /========\ */
+    mMethodString.clear();
+    mDetectMat.clear();
+    mRectList.clear();
+
+    mDetectMat.setGrey(inputImage);
+    DUMP << mDetectMat.dumpString();
+    if (mDetectMat.isNull()) return -2; // null cvMat       /* /========\ */
+    if (showDetect)
+    {
+        cv::imshow("DetectMat", mDetectMat.mat());
+        cv::waitKey(5000);
+    }
+
+    if (isNull()) return -3;            // empty cascade    /* /========\ */
+
+    mParameters.set(groupKey);
+    mParameters.calculate(cmType, mDetectMat.size(), coreSize());
+#if 0
+    QSize minSize = mParameters.minSize();
+    QSize maxSize = mParameters.maxSize();
+#else
+    NEEDDO(RemoveForFlight);
+    QSize minSize(0,0);
+    QSize maxSize(0,0);
+#endif
+    mMethodString = mParameters.methodString(mCascadeXmlInfo);
+    DUMPVAL(mMethodString);
+
+    std::vector<cv::Rect> cvRectVector;
+    classifier()->detectMultiScale(mDetectMat.mat(),
+                        cvRectVector,
+                        mParameters.factor(),
+                        mParameters.neighbors(),
+                        mParameters.flags(),
+                        cv::Size(minSize.width(), minSize.height()),
+                        cv::Size(maxSize.width(), maxSize.height()));
+
+    foreach (cv::Rect cvrc, cvRectVector)
+        mRectList << QQRect(cvrc.x, cvrc.y, cvrc.width, cvrc.height);
+    return mRectList.size();
+}
+
+#else
 int cvCascade::detectRectangles(Settings *rectFinderSettings,
                                 const QQImage &inputImage,
                                 const bool showDetect,
@@ -123,7 +176,7 @@ int cvCascade::detectRectangles(Settings *rectFinderSettings,
         mRectList << QQRect(cvrc.x, cvrc.y, cvrc.width, cvrc.height);
     return mRectList.size();
 }
-
+#endif
 cvMat cvCascade::detectMat() const
 {
     return mDetectMat;

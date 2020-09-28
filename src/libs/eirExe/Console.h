@@ -18,12 +18,7 @@ class EIREXE_EXPORT Console : public ApplicationHelper
         WRITE setForkQtDebug RESET resetForkQtDebug USER true)
 
 public:
-    explicit Console(QObject *parent = nullptr);
-    /* The mechanism below is broken; simply use qApp-> for now
-    QCoreApplication * core();
-    QObject * appParent();
-    */
-
+    explicit Console(const Flags flags);
     bool isForkQtDebug() const;
 
 public slots:
@@ -49,7 +44,6 @@ signals:
     void lineNotRead();
 
 private:
-    QCoreApplication * const cmpCoreApp=nullptr;
 
     QFile * mpIn=nullptr;
     QFile * mpOut=nullptr;

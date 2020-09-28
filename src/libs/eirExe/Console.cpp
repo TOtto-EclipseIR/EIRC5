@@ -4,45 +4,26 @@
 
 #include <eirXfr/Debug.h>
 
-Console::Console(QObject *parent)
-    : ApplicationHelper(parent)
-    , cmpCoreApp(QCoreApplication::instance())
-    , mpIn(new QFile(this))
+Console::Console(const ApplicationHelper::Flags flags)
+    : mpIn(new QFile(this))
     , mpOut(new QFile(this))
     , mpErr(new QFile(this))
 {
     TRACEFN
-    TSTALLOC(mpIn)
-    TSTALLOC(mpOut)
-    TSTALLOC(mpErr)
+    TSTALLOC(mpIn);
+    TSTALLOC(mpOut);
+    TSTALLOC(mpErr);
+    ApplicationHelper::setFlags(flags);
     setObjectName("Console");
-    EXPECT(mpIn->open(stdin, QIODevice::ReadOnly))
-    EXPECT(mpOut->open(stdout, QIODevice::WriteOnly))
-            EXPECT(mpErr->open(stderr, QIODevice::WriteOnly))
+    EXPECT(mpIn->open(stdin, QIODevice::ReadOnly));
+    EXPECT(mpOut->open(stdout, QIODevice::WriteOnly));
+    EXPECT(mpErr->open(stderr, QIODevice::WriteOnly));
 }
 
 bool Console::isForkQtDebug() const
 {
     return m_ForkQtDebug;
 }
-
-/* This mechanism is broken; simply use qApp-> for now
-QCoreApplication *Console::core()
-{
-    TRACEQFI << QOBJNAME(cmpCoreApp);
-    return cmpCoreApp;
-}
-
-QObject *Console::appParent()
-{
-    TRACEQFI << QOBJNAME(core());
-    QObject * parent = nullptr;
-    if (core()) parent = core()->parent();
-    TODO(others);
-    TRACERTV() << QOBJNAME(parent);
-    return parent;
-}
-*/
 
 void Console::putChar(const char c)
 {

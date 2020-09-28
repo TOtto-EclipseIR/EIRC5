@@ -29,8 +29,8 @@ public:
     Q_DECLARE_FLAGS(Flags, Flag)
 
 public:
-    explicit ApplicationHelper(QObject *parent = nullptr);
-    explicit ApplicationHelper(const Flags, QObject *parent = nullptr);
+    explicit ApplicationHelper();
+    void setFlags(const Flags flags);
     VersionInfo version() const;
     QStringList arguments() const;
     void set(CommandLineClientInterface const * client) const;
@@ -48,7 +48,7 @@ signals:
     void commandLineInitd();
 
 private:
-    const Flags cmFlags=NoFLag;
+    Flags mFlags=NoFLag;
     VersionInfo cmVerInfo;
 };
 

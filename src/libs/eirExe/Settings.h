@@ -60,8 +60,8 @@ public: // access
     MultiName::List keys() const;
     Map extract() const;
     Map extract(const Key groupKey, const bool keepKey=false) const;
-    QStringList toStringList() const;
-    void dump() const;
+    QStringList toStringList(const Key &groupKey=Key());
+    void dump(const Key &groupKey=Key());
 
 public: // values
     bool boolean(const Key &key, const bool &defaultValue=false) const;

@@ -40,10 +40,7 @@ public:
     {
     public:
         Parameters();
-//        Parameters(const QVariant &variant);
-        Parameters(Settings *cascadeSettings);
-        Settings *cascadeSettings();
-        void set(Settings *cascadeSettings);
+        void set(const Settings::Key &groupKey);
         void calculate(const Type type,
                        const QQSize imageSize,
                        const QQSize coreSize);
@@ -60,7 +57,7 @@ public:
         double parseFactor();
 
     private:
-        Settings * mpCascadeSettings;
+        Settings::Key mGrpupKey;
         double mFactor=Q_QNAN;
         int mNeighbors=0;
         int mFlags=0;
@@ -80,7 +77,7 @@ public:
     QQFileInfo cascadeFileInfo() const;
     cv::CascadeClassifier *classifier();
 
-    int detectRectangles(Settings *rectFinderSettings,
+    int detectRectangles(const Settings::Key &groupKey,
                          const QQImage &inputImage,
                          const bool showDetect=false,
                          const QQRect &region=QQRect());
@@ -92,12 +89,12 @@ public:
 
 public: // static
     static BasicName typeName(Type type);
-
+#if 0
 private: // static
     int determineVersion(const QDomElement topDE);
     QQSize getSize2(const QDomElement topDE);
     QQSize getSize4(const QDomElement topDE);
-
+#endif
 private:
     Type cmType=nullType;
     QQFileInfo mCascadeXmlInfo;

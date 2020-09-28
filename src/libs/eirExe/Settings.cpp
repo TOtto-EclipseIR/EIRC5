@@ -169,17 +169,19 @@ Settings::Map Settings::extract(const Key groupKey, const bool keepKey) const
     return extractedMap;
 }
 
-QStringList Settings::toStringList() const
+QStringList Settings::toStringList(const Key &groupKey)
 {
     QStringList qsl;
+    if ( ! groupKey.isEmpty()) beginGroup(groupKey);
     foreach (Key key, keys())
         qsl << QString("%1={%2}").arg(key).arg(get(key));
+    if ( ! groupKey.isEmpty()) endGroup();
     return qsl;
 }
 
-void Settings::dump() const
+void Settings::dump(const Key &groupKey)
 {
-    foreach (QString s, toStringList()) DUMP << s;
+    foreach (QString s, toStringList(groupKey)) DUMP << s;
 }
 
 int Settings::signedInt(const Key &key, const signed &defaultValue) const

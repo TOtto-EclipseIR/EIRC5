@@ -13,19 +13,14 @@
 
 #include "../../version.h"
 
-ApplicationHelper::ApplicationHelper(QObject *parent)
-    : QObject(parent)
+ApplicationHelper::ApplicationHelper()
 {
-    TRACEQFI << QOBJNAME(parent);
-    setObjectName("ApplicationHelper");
+    TRACEFN;
 }
 
-ApplicationHelper::ApplicationHelper(const Flags flags, QObject *parent)
-    : QObject(parent)
-    , cmFlags(flags)
+void ApplicationHelper::setFlags(const Flags flags)
 {
-    TRACEQFI << flags << QOBJNAME(parent);
-    setObjectName("ApplicationHelper");
+    mFlags = flags;
 }
 
 VersionInfo ApplicationHelper::version() const
@@ -49,6 +44,6 @@ void ApplicationHelper::run()
 void ApplicationHelper::initCommandLine()
 {
     TRACEFN
-    CMD->process(cmFlags & ExpandCommandLineDirs);
+    CMD->process(mFlags & ExpandCommandLineDirs);
     EMIT(commandLineInitd());
 }

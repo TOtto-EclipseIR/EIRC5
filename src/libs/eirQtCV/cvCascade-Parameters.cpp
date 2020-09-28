@@ -2,33 +2,16 @@
 
 #include "cvCascade.h"
 
+#include <APP>
 #include <eirType/Real.h>
 #include <eirXfr/Debug.h>
 
 cvCascade::Parameters::Parameters() { TRACEFN; }
-/*
-cvCascade::Parameters::Parameters(const QVariant &variant)
-{
-    TRACEQFI << variant;
-    *this = variant.value<cvCascade::Parameters>();
-}
-*/
-cvCascade::Parameters::Parameters(Settings *cascadeSettings)
+
+void cvCascade::Parameters::set(const Settings::Key &groupKey)
 {
     TRACEFN;
-    set(cascadeSettings);
-}
-
-Settings *cvCascade::Parameters::cascadeSettings()
-{
-    return mpCascadeSettings;
-}
-
-void cvCascade::Parameters::set(Settings *cascadeSettings)
-{
-    TRACEFN;
-    cascadeSettings->dump();
-    mpCascadeSettings = cascadeSettings;
+    STG->dump(groupKey);
 }
 
 void cvCascade::Parameters::calculate(const cvCascade::Type type,
@@ -83,9 +66,10 @@ void cvCascade::Parameters::calculate(const cvCascade::Type type,
     mFactor = qIsNull(fac) ? 1.160 : fac;
     NEEDDO("Default Based on Image/Core size & MaxDetectors, etc.");
 
-    int neigh = mpCascadeSettings->signedInt("Neighbors", 2);
+    STG->beginGroup(mGrpupKey);
+    int neigh = STG->signedInt("Neighbors", 2);
     mNeighbors = (neigh >= 0) ? neigh : 2;
-
+    STG->endGroup();
     DUMP << dumpList();
 }
 
@@ -131,7 +115,9 @@ QVariant cvCascade::Parameters::toVariant() const
 double cvCascade::Parameters::parseFactor()
 {
     double result=qQNaN();
-    double f = mpCascadeSettings->realPerMille("Factor");
+    STG->beginGroup(mGrpupKey);
+    double f = STG->realPerMille("Factor");
+    STG->endGroup();
     if (f >= 1.001 && f <= 2.000)
         result = 0.0;
     else if (f > 1.0 && f < 999.0)

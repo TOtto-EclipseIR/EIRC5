@@ -28,6 +28,7 @@ public:
     MultiName(const QStringList & qslNames);
     MultiName(const MultiName &base, const MultiName &name);
     bool isEmpty(void) const;
+    bool notEmpty(void) const;
     void clear(void);
     void set(const QString & qsNames);
     void set(const QStringList & qslNames);
