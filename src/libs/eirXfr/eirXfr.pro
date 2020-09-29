@@ -23,10 +23,13 @@ include(../../EIRC2.pri)
 SOURCES += \
     HexDump.cpp \
     StartupDebug.cpp \
+    XerEntry.cpp \
+    XerEntryList.cpp \
     XfrBaseEventReceiver.cpp \
     XfrEntry.cpp \
     XfrEvent.cpp \
     XfrEventQueue.cpp \
+    XfrFilter.cpp \
     XfrFlags.cpp \
     XfrFunctionInfo.cpp \
     XfrLevel.cpp \
@@ -37,10 +40,13 @@ HEADERS += \
     Debug.h \
     HexDump.h \
     StartupDebug.h \
+    XerEntry.h \
+    XerEntryList.h \
     XfrBaseEventReceiver.h \
     XfrEntry.h \
     XfrEvent.h \
     XfrEventQueue.h \
+    XfrFilter.h \
     XfrFlags.h \
     XfrFunctionInfo.h \
     XfrLevel.h \

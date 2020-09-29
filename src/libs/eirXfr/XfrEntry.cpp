@@ -3,12 +3,12 @@ DEFINE_DATAPROPS(XfrEntry, XfrEntryData)
 
 #include <QtDebug>
 
-QHash<QUuid, XfrEntry> XfrEntry::smUidEntryHash;
+QHash<QUuid, XfrEntry*> XfrEntry::smUidEntryHash;
 
 void XfrEntry::ctor(void)
 {
     mUid = QUuid::createUuid();
-    smUidEntryHash.insert(uid(), *this);
+    smUidEntryHash.insert(uid(), this);
 }
 
 void XfrEntry::dtor(void)
@@ -49,7 +49,7 @@ const XfrLevel XfrEntry::toLevel() const
 
 XfrEntry XfrEntry::at(const QUuid &uid)
 {
-    return smUidEntryHash.value(uid);
+    return *smUidEntryHash.value(uid);
 }
 
 XfrEntry XfrEntry::from(const char *qFuncInfo, const char *levelName,
@@ -62,7 +62,7 @@ XfrEntry XfrEntry::from(const char *qFuncInfo, const char *levelName,
     entry.setLevel(XfrLevel::level(levelName));
     entry.setVarNames(names);
     entry.setVarList(vars);
-    smUidEntryHash.insert(uid, entry);
+    smUidEntryHash.insert(uid, &entry);
 
     qDebug() << QDateTime::fromMSecsSinceEpoch(entry.getTimeStampUtc())
              << entry.getQFuncInfo() << entry.getLevel()

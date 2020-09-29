@@ -23,7 +23,7 @@ typedef XfrLevel::Level XfrLevelLevel;
     TND(QString, QFuncInfo, QString()) \
     TND(QString, ClassName, QString()) \
     TND(QString, FunctionName, QString()) \
-    TND(QStringList, ArgumentNames, QStringList()) \
+    TND(QString, Arguments, QString()) \
     TND(QString, Message, QString()) \
     TND(QString, Format, QString()) \
     TND(QStringList, VarNames, QStringList()) \
@@ -51,7 +51,7 @@ public:
     XfrLevel::Level getLevel() const;
     void setLevel(XfrLevel::Level lvl);
     const XfrLevel toLevel() const;
-
+    bool operator == (const XfrEntry &other) { return uid() == other.uid(); }
 
 
 private:
@@ -71,5 +71,5 @@ public:
                               const QString name4=QString(), const QVariant &var4=QVariant());
 
 private:
-    static QHash<QUuid, XfrEntry> smUidEntryHash;
+    static QHash<QUuid, XfrEntry*> smUidEntryHash;
 };

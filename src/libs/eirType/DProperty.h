@@ -40,8 +40,8 @@ In .cpp file:
 
 DEFINE_DATAPROPS(LogItem, LogItemData)
 
-LogItem::LogItem(const int size)
-    : data(new LogItemData)
+LogItem::LogItem(const int size)    // alternate ctor
+    : data(new LogItemData)         <<<---Important!
     , size_i(size)
 {
     ctor();
@@ -74,6 +74,7 @@ void LogItem::dtor(void) {;}
         void set##NAME(const TYPE v)        { TYPE##_##NAME = v;    } \
         TYPE get##NAME(void) const          { return TYPE##_##NAME; } \
         TYPE * ptr##NAME(void)              { return & TYPE##_##NAME; } \
+        TYPE * ref##NAME(void)              { return & TYPE##_##NAME; } \
         const TYPE * cptr##NAME(void) const { return & TYPE##_##NAME; } \
 
 #define DATAPROP_CTOR(TYPE, NAME, DFLT) \
@@ -100,8 +101,8 @@ void LogItem::dtor(void) {;}
         QSharedDataPointer<DATA> data; \
 
 #define DEFINE_DATAPROPS(CLASS, DATA) \
-CLASS::CLASS() : data(new DATA) { ctor(); } \
-CLASS::CLASS(const CLASS &rhs) : data(rhs.data) {} \
-CLASS &CLASS::operator=(const CLASS &rhs) \
-{ if (this != &rhs) data.operator=(rhs.data); return *this; } \
-CLASS::~CLASS() { dtor(); }
+        CLASS::CLASS() : data(new DATA) { ctor(); } \
+        CLASS::CLASS(const CLASS &rhs) : data(rhs.data) {} \
+        CLASS &CLASS::operator=(const CLASS &rhs) \
+        { if (this != &rhs) data.operator=(rhs.data); return *this; } \
+        CLASS::~CLASS() { dtor(); }
