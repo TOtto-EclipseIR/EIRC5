@@ -2,6 +2,7 @@
 
 #include <QTimer>
 
+#include <APP>
 #include <eirBase/Uuid.h>
 #include <eirExe/Settings.h>
 #include <eirXfr/Debug.h>
@@ -62,18 +63,17 @@ bool ObjectDetector::isLoaded()
     return ! cascade()->isNull();
 }
 
-ObjDetResultList ObjectDetector::process(Settings *settings,
+ObjDetResultList ObjectDetector::process(const Settings::Key groupKey,
                                    const QFileInfo &inputFileInfo,
                                    bool showDetect)
 {
     TRACEQFI << inputFileInfo << showDetect;
-    settings->dump();
     QQImage inputImage(inputFileInfo.absoluteFilePath());
-    cascade()->detectRectangles(settings, inputImage, showDetect);
+    cascade()->detectRectangles(groupKey, inputImage, showDetect);
     DUMP << cascade()->parameters();
     QQRectList rectList = cascade()->rectList();
-    qreal unionGroupOverlap = settings->realPerMille("UnionGroupOverlap", 500);
-    qreal unionGroupOrphan = settings->unsignedInt("UnionGroupOrphan", 1);
+    qreal unionGroupOverlap = STG->realPerMille("UnionGroupOverlap", 500);
+    qreal unionGroupOrphan = STG->unsignedInt("UnionGroupOrphan", 1);
     ObjDetResultList resultList = groupByUnion(rectList, unionGroupOverlap, unionGroupOrphan);
     return resultList;
 }

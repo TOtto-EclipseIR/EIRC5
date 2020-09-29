@@ -16,8 +16,8 @@
 #include <eirXfr/Debug.h>
 #include <eirXfr/StartupDebug.h>
 
-FaceConsole::FaceConsole(QObject *parent)
-    : Console(parent)
+FaceConsole::FaceConsole()
+    : Console(ExpandCommandLineDirs)
 {
     TRACEFN;
     setObjectName("FaceConsole");

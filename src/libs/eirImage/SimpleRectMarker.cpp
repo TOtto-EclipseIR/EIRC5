@@ -23,7 +23,6 @@ void SimpleRectMarker::markAll(const Settings &markRectSettings,
                                const QQRectList &rectList)
 {
     TRACEQFI << rectList.size();
-    markRectSettings.dump();
     QPainter painter(this);
     QColor penColor = QColor(markRectSettings.string("PenColor","#7f00CCCC"));
     qreal penWidth = markRectSettings.real("PenWidth", 1.0);
@@ -42,7 +41,6 @@ void SimpleRectMarker::mark(const Settings &markRectSettings,
 {
     TRACEFN;
     BEXPECTNOT(wheel.isEmpty());
-    markRectSettings.dump();
     resultList.dump(2);
     QPainter painter(this);
     qreal penWidth = markRectSettings.real("PenWidth", 5.0);

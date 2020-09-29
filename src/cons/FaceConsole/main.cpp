@@ -24,6 +24,6 @@ int main(int argc, char *argv[])
     a.setOrganizationName(VER_ORGNAME);
     sdo->start(argv[0], "./log");
 
-    FaceConsole c(a.parent()); Q_UNUSED(c);
+    FaceConsole c; Q_UNUSED(c);
     return a.exec();
 }

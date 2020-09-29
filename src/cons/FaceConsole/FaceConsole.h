@@ -12,7 +12,7 @@ class FaceConsole : public Console
 {
     Q_OBJECT
 public:
-    explicit FaceConsole(QObject *parent = nullptr);
+    explicit FaceConsole();
 
 public slots:
     void initializeApplication();

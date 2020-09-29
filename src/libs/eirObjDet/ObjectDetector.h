@@ -29,7 +29,7 @@ public:
     // single-threaded execution
     bool load(const QQFileInfo cascadeFInfo);
     bool isLoaded();
-    ObjDetResultList process(Settings *settings,
+    ObjDetResultList process(const Settings::Key groupKey,
                        const QFileInfo &inputFileInfo,
                        bool showDetect=false);
     QQImage inputImageForProcess() const;
