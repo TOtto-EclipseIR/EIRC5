@@ -56,7 +56,7 @@ public:
         double parseFactor();
 
     private:
-        Settings::Key mGrpupKey;
+        Settings::Key mGroupKey;
         double mFactor=Q_QNAN;
         int mNeighbors=0;
         int mFlags=0;

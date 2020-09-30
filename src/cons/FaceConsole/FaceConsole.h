@@ -36,6 +36,7 @@ private slots:
     void catchSettingsChange(const Settings::Key key, const Settings::Value newValu, const Settings::Value oldValu);
     void catchSettingsGroup(const Settings::Key key);
     void catchCommandLineWarning(const QString what, const QString why);
+    void catchCommandLineInfo(const QString what, const QString why);
 
 
 signals:

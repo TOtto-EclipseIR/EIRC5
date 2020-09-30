@@ -38,6 +38,11 @@ QString QQString::squeezed() const
     return mid(0).simplified().replace(QChar(' '), "");
 }
 
+bool QQString::operator ==(const QQString &other)
+{
+    return isNull() == other.isNull() && string() == other.string();
+}
+
 QQString::operator QVariant() const
 {
     return QVariant(toLocal8Bit());

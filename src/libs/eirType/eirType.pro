@@ -41,6 +41,7 @@ SOURCES += \
     QQSize.cpp \
     QQString.cpp \
     QQStringList.cpp \
+    QQStringStdList.cpp \
     Rational.cpp \
     Real.cpp \
     RealMath.cpp \
@@ -91,6 +92,7 @@ HEADERS += \
     QQSize.h \
     QQString.h \
     QQStringList.h \
+    QQStringStdList.h \
     Rational.h \
     Real.h \
     RealMath.h \

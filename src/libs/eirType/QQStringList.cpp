@@ -24,6 +24,11 @@ QQString QQStringList::join(const QQString &separator) const
     if (isEmpty()) return QQString();           /* /========\ */
     QQStringList copy = *this;
     QQString joined = copy.takeFirst();
-    while ( ! isEmpty()) joined += separator + copy.takeFirst();
+    while ( ! copy.isEmpty()) joined += separator + copy.takeFirst();
     return joined;
+}
+
+bool QQStringList::notEmpty() const
+{
+    return ! isEmpty();
 }

@@ -49,12 +49,16 @@ bool cvCascade::loadCascade(const QQFileInfo &cascadeXmlInfo)
 
 bool cvCascade::isLoaded() const
 {
+<<<<<<< HEAD
     return mpClassifier->empty();
 }
 
 bool cvCascade::notLoaded() const
 {
     return ! isLoaded();
+=======
+    return ! mpClassifier->empty();
+>>>>>>> c9081049be86ebf94694ac1f2bc2ffa3efd7435d
 }
 
 QSize cvCascade::coreSize() const

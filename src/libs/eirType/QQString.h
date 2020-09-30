@@ -31,6 +31,7 @@ public:
     void set(const QString &other);
     QString squeezed() const;
     operator QVariant () const;
+    bool operator == (const QQString &other);
 
 private:
     Flags mFlags=NoFlag;

@@ -65,6 +65,8 @@ void FaceConsole::initializeApplication()
             this, &FaceConsole::catchSettingsGroup);
     CONNECT(CMD, &CommandLine::warning,
             this, &FaceConsole::catchCommandLineWarning);
+    CONNECT(CMD, &CommandLine::info,
+            this, &FaceConsole::catchCommandLineInfo);
     EMIT(applicationInitd());
     QTimer::singleShot(100, this, &FaceConsole::processCommandLine);
 }
@@ -184,10 +186,9 @@ void FaceConsole::initializeResources()
     TRACEFN;
     new ObjectDetector(cvCascade::PreScan, this);
     TSTALLOC(ObjectDetector::p(cvCascade::PreScan));
-    STG->beginGroup("ObjectDetector");
-    QQDir baseCascadeDir(STG->string("/Resources/RectFinder/BaseDir"));
-    QString cascadeFileName = STG->
-            string("/Resources/RectFinder/PreScan/XmlFile");
+    STG->beginGroup("/ObjectDetector/Resources/RectFinder");
+    QQDir baseCascadeDir(STG->string("BaseDir"));
+    QString cascadeFileName = STG->string("PreScan/XmlFile");
     QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
     STG->endGroup();
 
@@ -200,16 +201,6 @@ void FaceConsole::initializeResources()
     EXPECTNOT(cascadeFileInfo.notReadable());
     EXPECTNOT(cascadeFileInfo.notFile());
     write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
-    if (cascadeFileInfo.notExists()
-            || cascadeFileInfo.notFile()
-            || cascadeFileInfo.notReadable())
-    {
-        writeLine("error");
-        writeErr("***Invalid cascade file specified: "
-                 + cascadeFileInfo.absoluteFilePath());
-        EMIT(resourseInitFailed(1, "Invalid Cascade"));
-    }
-
     EXPECT(ObjectDetector::p(cvCascade::PreScan)->load(cascadeFileInfo));
     if (ObjectDetector::p(cvCascade::PreScan)->isLoaded())
     {
@@ -391,4 +382,10 @@ void FaceConsole::catchCommandLineWarning(const QString what, const QString why)
 {
     TRACEQFI << what << why;
     writeErr(QString("***%1 is %2").arg(what).arg(why));
+}
+
+void FaceConsole::catchCommandLineInfo(const QString what, const QString why)
+{
+    TRACEQFI << what << why;
+    writeErr(QString("...%1 is %2").arg(what).arg(why));
 }

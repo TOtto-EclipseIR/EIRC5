@@ -12,9 +12,9 @@ class EIRIMAGE_EXPORT SimpleRectMarker : public QQImage
 {
 public:
     SimpleRectMarker(const QQImage &inputImage);
-    void markAll(const Settings &markRectSettings,
+    void markAll(const Settings::Key &groupKey,
                  const QQRectList &rectList);
-    void mark(const Settings &markRectSettings,
+    void mark(const Settings::Key &groupKey,
               const ObjDetResultList &resultList,
               const ColorWheel &wheel,
               const bool markAll=false);

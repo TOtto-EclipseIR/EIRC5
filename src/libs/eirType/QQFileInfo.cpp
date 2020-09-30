@@ -145,7 +145,7 @@ QQString QQFileInfo::attributes() const
 
 QQString QQFileInfo::toString() const
 {
-    if (tryHasDir())     return absolutePath();
+    if (tryIsDir())     return absolutePath();
     if (tryIsFile())    return absoluteFilePath();
     return absoluteFilePath();
 }

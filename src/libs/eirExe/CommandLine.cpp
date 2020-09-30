@@ -86,7 +86,7 @@ void CommandLine::process(const bool expandDirs)
 
     if (mpInterface) parseQtOptions();
     extractDirectiveArguments();
-
+    expandFileArguments();
     stripSettings();
     TRACE << "Settings:";
     DUMP << STG->toStringList();
@@ -158,6 +158,7 @@ void CommandLine::dump()
 void CommandLine::expandFileArguments(const QChar trigger)
 {
     TRACEQFI << trigger;
+    QQStringList workingArgList;
     foreach (QQString arg, mRemainingArgumentList)
     {
         if (arg.startsWith(trigger))
@@ -169,12 +170,23 @@ void CommandLine::expandFileArguments(const QChar trigger)
             WEXPECT(argFileInfo.isFile());
             if (argFileInfo.tryIsFile())
             {
+                EMIT(info(argFileInfo, "Processing"));
                 QQStringList expanded = readTxtFileArguments(argFileInfo);
                 TRACE << expanded;
-                mRemainingArgumentList.prepend(expanded);
+                workingArgList << expanded;
+            }
+            else
+            {
+                EMIT(warning(argFileInfo, "Not Readable"));
             }
         }
+        else
+        {
+            EMIT(info(arg, "Continued"));
+            workingArgList << arg;
+        }
     }
+    mRemainingArgumentList = workingArgList;
 }
 
 void CommandLine::extractDirectiveArguments()
@@ -194,13 +206,16 @@ void CommandLine::parseQtOptions()
 void CommandLine::stripSettings(const Settings::Key &prefix, const QChar &trigger)
 {
     TRACEQFI << prefix() << trigger;
-    QStringList remainingArgs;
-    foreach (QString arg, mRemainingArgumentList)
+    QQStringList remainingArgs;
+    while (mRemainingArgumentList.notEmpty())
+    {
+        QQString arg = mRemainingArgumentList.takeFirst();
         if (arg.startsWith(trigger))
-        {
             parseSettingArgument(arg, prefix);
-            mRemainingArgumentList.removeOne(arg);
-        }
+        else
+            remainingArgs << arg;
+    }
+    mRemainingArgumentList = remainingArgs;
 }
 
 void CommandLine::parseSettingArgument(const QString &arg,
@@ -213,17 +228,16 @@ void CommandLine::parseSettingArgument(const QString &arg,
     Settings::Value valu = (qsl.size() > 1) ? qsl[1] : "true";
     STG->set(key, valu);
     TRACE << key() << "=" << valu;
+    EMIT(info(QString("%1={%2}").arg(key).arg(valu), "Added"));
 }
 
 QQStringList CommandLine::readTxtFileArguments(const QQFileInfo &argFileInfo)
 {
     TRACEQFI << argFileInfo.absoluteFilePath() << argFileInfo.attributes();
-    QQStringList newArgs;
+    QQStringList workingArgs;
     QFile file(argFileInfo.absoluteFilePath(), this);
     EXPECT(file.open(QIODevice::ReadOnly | QIODevice::Text));
-    if ( ! file.isReadable())
-        EMIT(warning(file.fileName() + " "
-                     + argFileInfo.attributes(), "Not a Readable File"));
+    WEXPECT(file.isReadable());
 
     while ( ! file.atEnd())
     {
@@ -231,10 +245,11 @@ QQStringList CommandLine::readTxtFileArguments(const QQFileInfo &argFileInfo)
         TRACE << "fileLine: {>" << fileLine << "<}";
         if (fileLine.isEmpty() || fileLine.startsWith('#'))
             continue;
-        newArgs << QQString(fileLine);
+        workingArgs << QQString(fileLine);
+        EMIT(info(QQString(fileLine), "Expanded"));
     }
-    TRACE << file.fileName() << "newArgs" << newArgs;
-    return newArgs;
+    TRACE << file.fileName() << "workingArgs" << workingArgs;
+    return workingArgs;
 }
 
 void CommandLine::dumpPositionalArgs() const

@@ -7,7 +7,7 @@
 #define VER_MICRO 0
 #define VER_RELEASE 0xA4
 #define VER_BRANCH 0
-#define VER_STRING "v5.09-Alpha4"
+#define VER_STRING "v5.09-preAlpha4"
 #define VER_TRUNKNAME "develop"
 #define VER_BRANCHNAME ""
 #define VER_APPVER VER_STRING
