@@ -88,12 +88,12 @@ int cvCascade::Parameters::flags() const
     return mFlags;
 }
 
-QQSize cvCascade::Parameters::minSize() const
+cvSize cvCascade::Parameters::minSize() const
 {
     return mMinSize.isValid() ? mMinSize : QQSize::null;
 }
 
-QQSize cvCascade::Parameters::maxSize() const
+cvSize cvCascade::Parameters::maxSize() const
 {
     return mMaxSize.isValid() ? mMaxSize : QQSize::null;
 }
@@ -101,10 +101,10 @@ QQSize cvCascade::Parameters::maxSize() const
 QString cvCascade::Parameters::methodString(const QFileInfo &cascadeXmlInfo) const
 {
     return QString("Factor=%1,Neighbors=%2,MinSize=%3x%4,MaxSize=%5x%6,%7")
-            .arg(factor(),5,'f',3).arg(neighbors())
-            .arg(minSize().width()).arg(minSize().height())
-            .arg(maxSize().width()).arg(maxSize().height())
-            .arg(cascadeXmlInfo.completeBaseName());
+                    .arg(factor(),5,'f',3).arg(neighbors())
+                    .arg(minSize().width).arg(minSize().height)
+                    .arg(maxSize().width).arg(maxSize().height)
+                    .arg(cascadeXmlInfo.completeBaseName());
 }
 
 QVariant cvCascade::Parameters::toVariant() const
@@ -135,10 +135,10 @@ QStringList cvCascade::Parameters::dumpList() const
     qsl << QString("%1 = %2").arg("factor").arg(factor());
     qsl << QString("%1 = %2").arg("neighbors").arg(neighbors());
     qsl << QString("%1 = %2").arg("flags").arg(flags());
-    qsl << QString("%1 = %2x%3").arg("minSize").arg(minSize().width())
-                                               .arg(minSize().height());
-    qsl << QString("%1 = %2x%3").arg("maxSize").arg(maxSize().width())
-                                               .arg(maxSize().height());
+    qsl << QString("%1 = %2x%3").arg("minSize").arg(minSize().width)
+                                               .arg(minSize().height);
+    qsl << QString("%1 = %2x%3").arg("maxSize").arg(maxSize().width)
+                                               .arg(maxSize().height);
     return qsl;
 }
 

@@ -15,7 +15,7 @@ QHash<cvCascadeType, ObjectDetector::This> ObjectDetector::smTypeDetectorHash;
 ObjectDetector::ObjectDetector(const cvCascade::Type type,
                                QObject *parent)
     : QObject(parent)
-    , mCascade(type)
+    , mpCascade(type)
     , cmpTimer(new QTimer(parent))
 {
     TRACEQFI << cvCascade::typeName(type)() << QOBJNAME(parent);
@@ -47,7 +47,7 @@ ObjectDetector *ObjectDetector::p(const cvCascadeType type)
 
 cvCascade *ObjectDetector::cascade()
 {
-    return &mCascade;
+    return &mpCascade;
 }
 
 bool ObjectDetector::load(const QQFileInfo cascadeFInfo)
