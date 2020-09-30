@@ -20,8 +20,7 @@
 #include <eirType/QQSize.h>
 
 #include "cvMat.h"
-
-class QDomElement;
+#include "cvSize.h"
 
 namespace cv { class CascadeClassifier; }
 
@@ -47,8 +46,8 @@ public:
         double factor() const;
         int neighbors() const;
         int flags() const;
-        QQSize minSize() const;
-        QQSize maxSize() const;
+        cvSize minSize() const;
+        cvSize maxSize() const;
         QString methodString(const QFileInfo &cascadeXmlInfo) const;
         QVariant toVariant() const;
         QStringList dumpList() const;
@@ -61,8 +60,8 @@ public:
         double mFactor=Q_QNAN;
         int mNeighbors=0;
         int mFlags=0;
-        QQSize mMinSize;
-        QQSize mMaxSize;
+        cvSize mMinSize;
+        cvSize mMaxSize;
     };
 
 
@@ -70,9 +69,9 @@ public:
     cvCascade(const Type &type);
     Type type() const;
     BasicName typeName() const;
-    bool isNull() const;
     bool loadCascade(const QQFileInfo &cascadeXmlInfo);
     bool isLoaded() const;
+    bool notLoaded() const;
     QSize coreSize() const;
     QQFileInfo cascadeFileInfo() const;
     cv::CascadeClassifier *classifier();

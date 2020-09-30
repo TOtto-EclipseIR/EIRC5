@@ -6,7 +6,7 @@
 #include <eirType/QQRect.h>
 #include <eirType/QQRectF.h>
 #include <eirType/QQRectList.h>
-#include <eirQtCV/cvCascade.h>
+//#include <eirQtCV/cvCascade.h>
 
 class EIROBJDET_EXPORT ObjDetResultItem
 {

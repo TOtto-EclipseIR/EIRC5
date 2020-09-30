@@ -20,6 +20,8 @@ SOURCES += \
     cvCascade-Parameters.cpp \
     cvCascade.cpp \
     cvMat.cpp \
+    cvRect.cpp \
+    cvSize.cpp \
     cvString.cpp \
     cvVersion.cpp \
     eirQtCV.cpp
@@ -28,6 +30,8 @@ HEADERS += \
     cvBGRA.h \
     cvCascade.h \
     cvMat.h \
+    cvRect.h \
+    cvSize.h \
     cvString.h \
     cvVersion.h \
     eirQtCV_global.h \
