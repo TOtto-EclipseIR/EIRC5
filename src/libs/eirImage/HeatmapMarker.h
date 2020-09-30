@@ -9,7 +9,7 @@ class EIRIMAGE_EXPORT HeatmapMarker : public QQImage
 {
 public:
     HeatmapMarker(const QQImage &inputImage);
-    void mark(const Settings &markHeatSettings,
+    void mark(const Settings::Key &groupKey,
               const ObjDetResultList &resultList);
 };
 

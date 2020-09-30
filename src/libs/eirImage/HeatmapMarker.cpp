@@ -22,9 +22,9 @@ HeatmapMarker::HeatmapMarker(const QQImage &inputImage)
     TRACEQFI << inputImage << format();
 }
 
-void HeatmapMarker::mark(const Settings &markHeatSettings, const ObjDetResultList &resultList)
+void HeatmapMarker::mark(const Settings::Key &groupKey, const ObjDetResultList &resultList)
 {
-    TRACEFN;
+    TRACEFN; NEEDUSE(groupKey);
     resultList.dump(2);
 
     QImage heat(size(), QImage::Format_Indexed8);

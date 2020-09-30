@@ -19,6 +19,7 @@ class QCommandLineParser;
 #include <eirType/QQFileInfoList.h>
 #include <eirType/QQString.h>
 #include <eirType/QQStringList.h>
+#include <eirType/QQStringStdList.h>
 
 class CommandLineClientInterface;
 
@@ -57,6 +58,7 @@ public slots:
 
 signals:
     void constructed(void);
+    void info(const QString what, const QString why);
     void warning(const QString what, const QString why);
 
 protected slots:

@@ -66,7 +66,7 @@ void cvCascade::Parameters::calculate(const cvCascade::Type type,
     mFactor = qIsNull(fac) ? 1.160 : fac;
     NEEDDO("Default Based on Image/Core size & MaxDetectors, etc.");
 
-    STG->beginGroup(mGrpupKey);
+    STG->beginGroup(mGroupKey);
     int neigh = STG->signedInt("Neighbors", 2);
     mNeighbors = (neigh >= 0) ? neigh : 2;
     STG->endGroup();
@@ -115,7 +115,7 @@ QVariant cvCascade::Parameters::toVariant() const
 double cvCascade::Parameters::parseFactor()
 {
     double result=qQNaN();
-    STG->beginGroup(mGrpupKey);
+    STG->beginGroup(mGroupKey);
     double f = STG->realPerMille("Factor");
     STG->endGroup();
     if (f >= 1.001 && f <= 2.000)

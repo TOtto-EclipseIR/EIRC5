@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QPen>
 
+#include <APP>
 #include <eirExe/Settings.h>
 #include <eirObjDet/ObjectDetector.h>
 #include <eirObjDet/ObjDetResultItem.h>
@@ -19,14 +20,16 @@ SimpleRectMarker::SimpleRectMarker(const QQImage &inputImage)
     TRACEQFI << inputImage << format();
 }
 
-void SimpleRectMarker::markAll(const Settings &markRectSettings,
+void SimpleRectMarker::markAll(const Settings::Key &groupKey,
                                const QQRectList &rectList)
 {
     TRACEQFI << rectList.size();
     QPainter painter(this);
-    QColor penColor = QColor(markRectSettings.string("PenColor","#7f00CCCC"));
-    qreal penWidth = markRectSettings.real("PenWidth", 1.0);
-    Qt::PenStyle penStyle = Qt::PenStyle(markRectSettings.unsignedInt("PenStyle", 1));
+    STG->beginGroup(groupKey);
+    QColor penColor = QColor(STG->string("PenColor","#7f00CCCC"));
+    qreal penWidth = STG->real("PenWidth", 1.0);
+    Qt::PenStyle penStyle = Qt::PenStyle(STG->unsignedInt("PenStyle", 1));
+    STG->endGroup();
     QBrush penBrush(penColor);
     QPen pen(penBrush, penWidth, penStyle);
     painter.setPen(pen);
@@ -34,7 +37,7 @@ void SimpleRectMarker::markAll(const Settings &markRectSettings,
     painter.end();
 }
 
-void SimpleRectMarker::mark(const Settings &markRectSettings,
+void SimpleRectMarker::mark(const Settings::Key &groupKey,
                             const ObjDetResultList &resultList,
                             const ColorWheel &wheel,
                             const bool markAll)
@@ -43,8 +46,10 @@ void SimpleRectMarker::mark(const Settings &markRectSettings,
     BEXPECTNOT(wheel.isEmpty());
     resultList.dump(2);
     QPainter painter(this);
-    qreal penWidth = markRectSettings.real("PenWidth", 5.0);
-    Qt::PenStyle penStyle = Qt::PenStyle(markRectSettings.unsignedInt("PenStyle", 1));
+    STG->beginGroup(groupKey);
+    qreal penWidth = STG->real("PenWidth", 5.0);
+    Qt::PenStyle penStyle = Qt::PenStyle(STG->unsignedInt("PenStyle", 1));
+    STG->endGroup();
     foreach (ObjDetResultItem item, resultList.list())
     {
         QBrush penBrush(wheel.at(item.quality(item.quality())));

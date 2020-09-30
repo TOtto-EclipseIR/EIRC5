@@ -12,5 +12,6 @@ public:
     QQStringList(const QStringList &other);
     void prepend(const QQStringList &other);
     QQString join(const QQString &separator) const;
+    bool notEmpty() const;
 };
 

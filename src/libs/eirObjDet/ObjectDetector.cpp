@@ -60,7 +60,7 @@ bool ObjectDetector::load(const QQFileInfo cascadeFInfo)
 
 bool ObjectDetector::isLoaded()
 {
-    return ! cascade()->isNull();
+    return ! cascade()->isLoaded();
 }
 
 ObjDetResultList ObjectDetector::process(const Settings::Key groupKey,
