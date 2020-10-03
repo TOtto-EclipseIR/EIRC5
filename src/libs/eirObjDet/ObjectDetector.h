@@ -9,7 +9,8 @@ class QTimer;
 #include <eirBase/Uuid.h>
 #include <eirType/Milliseconds.h>
 #include <eirExe/Settings.h>
-#include <eirQtCV/cvCascade.h>
+//#include <eirQtCV/cvCascade.h>
+class cvCascade;
 
 #include "ObjDetResultItem.h"
 #include "ObjDetResultList.h"
@@ -88,7 +89,7 @@ private slots:
     void removeReleased(const Uuid uuid);
 
 private:
-    cvCascade mCascade;
+    cvCascade *mpCascade;
     QTimer  * const cmpTimer=nullptr;
     Settings *mpObjDetSettings;
     QQImage mProcessInputImage;

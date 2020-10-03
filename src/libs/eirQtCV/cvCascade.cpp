@@ -14,6 +14,7 @@
 #include <eirExe/XmlFile.h>
 #include <eirXfr/Debug.h>
 
+#include "cvRect.h"
 #include "cvString.h"
 
 cvCascade::cvCascade(const cvCascade::Type &type)
@@ -46,6 +47,7 @@ bool cvCascade::loadCascade(const QQFileInfo &cascadeXmlInfo)
 bool cvCascade::isLoaded() const
 {
     return ! notLoaded();
+>>>>>>> c9081049be86ebf94694ac1f2bc2ffa3efd7435d
 }
 
 bool cvCascade::notLoaded() const
@@ -100,27 +102,26 @@ int cvCascade::detectRectangles(const Settings::Key &groupKey,
     mParameters.set(groupKey);
     mParameters.calculate(cmType, mDetectMat.size(), coreSize());
 #if 0
-    QSize minSize = mParameters.minSize();
-    QSize maxSize = mParameters.maxSize();
+    cvSize minSize = mParameters.minSize();
+    cvSize maxSize = mParameters.maxSize();
 #else
     NEEDDO(RemoveForFlight);
-    QSize minSize(0,0);
-    QSize maxSize(0,0);
+    cvSize minSize(0,0);
+    cvSize maxSize(0,0);
 #endif
     mMethodString = mParameters.methodString(mCascadeXmlInfo);
     DUMPVAL(mMethodString);
 
     std::vector<cv::Rect> cvRectVector;
+
     classifier()->detectMultiScale(mDetectMat.mat(),
                         cvRectVector,
                         mParameters.factor(),
                         mParameters.neighbors(),
                         mParameters.flags(),
-                        cv::Size(minSize.width(), minSize.height()),
-                        cv::Size(maxSize.width(), maxSize.height()));
+                        minSize, maxSize);
 
-    foreach (cv::Rect cvrc, cvRectVector)
-        mRectList << QQRect(cvrc.x, cvrc.y, cvrc.width, cvrc.height);
+    foreach (cvRect cvrc, cvRectVector) mRectList << cvrc.toRect();
     return mRectList.size();
 }
 
