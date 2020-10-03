@@ -6,9 +6,9 @@ SUBDIRS += \
         ../../libs/eirType \
         ../../libs/eirWgt \
         ../../libs/eirExe \
-        ../../libs/eirImage \
         ../../libs/eirQtCV \
         ../../libs/eirObjDet \
+        ../../libs/eirImage \
         ../../tests/testXfr \
         ../FaceConsole \
 

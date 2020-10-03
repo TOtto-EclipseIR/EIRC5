@@ -80,7 +80,7 @@ void FaceConsole::enqueueNext()
 void FaceConsole::processCommandLine()
 {
     TRACEFN;
-    CMD->process(true);
+    CMD->process(ExpandCommandLineDirs);
     CommandLine::ExpandDirResultList xdrl = CMD->expandDirResults();
     writeLine("---Directories:");
     int k = 0;
@@ -186,6 +186,7 @@ void FaceConsole::initializeResources()
     TRACEFN;
     new ObjectDetector(cvCascade::PreScan, this);
     TSTALLOC(ObjectDetector::p(cvCascade::PreScan));
+
     STG->beginGroup("/ObjectDetector/Resources/RectFinder");
     QQDir baseCascadeDir(STG->string("BaseDir"));
     QString cascadeFileName = STG->string("PreScan/XmlFile");
@@ -200,8 +201,26 @@ void FaceConsole::initializeResources()
     EXPECTNOT(cascadeFileInfo.notExists());
     EXPECTNOT(cascadeFileInfo.notReadable());
     EXPECTNOT(cascadeFileInfo.notFile());
+
     write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
     EXPECT(ObjectDetector::p(cvCascade::PreScan)->load(cascadeFileInfo));
+#if 1
+    if (ObjectDetector::p(cvCascade::PreScan)->cascade()->isLoaded())
+    {
+        writeLine("done");
+    }
+    else
+    {
+        writeLine("error");
+        writeErr("***Cascade file load reported failed: "
+                 + cascadeFileInfo.absoluteFilePath());
+    }
+
+    CMD->dumpPositionalArgs();
+    EMIT(resoursesInitd());
+    QTimer::singleShot(100, this, &FaceConsole::startProcessing);
+
+#else
     if (ObjectDetector::p(cvCascade::PreScan)->isLoaded())
     {
         writeLine("done");
@@ -215,7 +234,7 @@ void FaceConsole::initializeResources()
                  + cascadeFileInfo.absoluteFilePath());
         EMIT(resourseInitFailed(2, "Cascade Load Failed"));
     }
-
+#endif
     NEEDDO(cmpPreScanDetector->cascade()->configure);
 //    Configuration preScanConfig = config()->configuration("Option/RectFinder");
   //  preScanConfig += config()->configuration("PreScan/RectFinder");
@@ -260,9 +279,10 @@ void FaceConsole::processCurrentFile()
         EMIT(processed(QFileInfo(mCurrentFileInfo),0));
     }
 
-    STG->beginGroup("Option/RectFinder");
+//    STG->beginGroup("Option/RectFinder");
 #if 1
     //QbjectDetector::p(cvCascade::PreScan)->process();
+    EMIT(processed(QFileInfo(mCurrentFileInfo),0));
 #else
     int rectCount = cmpPreScanDetector->cascade()->detectRectangles(preScanConfig, inputImage);
     DUMPVAL(rectCount);

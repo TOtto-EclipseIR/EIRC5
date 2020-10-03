@@ -70,9 +70,9 @@ public:
     cvCascade(const Type &type);
     Type type() const;
     BasicName typeName() const;
-    bool isNull() const;
     bool loadCascade(const QQFileInfo &cascadeXmlInfo);
     bool isLoaded() const;
+    bool notLoaded() const;
     QSize coreSize() const;
     QQFileInfo cascadeFileInfo() const;
     cv::CascadeClassifier *classifier();

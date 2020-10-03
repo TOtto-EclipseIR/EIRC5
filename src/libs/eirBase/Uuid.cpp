@@ -16,7 +16,7 @@ Uuid &Uuid::operator =(const Uuid &other)
 
 void Uuid::set(const QUuid &other)
 {
-    *this = other;
+    this->fromString(other.toString());
 }
 
 QUuid Uuid::toUuid() const

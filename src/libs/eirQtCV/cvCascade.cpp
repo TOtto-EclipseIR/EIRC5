@@ -35,25 +35,22 @@ BasicName cvCascade::typeName() const
     return typeName(cmType);
 }
 
-bool cvCascade::isNull() const
-{
-    return nullType == cmType;
-}
-
 bool cvCascade::loadCascade(const QQFileInfo &cascadeXmlInfo)
 {
     TRACEQFI << typeName()() << cascadeXmlInfo.absoluteFilePath();
-    EXPECT(cascadeFileInfo().exists());
-    EXPECT(cascadeFileInfo().isFile());
-    EXPECT(cascadeFileInfo().isReadable());
-    if (mpClassifier->load(cvString(cascadeXmlInfo.absoluteFilePath())))
-        mCascadeXmlInfo = cascadeXmlInfo;
-    return ! mpClassifier->empty();
+    EXPECT(mpClassifier->load(cvString(cascadeXmlInfo.absoluteFilePath())));
+    mCascadeXmlInfo = cascadeXmlInfo;
+    return isLoaded();
 }
 
 bool cvCascade::isLoaded() const
 {
-    return ! mpClassifier->empty();
+    return ! notLoaded();
+}
+
+bool cvCascade::notLoaded() const
+{
+    return mpClassifier->empty();
 }
 
 QSize cvCascade::coreSize() const
@@ -98,7 +95,7 @@ int cvCascade::detectRectangles(const Settings::Key &groupKey,
         cv::waitKey(5000);
     }
 
-    if (isNull()) return -3;            // empty cascade    /* /========\ */
+    if (notLoaded()) return -3;         // empty cascade    /* /========\ */
 
     mParameters.set(groupKey);
     mParameters.calculate(cmType, mDetectMat.size(), coreSize());

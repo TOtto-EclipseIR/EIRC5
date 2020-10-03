@@ -1,8 +1,8 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-	FILEVERSION 5,9,164,0
-	PRODUCTVERSION 5,9,164,0
+	FILEVERSION 5,9,164,5
+	PRODUCTVERSION 5,9,164,5
 	FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
 	FILEFLAGS VS_FF_DEBUG
@@ -19,11 +19,11 @@ VS_VERSION_INFO VERSIONINFO
 			BEGIN
 				VALUE "CompanyName", "\0"
 				VALUE "FileDescription", "\0"
-				VALUE "FileVersion", "5.9.164.0\0"
+				VALUE "FileVersion", "5.9.164.5\0"
 				VALUE "LegalCopyright", "\0"
 				VALUE "OriginalFilename", "eirQtCV5.dll\0"
 				VALUE "ProductName", "eirQtCV\0"
-				VALUE "ProductVersion", "5.9.164.0\0"
+				VALUE "ProductVersion", "5.9.164.5\0"
 			END
 		END
 		BLOCK "VarFileInfo"

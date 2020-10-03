@@ -29,7 +29,7 @@ public:
     Q_DECLARE_FLAGS(Flags, Flag)
 
 public:
-    explicit ApplicationHelper();
+    explicit ApplicationHelper(const Flags flags);
     void setFlags(const Flags flags);
     VersionInfo version() const;
     QStringList arguments() const;

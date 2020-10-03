@@ -5,7 +5,8 @@
 #include <eirXfr/Debug.h>
 
 Console::Console(const ApplicationHelper::Flags flags)
-    : mpIn(new QFile(this))
+    : ApplicationHelper(flags)
+    , mpIn(new QFile(this))
     , mpOut(new QFile(this))
     , mpErr(new QFile(this))
 {
