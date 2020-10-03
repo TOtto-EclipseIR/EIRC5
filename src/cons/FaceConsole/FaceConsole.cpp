@@ -270,7 +270,7 @@ void FaceConsole::processCurrentFile()
     QImage rectImage;
     QString markedRectOutputFileName;
 
-    writeLine(QString("---Processing: %1. %2").arg(++mCurrentFileCount)
+    writeLine(QString("---Processing: %1. %2").arg(++mCurrentFileCount, 4)
               .arg(mCurrentFileInfo.fileName(QQString::Squeeze)));
     QQImage inputImage(mCurrentFileInfo.absoluteFilePath());
     if (inputImage.isNull())

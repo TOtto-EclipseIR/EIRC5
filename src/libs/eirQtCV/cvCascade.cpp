@@ -47,7 +47,6 @@ bool cvCascade::loadCascade(const QQFileInfo &cascadeXmlInfo)
 bool cvCascade::isLoaded() const
 {
     return ! notLoaded();
->>>>>>> c9081049be86ebf94694ac1f2bc2ffa3efd7435d
 }
 
 bool cvCascade::notLoaded() const
