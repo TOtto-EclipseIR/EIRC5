@@ -26,10 +26,10 @@ void ObjDetProcessor::setImage(const QQImage &inputImage)
     mGreyInputMat.setGrey(mInputImage);
 }
 
-int ObjDetProcessor::findRects(const QQRect &region)
+int ObjDetProcessor::findRects(const bool showMat, const QQRect &region)
 {
     TRACEFN; MUSTDO(it); TOUSE(region);
-    return INT_MIN;
+    return cascade()->detectRectangles(mRectSettings.toMap(), mGreyInputMat, showMat, region);
 }
 
 int ObjDetProcessor::groupRects()

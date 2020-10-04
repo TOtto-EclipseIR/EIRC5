@@ -23,7 +23,6 @@ SOURCES += \
     ObjDetRectSettings.cpp \
     ObjDetResultItem.cpp \
     ObjDetResultList.cpp \
-    ObjectDetector.cpp \
     RectangleFinder.cpp \
     RectangleGrouper.cpp \
     eirObjDet.cpp
@@ -35,7 +34,6 @@ HEADERS += \
     ObjDetRectSettings.h \
     ObjDetResultItem.h \
     ObjDetResultList.h \
-    ObjectDetector.h \
     RectangleFinder.h \
     RectangleGrouper.h \
     eirObjDet_global.h \

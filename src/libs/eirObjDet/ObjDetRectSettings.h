@@ -16,8 +16,8 @@ public:
     ~ObjDetRectSettings();
 
     void read(const Settings::Key rectKey);
-    QSettings::SettingsMap toMap(const Settings::Key rectKey) const;
-
+    QSettings::SettingsMap toMap(const Settings::Key rectKey=Settings::Key()) const;
+    void dump(const Settings::Key rectKey=Settings::Key()) const;
 
 private:
     QSharedDataPointer<ObjDetRectSettingsData> data;

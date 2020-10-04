@@ -62,17 +62,19 @@ public: // access
     Map extract() const;
     Map extract(const Key groupKey, const bool keepKey=false) const;
     QStringList toStringList(const Key &groupKey=Key());
+    static QStringList toStringList(const QSettings::SettingsMap &map);
     void dump(const Key &groupKey=Key());
+    static void dump(const QSettings::SettingsMap &map);
 
 public: // values
     bool boolean(const Key &key, const bool &defaultValue=false) const;
     int signedInt(const Key &key, const signed &defaultValue=0) const;
     unsigned unsignedInt(const Key &key, const unsigned &defaultValue=0) const;
     qreal real(const Key &key, const qreal &defaultValue=0) const;
-    qreal realPerMille(const Key &key, const int &defaultValue=0) const;
+    qreal realPerMille(const Key &key, const unsigned &defaultValue=0) const;
     QString string(const Key &key, const QString &defaultValu=QString()) const;
     QQSize size(const Key &key, const QQSize &defaultValu=QQSize()) const;
-
+    static qreal perMille(const unsigned iValue);
 
     /*
         Rational rational(const QString &key, const Rational &defaultValue=Rational(0)) const;

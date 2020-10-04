@@ -179,9 +179,22 @@ QStringList Settings::toStringList(const Key &groupKey)
     return qsl;
 }
 
+QStringList Settings::toStringList(const QSettings::SettingsMap &map)
+{
+    QStringList qsl;
+    foreach (QString key, map.keys())
+        qsl << QString("%1={%2}").arg(key).arg(map.value(key).toString());
+    return qsl;
+}
+
 void Settings::dump(const Key &groupKey)
 {
     foreach (QString s, toStringList(groupKey)) DUMP << s;
+}
+
+void Settings::dump(const QSettings::SettingsMap &map)
+{
+    foreach (QString s, toStringList(map)) DUMP << s;
 }
 
 bool Settings::boolean(const Settings::Key &key, const bool &defaultValue) const
@@ -212,11 +225,11 @@ qreal Settings::real(const Key &key, const qreal &defaultValue) const
     return ok ? result : defaultValue;
 }
 
-qreal Settings::realPerMille(const Key &key, const int &defaultValue) const
+qreal Settings::realPerMille(const Key &key, const unsigned &defaultValue) const
 {
     bool ok = contains(key);
-    qreal result = get(key).toInt(&ok);
-    return qreal(ok ? result : defaultValue) / 1000.0;
+    qreal result = get(key).toUInt(&ok);
+    return perMille(ok ? result : defaultValue);
 }
 
 QQSize Settings::size(const Settings::Key &key, const QQSize &defaultValu) const
@@ -228,6 +241,11 @@ QQSize Settings::size(const Settings::Key &key, const QQSize &defaultValu) const
         resultSize.set(sizeString);
     }
     return resultSize;
+}
+
+qreal Settings::perMille(const unsigned uValue)
+{
+    return qBound(0.001, qreal(uValue) / 1000.0, 0.999);
 }
 
 QString Settings::string(const Key &key, const Value &defaultValue) const

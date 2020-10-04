@@ -1,4 +1,4 @@
-#include "ObjectDetector.h"
+#include "del-ObjectDetector.h"
 
 #include <QTimer>
 

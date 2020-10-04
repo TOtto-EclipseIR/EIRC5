@@ -46,7 +46,7 @@ void ObjDetRectSettings::read(const Settings::Key rectKey)
 QSettings::SettingsMap ObjDetRectSettings::toMap(const Settings::Key rectKey) const
 {
     QSettings::SettingsMap resultMap;
-    STG->beginGroup(rectKey);
+    if (rectKey.notEmpty()) STG->beginGroup(rectKey);
     resultMap.insert("MinAcross", STG->value("MinAcross"));
     resultMap.insert("MaxAcross", STG->value("MaxAcross"));
     resultMap.insert("ScaleFactor", STG->value("ScaleFactor"));
@@ -54,8 +54,13 @@ QSettings::SettingsMap ObjDetRectSettings::toMap(const Settings::Key rectKey) co
     resultMap.insert("MaxDetectors", STG->value("MaxDetectors"));
     resultMap.insert("MinSize", STG->value("MinSize"));
     resultMap.insert("MaxSize", STG->value("MaxSize"));
-    STG->endGroup();
+    if (rectKey.notEmpty()) STG->endGroup();
     return resultMap;
+}
+
+void ObjDetRectSettings::dump(const Settings::Key rectKey) const
+{
+    Settings::dump(toMap(rectKey));
 }
 
 ObjDetRectSettings &ObjDetRectSettings::operator=(const ObjDetRectSettings &rhs)

@@ -10,7 +10,7 @@
 #include <eirExe/Settings.h>
 #include <eirImage/HeatmapMarker.h>
 #include <eirImage/SimpleRectMarker.h>
-#include <eirObjDet/ObjectDetector.h>
+#include <eirObjDet/del-ObjectDetector.h>
 #include <eirQtCV/cvVersion.h>
 #include <eirType/Success.h>
 #include <eirXfr/Debug.h>
@@ -184,8 +184,8 @@ void FaceConsole::setOutputDirs()
 void FaceConsole::initializeResources()
 {
     TRACEFN;
-    new ObjectDetector(cvCascade::PreScan, this);
-    TSTALLOC(ObjectDetector::p(cvCascade::PreScan));
+//    new ObjectDetector(cvCascade::PreScan, this);
+  //  TSTALLOC(ObjectDetector::p(cvCascade::PreScan));
 
     STG->beginGroup("/ObjectDetector/Resources/RectFinder");
     QQDir baseCascadeDir(STG->string("BaseDir"));
@@ -201,7 +201,7 @@ void FaceConsole::initializeResources()
     EXPECTNOT(cascadeFileInfo.notExists());
     EXPECTNOT(cascadeFileInfo.notReadable());
     EXPECTNOT(cascadeFileInfo.notFile());
-
+#if 0
     write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
     EXPECT(ObjectDetector::p(cvCascade::PreScan)->load(cascadeFileInfo));
 #if 1
@@ -234,6 +234,7 @@ void FaceConsole::initializeResources()
                  + cascadeFileInfo.absoluteFilePath());
         EMIT(resourseInitFailed(2, "Cascade Load Failed"));
     }
+#endif
 #endif
     NEEDDO(cmpPreScanDetector->cascade()->configure);
 //    Configuration preScanConfig = config()->configuration("Option/RectFinder");

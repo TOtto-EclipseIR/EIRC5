@@ -20,7 +20,7 @@ public:
 
     void configure(const Settings::Key rectKey, const Settings::Key groupKey);
     void setImage(const QQImage &inputImage);
-    int findRects(const QQRect &region=QQRect());
+    int findRects(const bool showMat=false, const QQRect &region=QQRect());
     int groupRects();
 
     ObjDetRectSettings rectSettings() const { return mRectSettings; }

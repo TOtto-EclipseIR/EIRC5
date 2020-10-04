@@ -12,7 +12,7 @@
 class EIRQTCV_EXPORT cvRect : public cv::Rect
 {
 public:
-    typedef std::vector<cvRect> Vector;
+    typedef std::vector<cvRect> StdVector;
 
 public:
     cvRect();

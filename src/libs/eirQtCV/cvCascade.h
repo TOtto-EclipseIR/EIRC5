@@ -43,6 +43,10 @@ public:
         void calculate(const Type type,
                        const QQSize imageSize,
                        const QQSize coreSize);
+        void calculate(const QSettings::SettingsMap &map,
+                       const Type type,
+                       const QQSize imageSize,
+                       const QQSize coreSize);
         double factor() const;
         int neighbors() const;
         int flags() const;
@@ -50,6 +54,7 @@ public:
         cvSize maxSize() const;
         QString methodString(const QFileInfo &cascadeXmlInfo) const;
         QVariant toVariant() const;
+        static qreal typeFactor(const cvCascade::Type type);
         QStringList dumpList() const;
 
     private:
@@ -57,8 +62,8 @@ public:
 
     private:
         Settings::Key mGroupKey;
-        double mFactor=Q_QNAN;
-        int mNeighbors=0;
+        qreal mFactor=Q_QNAN;
+        unsigned mNeighbors=0;
         int mFlags=0;
         cvSize mMinSize;
         cvSize mMaxSize;
@@ -78,6 +83,10 @@ public:
 
     int detectRectangles(const Settings::Key &groupKey,
                          const QQImage &inputImage,
+                         const bool showDetect=false,
+                         const QQRect &region=QQRect());
+    int detectRectangles(const QSettings::SettingsMap rectSettings,
+                         const cvMat &greyInputMat,
                          const bool showDetect=false,
                          const QQRect &region=QQRect());
     cvMat detectMat() const;
