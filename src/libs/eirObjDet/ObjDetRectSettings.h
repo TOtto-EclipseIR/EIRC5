@@ -16,6 +16,7 @@ public:
     ~ObjDetRectSettings();
 
     void read(const Settings::Key rectKey);
+    QSettings::SettingsMap toMap(const Settings::Key rectKey) const;
 
 
 private:

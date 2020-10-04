@@ -166,7 +166,7 @@ void cvMat::setGrey(const QQImage &image)
     {
         EXPECTEQ(greyImage.sizeInBytes(), int(sizeInBytes()));
         if (greyImage.sizeInBytes() != int(sizeInBytes()))
-            return;                                             /* /=========\ */
+            return;                                         /* /=========\ */
         std::memcpy(mpCvMat->ptr(), greyImage.bits(), sizeInBytes());
     }
     else

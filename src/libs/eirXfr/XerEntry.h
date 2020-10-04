@@ -1,18 +1,32 @@
 #pragma once
 #include "eirXfr.h"
 
-#include "XfrEntry.h"
+#include <QMap>
+#include <QUuid>
 
-class EIRXFR_EXPORT XerEntry : public XfrEntry
+#include "XfrEntry.h"
+#include "XfrFunctionInfo.h"
+#include "XfrLevel.h"
+
+class EIRXFR_EXPORT XerEntry
 {
 public:
+    typedef QMap<QUuid, XerEntry*> UidMap;
+
+public:
     XerEntry();
+    ~XerEntry();
+    QUuid uid() const { return mUid; }
+    XfrLevel level() const;
     QString what() const;
     QString why() const;
     QString where() const;
     QString how() const;
 
 private:
+    QUuid mUid;
+    XfrLevel mLevel=XfrLevel::level("NoLevel");
+    XfrFunctionInfo mFuncInfo;
     QString mWhat;
     QString mWhy;
     QString mWhere;
@@ -40,5 +54,5 @@ public:
                               const QString name4=QString(), const QVariant &var4=QVariant());
 */
 private:
-    static QList<QUuid> mCurrentIidList;
+    static UidMap smMap;
 };
