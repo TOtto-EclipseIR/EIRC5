@@ -3,6 +3,8 @@
 
 #include <QSize>
 
+#include "QQString.h"
+
 class EIRTYPE_EXPORT QQSize : public QSize
 {
 public:
@@ -11,6 +13,8 @@ public:
     QQSize(const QQSize &other);
     QQSize(const int width, const int height);
     //QQSize(const int width, const int height, const int truncate);
+    void set(const int width, const int height);
+    void set(const QQString &str);
     qreal aspect() const;
     int minDimension() const;
     int area() const;

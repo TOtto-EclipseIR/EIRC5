@@ -17,6 +17,10 @@ LIBS *= -leirExe5
 LIBS *= -leirQtCV5
 
 SOURCES += \
+    ObjDetGroupSettings.cpp \
+    ObjDetManager.cpp \
+    ObjDetProcessor.cpp \
+    ObjDetRectSettings.cpp \
     ObjDetResultItem.cpp \
     ObjDetResultList.cpp \
     ObjectDetector.cpp \
@@ -25,6 +29,10 @@ SOURCES += \
     eirObjDet.cpp
 
 HEADERS += \
+    ObjDetGroupSettings.h \
+    ObjDetManager.h \
+    ObjDetProcessor.h \
+    ObjDetRectSettings.h \
     ObjDetResultItem.h \
     ObjDetResultList.h \
     ObjectDetector.h \

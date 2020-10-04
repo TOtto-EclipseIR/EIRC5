@@ -12,6 +12,7 @@ class QTemporaryFile;
 
 #include <eirType/MultiName.h>
 #include <eirType/QQFileInfo.h>
+#include <eirType/QQSize.h>
 #include <eirType/Rational.h>
 
 class ApplicationHelper;
@@ -70,6 +71,7 @@ public: // values
     qreal real(const Key &key, const qreal &defaultValue=0) const;
     qreal realPerMille(const Key &key, const int &defaultValue=0) const;
     QString string(const Key &key, const QString &defaultValu=QString()) const;
+    QQSize size(const Key &key, const QQSize &defaultValu=QQSize()) const;
 
 
     /*

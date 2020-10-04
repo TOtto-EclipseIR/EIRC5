@@ -184,6 +184,13 @@ void Settings::dump(const Key &groupKey)
     foreach (QString s, toStringList(groupKey)) DUMP << s;
 }
 
+bool Settings::boolean(const Settings::Key &key, const bool &defaultValue) const
+{
+    bool ok = contains(key);
+    bool result = value(key).toBool();
+    return ok ? result : defaultValue;
+}
+
 int Settings::signedInt(const Key &key, const signed &defaultValue) const
 {
     bool ok = contains(key);
@@ -210,6 +217,17 @@ qreal Settings::realPerMille(const Key &key, const int &defaultValue) const
     bool ok = contains(key);
     qreal result = get(key).toInt(&ok);
     return qreal(ok ? result : defaultValue) / 1000.0;
+}
+
+QQSize Settings::size(const Settings::Key &key, const QQSize &defaultValu) const
+{
+    QQSize resultSize = defaultValu;
+    if (contains(key))
+    {
+        QQString sizeString = get(key);
+        resultSize.set(sizeString);
+    }
+    return resultSize;
 }
 
 QString Settings::string(const Key &key, const Value &defaultValue) const
