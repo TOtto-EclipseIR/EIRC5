@@ -87,8 +87,8 @@ int cvCascade::detectRectangles(const Settings::Key &groupKey,
     mDetectMat.clear();
     mRectList.clear();
 
-    mDetectMat.setGrey(inputImage);
-    DUMP << mDetectMat.dumpString();
+    mDetectMat = cvMat::greyFromImage(inputImage);
+    DUMP << mDetectMat.toDebugString();
     if (mDetectMat.isNull()) return -2; // null cvMat       /* /========\ */
     if (showDetect)
     {
@@ -131,7 +131,7 @@ int cvCascade::detectRectangles(const QSettings::SettingsMap rectSettings,
 {
     TRACEQFI << showDetect << region;
     Settings::dump(rectSettings);
-    DUMP << mDetectMat.dumpString();
+    DUMP << mDetectMat.toDebugString();
     TSTALLOC(mpClassifier);
 
     mMethodString.clear();

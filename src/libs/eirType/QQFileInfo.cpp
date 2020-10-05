@@ -10,7 +10,7 @@
 
 QQFileInfo::QQFileInfo() {;}
 QQFileInfo::QQFileInfo(const QQString &filePathName, const QQString::Flags flags)
-    : QFileInfo(QQString(filePathName, flags)), mIsNull(false) {;}
+    : QFileInfo(QQString(filePathName, flags)), mIsNull(filePathName.isEmpty()) {;}
 QQFileInfo::QQFileInfo(const QFileInfo &other)
     : QFileInfo(other), mIsNull(false) {;}
 QQFileInfo::QQFileInfo(const QFile &file)
@@ -19,6 +19,12 @@ QQFileInfo::QQFileInfo(const QFile &file)
 QQFileInfo::QQFileInfo(const QDir &dir, const QQString &fileName, const QQString::Flags flags)
 {
     setFile(dir, QQString(fileName, flags));
+}
+
+QQFileInfo::QQFileInfo(const QDir &dir, const QQString &fileName, const QQString &sfx,
+                       const QQString::Flags flags)
+{
+    setFile(dir, QQString(fileName+"."+sfx, flags));
 }
 
 QQFileInfo::QQFileInfo(const QVariant &variant)
@@ -54,9 +60,8 @@ QQString QQFileInfo::absolutePath(const QQString::Flags flags) const
 void QQFileInfo::setFile(const QQString &filePathName)
 {
     TRACEQFI << filePathName;
-    mIsNull = false;
+    mIsNull = filePathName.isEmpty();
     QFileInfo::setFile(filePathName);
-//    replace("@", Milliseconds::baseDateStamp());
     TRACE << QFileInfo::filePath();
 }
 
@@ -146,7 +151,6 @@ QQString QQFileInfo::attributes() const
 QQString QQFileInfo::toString() const
 {
     if (tryIsDir())     return absolutePath();
-    if (tryIsFile())    return absoluteFilePath();
     return absoluteFilePath();
 }
 

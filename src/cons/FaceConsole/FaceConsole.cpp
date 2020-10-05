@@ -10,7 +10,6 @@
 #include <eirExe/Settings.h>
 #include <eirImage/HeatmapMarker.h>
 #include <eirImage/SimpleRectMarker.h>
-#include <eirObjDet/del-ObjectDetector.h>
 #include <eirQtCV/cvVersion.h>
 #include <eirType/Success.h>
 #include <eirXfr/Debug.h>
@@ -18,9 +17,10 @@
 
 FaceConsole::FaceConsole()
     : Console(ExpandCommandLineDirs)
+    , mPreScanProcessor(ObjDetProcessor(cvCascadeType::PreScan))
 {
     TRACEFN;
-    setObjectName("FaceConsole");
+    //setObjectName("FaceConsole");
     QTimer::singleShot(500, this, &FaceConsole::initializeApplication);
     TRACERTV();
 }
@@ -96,6 +96,8 @@ void FaceConsole::setConfiguration()
     TRACEFN;
     writeLine("---Configuration:");
     writeLines(STG->toStringList());
+    cvCascade::Parameters parms;
+    parms.calculate(STG->extract("/PreScan/RectFinder"), cvCascadeType::PreScan, QQSize(), QQSize());
     EMIT(configurationSet());
     QTimer::singleShot(100, this, &FaceConsole::setBaseOutputDir);
 }
@@ -201,11 +203,10 @@ void FaceConsole::initializeResources()
     EXPECTNOT(cascadeFileInfo.notExists());
     EXPECTNOT(cascadeFileInfo.notReadable());
     EXPECTNOT(cascadeFileInfo.notFile());
-#if 0
+
     write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
-    EXPECT(ObjectDetector::p(cvCascade::PreScan)->load(cascadeFileInfo));
-#if 1
-    if (ObjectDetector::p(cvCascade::PreScan)->cascade()->isLoaded())
+    EXPECT(mPreScanProcessor.cascade()->loadCascade(cascadeFileInfo));
+    if (mPreScanProcessor.cascade()->isLoaded())
     {
         writeLine("done");
     }
@@ -216,37 +217,17 @@ void FaceConsole::initializeResources()
                  + cascadeFileInfo.absoluteFilePath());
     }
 
-    CMD->dumpPositionalArgs();
     EMIT(resoursesInitd());
     QTimer::singleShot(100, this, &FaceConsole::startProcessing);
 
-#else
-    if (ObjectDetector::p(cvCascade::PreScan)->isLoaded())
-    {
-        writeLine("done");
-        EMIT(resoursesInitd());
-        QTimer::singleShot(100, this, &FaceConsole::startProcessing);
-    }
-    else
-    {
-        writeLine("error");
-        writeErr("***Cascade file load failed: "
-                 + cascadeFileInfo.absoluteFilePath());
-        EMIT(resourseInitFailed(2, "Cascade Load Failed"));
-    }
-#endif
-#endif
-    NEEDDO(cmpPreScanDetector->cascade()->configure);
-//    Configuration preScanConfig = config()->configuration("Option/RectFinder");
-  //  preScanConfig += config()->configuration("PreScan/RectFinder");
-    //cmpPreScanDetector->cascade()->configure(preScanConfig);
+    NEEDDO(cascade()->configure);
 }
 
 void FaceConsole::startProcessing()
 {
     TRACEFN;
-
-    NEEDDO(more);
+    CMD->dumpPositionalArgs();
+    NEEDDO(more?);
     EMIT(processingStarted());
 }
 
@@ -255,7 +236,7 @@ void FaceConsole::nextFile()
     TRACEQFI << CMD->positionalArgumentSize();
     if (CMD->positionalArgumentSize() > 0)
     {
-        mCurrentFileInfo = QFileInfo(CMD->takePositionalArgument());
+        mCurrentFileInfo = QQFileInfo(CMD->takePositionalArgument());
         DUMPVAL(mCurrentFileInfo);
         QTimer::singleShot(100, this, &FaceConsole::processCurrentFile);
     }
@@ -280,9 +261,27 @@ void FaceConsole::processCurrentFile()
         EMIT(processed(QFileInfo(mCurrentFileInfo),0));
     }
 
-//    STG->beginGroup("Option/RectFinder");
 #if 1
-    //QbjectDetector::p(cvCascade::PreScan)->process();
+    mPreScanProcessor.setImage(inputImage);
+    int rectCount = mPreScanProcessor.findRects();
+    EXPECTNOT(rectCount < 0);
+    if (rectCount < 0)
+        writeErr("***PreScanProcessor findRects() failed, code = " + QString::number(rectCount));
+    else if (0 == rectCount)
+        writeErr("***PreScanProcessor findRects() zero results");
+    else
+        writeLine("   " + QString::number(rectCount) + " PreScan rectangles found");
+
+    if (rectCount > 0)
+    {
+        SimpleRectMarker rectMarker(inputImage);
+        rectMarker.markAll("Marker/PreScanRect", mPreScanProcessor.rectList());
+        QQFileInfo rectFileInfo(mMarkedRectOutputDir,
+                                mCurrentFileInfo.completeBaseName(QQString::Squeeze), "png");
+        if (rectMarker.save(rectFileInfo.absoluteFilePath()))
+            writeLine("   " + rectFileInfo.absoluteFilePath() + " saved");
+    }
+
     EMIT(processed(QFileInfo(mCurrentFileInfo),0));
 #else
     int rectCount = cmpPreScanDetector->cascade()->detectRectangles(preScanConfig, inputImage);

@@ -18,8 +18,9 @@ public:
     QQFileInfo(const QQString &filePathName, const QQString::Flags flags=QQString::NoFlag);
     QQFileInfo(const QFileInfo & other);
     QQFileInfo(const QFile & file);
-    QQFileInfo(const QDir &dir, const QQString &fileName
-               , const QQString::Flags flags=QQString::NoFlag);
+    QQFileInfo(const QDir &dir, const QQString &fileName, const QQString::Flags flags=QQString::NoFlag);
+    QQFileInfo(const QDir &dir, const QQString &fileName, const QQString &suffix,
+               const QQString::Flags flags=QQString::NoFlag);
     QQFileInfo(const QVariant & variant);
     QQString filePath(const QQString::Flags flags=QQString::NoFlag) const;
     QQString absoluteFilePath(const QQString::Flags flags=QQString::NoFlag) const;

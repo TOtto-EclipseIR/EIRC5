@@ -4,6 +4,7 @@
 #include <eirExe/Console.h>
 
 #include <eirType/QQDir.h>
+#include <eirObjDet/ObjDetProcessor.h>
 #include <eirObjDet/ObjDetResultList.h>
 
 class QCommandLineParser;
@@ -53,6 +54,7 @@ signals:
     void processingComplete();
 
 private:
+    ObjDetProcessor mPreScanProcessor;
     QDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
     QQDir::Vector mMarkedFaceQualityDirs;

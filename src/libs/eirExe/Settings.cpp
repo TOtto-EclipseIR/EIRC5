@@ -34,14 +34,8 @@ void Settings::insert(const QStringList &keyValueStrings)
     MUSTUSE(keyValueStrings);
 }
 
-void Settings::insert(const Settings::Map &keyValueStringMap)
-{
-    MUSTDO(it);
-    MUSTUSE(keyValueStringMap);
 
-}
-
-void Settings::insert(const QSettings::SettingsMap &keyVariantMap)
+void Settings::insert(const Map &keyVariantMap)
 {
     MUSTDO(it);
     MUSTUSE(keyVariantMap);

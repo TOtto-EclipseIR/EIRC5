@@ -23,7 +23,7 @@ class EIREXE_EXPORT Settings : public QSettings
 public:
     typedef MultiName Key;
     typedef QString Value;
-    typedef QMap<QString, QString> Map;
+    typedef QSettings::SettingsMap Map;
 
 public:
     explicit Settings(QObject *parent=nullptr);
@@ -31,8 +31,7 @@ public:
 public slots:
     void insert(const QQFileInfo &iniFileInfo);
     void insert(const QStringList &keyValueStrings);
-    void insert(const Map &keyValueStringMap);
-    void insert(const QSettings::SettingsMap &keyVariantMap);
+    void insert(const Map &keyVariantMap);
     void set(const Key &key, const Value &valu);
     void set(const Key &key, const QVariant &vari);
     virtual void setValue(const QString &key, const QVariant &vari);
@@ -62,9 +61,9 @@ public: // access
     Map extract() const;
     Map extract(const Key groupKey, const bool keepKey=false) const;
     QStringList toStringList(const Key &groupKey=Key());
-    static QStringList toStringList(const QSettings::SettingsMap &map);
+    static QStringList toStringList(const Map &map);
     void dump(const Key &groupKey=Key());
-    static void dump(const QSettings::SettingsMap &map);
+    static void dump(const Map &map);
 
 public: // values
     bool boolean(const Key &key, const bool &defaultValue=false) const;
