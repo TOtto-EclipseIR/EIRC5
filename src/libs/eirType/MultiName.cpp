@@ -62,11 +62,6 @@ bool MultiName::isEmpty() const
     return mBasicSegmentNames.isEmpty();
 }
 
-bool MultiName::notEmpty() const
-{
-    return  ! isEmpty();
-}
-
 void MultiName::clear()
 {
     mBasicSegmentNames.clear();

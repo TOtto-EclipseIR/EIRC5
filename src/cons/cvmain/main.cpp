@@ -16,12 +16,14 @@ void matInfo(const cv::Mat &mat)
 
 bool isNull(const cv::Mat &mat)
 {
-    return mat.empty();
+    return mat.rows <= 0 || mat.cols <= 0 || NULL == mat.data;
 }
 
 bool isValid(const cv::Mat &mat)
 {
-    return ! isNull(mat);
+    if (isNull(mat)) return false;
+    // TODO more
+    return true;
 }
 
 int main(int argc, char *argv[])
@@ -30,20 +32,18 @@ int main(int argc, char *argv[])
     std::cout << "Hello " << argv[0] << " compiled " << __TIME__ << " " << __DATE__ << std::endl;
     std::cout << "OpenCV version: " << CV_VERSION << std::endl;
 
-    std::string cascadeFileName((argc > 1) ? argv[1] : "T:/bin/detectors/v4/haarcascade_frontalface_alt.Xml");
-    if (face_cascade.load(cascadeFileName))
+    if (face_cascade.load("D:/bin/detectors/v4/haarcascade_frontalcatface_extended.Xml"))
     {
-        std::cout << "face_cascade.load() " << cascadeFileName << " loaded" << std::endl;
+        std::cout << "face_cascade.load() " << "D:/bin/detectors/v4/haarcascade_frontalcatface_extended.Xml" << " loaded" << std::endl;
         std::cout << "face_cascade.empty() " << (face_cascade.empty() ? "true!" : "FALSE") << std::endl;
     }
     else
     {
-        std::cerr << "face_cascade.load() " << cascadeFileName << " failed"<< std::endl;
+        std::cerr << "face_cascade.load() " << "D:/bin/detectors/v4/haarcascade_frontalcatface_extended.Xml" << " failed"<< std::endl;
         return 1;
     }
 
-    std::string imageFileName((argc > 2) ? argv[2] : "D:/INDIface/INDIin/18yoTwins.jpg");
-    cv::Mat inputMat = cv::imread(imageFileName, cv::IMREAD_COLOR);
+    cv::Mat inputMat = cv::imread("D:/INDIface/INDIin/console/hide/18yoTwins.jpg", cv::IMREAD_COLOR);
     matInfo(inputMat);
     std::cout << "inputMat is " << (isValid(inputMat) ? "valid" : "INVALID") << std::endl;
     cv::imshow("inputMat", inputMat);
@@ -56,11 +56,11 @@ int main(int argc, char *argv[])
     cv::waitKey();
 
     std::vector<cv::Rect> faceRects;
-    face_cascade.detectMultiScale(detectMat, faceRects, 1.08, 1); // , cv::CASCADE_DO_ROUGH_SEARCH);
+    face_cascade.detectMultiScale(detectMat, faceRects, 1.01, 1); // , cv::CASCADE_DO_ROUGH_SEARCH);
     std::cout << faceRects.size() << " Face Rectangles Detected" << std::endl;
 
     cv::Mat outputMat = inputMat;
-    for (unsigned x = 0; x < faceRects.size(); ++x)
+    for (int x = 0; x < faceRects.size(); ++x)
     {
         cv::Rect rc = faceRects[x];
         cv::circle(outputMat,

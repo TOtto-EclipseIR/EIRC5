@@ -16,7 +16,6 @@ Milliseconds::Milliseconds(void) : mEpochMsec(csmNullMsec) {;}
 Milliseconds::Milliseconds(qint64 ems) : mEpochMsec(ems) {;}
 Milliseconds::Milliseconds(const QDateTime & dt)
     : mEpochMsec(dt.isValid() ? dt.toMSecsSinceEpoch() : INT64_MIN) {;}
-Milliseconds::Milliseconds(const QVariant &var) : mEpochMsec(var.toLongLong()) {;}
 
 Milliseconds Milliseconds::current(void)
 {

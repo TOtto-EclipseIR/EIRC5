@@ -1,22 +1,21 @@
 // file: {repo: EIRC2}./src/libs/eirType/Id.cpp
 #include "Id.h"
 
-#include <QDateTime>
-
 #include <eirXfr/Debug.h>
 
-QMap<Uuid, Id> Id::smUidIdMap;
-QMap<quint64, Uuid> Id::smUKeyUidMap;
-QMap<MultiName, Uuid> Id::smNameUidMap;
+QMap<QUuid, Id> Id::smUidIdMap;
+QMap<quint64, QUuid> Id::smUKeyUidMap;
+QMap<MultiName, QUuid> Id::smNameUidMap;
 
 // Id::Id(const Uid uid) : mUid(uid), mU64Key(0) {;}
 
-Id::Id() {;}
+Id::Id() : mU64Key(0) {;}
 
 Id::Id(const quint64 key64,
        const QString &desc,
        const QVariant &data)
-    : mU64Key(key64)
+    : mUuid(QUuid::createUuid())
+    , mU64Key(key64)
     , mDescription(desc)
     , mData(data) {;}
 
@@ -24,7 +23,8 @@ Id::Id(const MultiName &name,
        const quint64 key64,
        const QString &desc,
        const QVariant &data)
-    : mU64Key(key64)
+    : mUuid(QUuid::createUuid())
+    , mU64Key(key64)
     , mNameKey(name)
     , mDescription(desc)
     , mData(data) {;}
@@ -32,7 +32,8 @@ Id::Id(const MultiName &name,
 Id::Id(const MultiName &name,
        const QString &desc,
        const QVariant &data)
-    : mNameKey(name)
+    : mUuid(QUuid::createUuid())
+    , mNameKey(name)
     , mDescription(desc)
     , mData(data) {;}
 
@@ -58,7 +59,7 @@ void Id::clear()
             mData.clear();
 }
 
-void Id::set(const Uuid &uuid)
+void Id::set(const QUuid &uuid)
 {
     mUuid = uuid;
 }
@@ -78,7 +79,7 @@ MultiName Id::name() const
     return mNameKey;
 }
 
-Uuid Id::uuid() const
+QUuid Id::uuid() const
 {
     return mUuid;
 }
@@ -137,10 +138,11 @@ Id Id::newId(const MultiName &name)
 {
     Id id;
     Uuid newUid;
-    while (smUidIdMap.contains(newUid))
+    do
     {
-        newUid = Uuid();
-    };
+        newUid = QUuid::createUuid();
+    }
+    while (smUidIdMap.contains(newUid)) ;
 
     id.set(newUid);
     id.set(name);

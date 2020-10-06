@@ -1,9 +1,5 @@
 #include "QQRectF.h"
 
-#include <QtDebug>
-
-#include <eirXfr/Debug.h>
-
 QQRectF::QQRectF() {;}
 
 QQRectF::QQRectF(qreal x, qreal y, qreal width, qreal height)
@@ -37,30 +33,3 @@ qreal QQRectF::area() const
     return height() * width();
 }
 
-QQRectF QQRectF::divide(const qreal divisor)
-{
-    return QQRectF(size() / divisor, center() / divisor);
-}
-
-QQRectF QQRectF::operator /(const qreal divisor)
-{
-    return divide(divisor);
-}
-
-QString QQRectF::toString() const
-{
-    return QString("(%1x%2) @%3,%4")
-               .arg(width()).arg(height())
-               .arg(center().x()).arg(center().y());}
-
-QQRectF::operator QString() const
-{
-    return toString();
-}
-
-
-QDebug operator<<(QDebug dbg, const QQRectF &rcf)
-{
-    dbg << rcf.toString();
-    return dbg;
-}

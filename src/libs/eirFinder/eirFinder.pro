@@ -18,10 +18,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include(../../EIRC2.pri)
 
-LIBS *= -leirType5
-LIBS *= -leirExe5
-LIBS *= -leirQtCV5
-LIBS *= -leirCascade5
+LIBS *= -leirType2
+LIBS *= -leirExe2
+LIBS *= -leirQtCV2
+LIBS *= -leirCascade2
 
 SOURCES += \
     FinderCascade.cpp \

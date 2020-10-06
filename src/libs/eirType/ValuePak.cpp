@@ -2,14 +2,16 @@
 
 #include <eirXfr/Debug.h>
 
-ValuePak::ValuePak() {;}
-ValuePak::ValuePak(const Id id) : mId(id) {;}
+ValuePak::ValuePak()
+{
+
+}
 
 void ValuePak::clear()
 {
     TRACEFN;
     mId.clear(),
-            mBytes.clear(),
+            mBA.clear(),
             mValueList.clear(),
             mValueMap.clear();
 }
@@ -24,35 +26,29 @@ bool ValuePak::notContains(const int index) const
     return ! contains(index);
 }
 
-void ValuePak::set(const QQByteArray &byteArray)
+void ValuePak::set(const QByteArray &byteArray)
 {
-    mBytes = byteArray;
+    mBA = byteArray;
 }
 
-void ValuePak::set(const int index, const QVariant value)
+void ValuePak::set(const int index, const Value &mapItem)
 {
-    if (notContains(index)) resizeList(index);
-    mValueList.replace(index, value);
+    at(index) = mapItem;
 }
 
-void ValuePak::set(const MultiName &key, const QVariant value)
+Value &ValuePak::at(const int index)
 {
-    mValueMap.insert(key, value);
+    return mValueList[index];
 }
 
-QVariant ValuePak::at(const int index) const
+Value ValuePak::at(const int index) const
 {
-    return contains(index) ? mValueList.at(index) :QVariant();
+    return mValueList[index];
 }
 
-QVariant &ValuePak::at(const MultiName &name)
+QVariant ValuePak::value(const int index) const
 {
-    return mValueMap[name];
-}
-
-QVariant ValuePak::at(const MultiName &name) const
-{
-    return mValueMap.value(name);
+    return at(index).second;
 }
 
 MultiName::List ValuePak::keys(const MultiName &groupName,
@@ -86,20 +82,12 @@ Uuid ValuePak::uuid() const
     return mId.uuid();
 }
 
-QQByteArray ValuePak::bytes() const
+QByteArray ValuePak::bytes() const
 {
-    return mBytes;
+    return mBA;
 }
 
 QVariant ValuePak::operator()(const int index) const
 {
-    return at(index);
-}
-
-/* --------- protected ------------------------------------ */
-
-void ValuePak::resizeList(const int index)
-{
-    while (mValueList.size() <= index)
-        mValueList.append(QVariant());
+    return at(index).second;
 }

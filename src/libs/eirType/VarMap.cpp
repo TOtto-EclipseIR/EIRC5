@@ -1,8 +1,6 @@
 // file: {repo: EIRC2}./src/libs/eirType/VarMap.cpp
 #include "VarMap.h"
 
-#include <QDataStream>
-
 #include <eirXfr/Debug.h>
 
 VarMap::VarMap(const MultiName &name) : mName(name) {;}
@@ -67,7 +65,7 @@ BasicName::List VarMap::groupKeys(const MultiName &groupName)
 */
 VarMap VarMap::extract(const MultiName &groupName) const
 {
-    TRACEQFI << groupName();
+//    TRACEQFI << groupName();
     VarMap extractedMap(groupName);
     int nGroupSegments = groupName.segmentCount();
     foreach (Var var, values())
@@ -142,20 +140,6 @@ BasicName::List VarMap::firstSegmentKeys() const
 VarMap VarMap::operator <<  (const Var &var)
 {
     return insert(var);
-}
-
-QVariant VarMap::toVariant() const
-{
-    QDataStream ds;
-    ds << name().toString();
-    ds << mVarMap.size();
-    foreach (Var var, mVarMap.values())
-    {
-        ds << var.name().toString();
-        ds << var.currentVari();
-        ds << var.defaultVari();
-    }
-    return QVariant(ds);
 }
 
 QStringList VarMap::dumpList() const

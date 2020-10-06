@@ -15,10 +15,10 @@ QQDir::QQDir(const QDir &dir, const QString &path)
     QDir::setPath(path);
 }
 
-QQDir &QQDir::operator =(const QQDir &other)
+QQDir &QQDir::operator =(const QDir &other)
 {
     QDir::setPath(other.path());
-    mNull = other.mNull;
+    mNull = QDir::exists();
     return *this;
 }
 
@@ -35,13 +35,6 @@ bool QQDir::notNull() const
 void QQDir::setNull(const bool nowNull)
 {
     mNull = nowNull;
-}
-
-bool QQDir::mkpath(const QString &dirPath)
-{
-    TRACEQFI << dirPath;
-    mNull = QDir::mkpath(dirPath);
-    return mNull;
 }
 
 bool QQDir::cd(const QString &dirName)

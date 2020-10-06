@@ -4,7 +4,6 @@
 
 #include <QDomDocument>
 #include <QDomElement>
-#include <QDomNamedNodeMap>
 class QFile;
 
 #include "FileName.h"
@@ -19,8 +18,6 @@ public:
     void close();
     QDomDocument document() const;
     QDomElement rootElement() const;
-
-    static QStringList dumpList(const QDomNamedNodeMap &namedNodeMap);
 
 private:
     FileName mFileName;

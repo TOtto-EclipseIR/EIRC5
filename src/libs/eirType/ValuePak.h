@@ -5,10 +5,6 @@
 #include <QList>
 #include <QMap>
 #include <QStack>
-#include <QVariant>
-#include <QVariantList>
-
-#include <eirType/QQByteArray.h>
 
 #include "Id.h"
 #include "MultiName.h"
@@ -22,36 +18,41 @@ public:
     void clear();
     bool contains(const int index) const;
     bool notContains(const int index) const;
-    bool contains(const MultiName &key) const;
-    bool notContains(const MultiName &key) const;
     void set(const Id &id);
-    void set(const QQByteArray &byteArray);
-    void set(const int index, const QVariant value);
-    void set(const MultiName &key, const QVariant value);
+    void set(const QByteArray &byteArray);
+    void set(const Value::List &varList);
     void insert(const Value::Map &valueMap);
+    void set(const int index, const Value &mapItem);
     void append(const Value &listItem);
     void insert(const Value &mapItem);
-    QVariant &at(const int index); // non-const
-    QVariant at(const int index) const;
-    QVariant &at(const MultiName &name); // non-const
-    QVariant at(const MultiName &name) const;
+    void insert(const MultiName &key,
+                const QVariant &value);
+    Value &at(const int index); // non-const
+    Value at(const int index) const;
+    Value &at(const MultiName &name); // non-const
+    Value at(const MultiName &name) const;
+    QVariant value(const int index) const;
+    QVariant value(const MultiName &name) const;
     MultiName::List keys(const MultiName &groupName, const bool recurse=false);
     Id id() const;
     Id &id();
     Uuid uuid() const;
-    QQByteArray bytes() const;
+    QByteArray bytes() const;
+    Value::List list() const;
+    Value::List & list(); // non-const
     Value::Map map() const;
-    Value::Map &map(); // non-const
+    Value::Map & map(); // non-const
+    Value &operator[](const int index); // non-const
+    Value operator[](const int index) const;
+    Value &operator[](const MultiName &name); // non-const
+    Value operator[](const MultiName &name) const;
     QVariant operator()(const int index) const;
     QVariant operator()(const MultiName &name) const;
 
-protected:
-    void resizeList(const int index);
-
 private:
     Id mId;
-    QQByteArray mBytes;
-    QVariantList mValueList;
+    QByteArray mBA;
+    Value::List mValueList;
     Value::Map mValueMap;
 };
 

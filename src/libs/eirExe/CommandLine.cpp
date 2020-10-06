@@ -5,11 +5,9 @@
 #include <QDir>
 #include <QTimer>
 
-#include <APP>
 #include <eirXfr/Debug.h>
 #include <eirType/QQFileInfo.h>
 #include <eirType/QQFileInfoList.h>
-#include <eirType/QQString.h>
 
 #include "CommandLineClientInterface.h"
 
@@ -25,12 +23,7 @@ CommandLine::CommandLine(QObject *parent)
 void CommandLine::set(CommandLineClientInterface *interface)
 {
     TRACEFN
-            mpInterface = interface;
-}
-
-CommandLine::ExpandDirResultList CommandLine::expandDirResults() const
-{
-    return mExpandDirResultList;
+    mpInterface = interface;
 }
 
 int CommandLine::positionalArgumentSize() const
@@ -38,35 +31,32 @@ int CommandLine::positionalArgumentSize() const
     return positionalArgumentList().size();
 }
 
-QQStringList CommandLine::positionalArgumentList() const
+QStringList CommandLine::positionalArgumentList() const
 {
     return mPositionalArgumentList;
 }
 
-QQString CommandLine::firstPositionalArgument() const
+QString CommandLine::firstPositionalArgument() const
 {
     return positionalArgumentSize()
-            ? mPositionalArgumentList.first() : QQString();
+            ? mPositionalArgumentList.first() : QString();
 }
 
-QQString CommandLine::takePositionalArgument()
+QString CommandLine::takePositionalArgument()
 {
     TRACEQFI << firstPositionalArgument();
-    if (positionalArgumentSize())
-        ++mPositionalArgumentsTaken;
     return positionalArgumentSize()
             ? mPositionalArgumentList.takeFirst() : QString();
 }
-
-int CommandLine::positionalArgumentsTaken() const
+/*
+QQFileInfoList CommandLine::positionalFileInfoList() const
 {
-    TRACEQFI << mPositionalArgumentsTaken;
-    return mPositionalArgumentsTaken;
+    return mPositionalFileDirInfoList;
 }
-
-const QQStringList CommandLine::exeArguments(bool withNumbers) const
+*/
+const QStringList CommandLine::exeArguments(bool withNumbers) const
 {
-    QQStringList argList = cmExeArgumentList;
+    QStringList argList = cmExeArgumentList;
     if (withNumbers)
         for (int x = 0; x < argList.size(); ++x)
             argList[x].prepend(QString("%1. ").arg(x,3));
@@ -78,22 +68,28 @@ const QQFileInfo CommandLine::exeFileInfo() const
     return mExeFileInfo;
 }
 
-void CommandLine::process(const ApplicationHelper::Flags flags)
+Configuration CommandLine::configuration() const
+{
+    return mConfiguration;
+}
+
+void CommandLine::process()
 {
     TRACEQFI << "ExeArgs:" << cmExeArgumentList;
-    mRemainingArgumentList = cmExeArgumentList;
-    mExeFileInfo = QQFileInfo(QQString(mRemainingArgumentList.takeFirst()));
+    QStringList arguments;
+    mExeFileInfo = QQFileInfo(cmExeArgumentList.first());
+    arguments = expandFileArguments(cmExeArgumentList.mid(1), '@');
+    TRACE << "Expanded:" << arguments;
+    arguments = stripConfiguration(arguments);
+    TRACE << "Configuration:";
+    mConfiguration.dump();
+    TRACE << "Post Configuration:" << arguments;
+    arguments = extractDirectiveArguments(arguments);
+    TRACE << "Post Extract:" << arguments;
+    if (mpInterface) arguments = parseQtOptions(arguments);
+    TRACE << "virtual setup() complete";
 
-    if (mpInterface) parseQtOptions();
-    extractDirectiveArguments();
-    expandFileArguments();
-    stripSettings();
-    TRACE << "Settings:";
-    DUMP << STG->toStringList();
-    TRACE << "Post Settings:" << mRemainingArgumentList;
-    if (flags.testFlag(ApplicationHelper::ExpandCommandLineDirs)) expandDirectories();
-    TRACE << "Remaining:" << mRemainingArgumentList;
-    //mPositionalArgumentList = mRemainingArgumentList;
+    mPositionalArgumentList = arguments;
     TRACE << "PosArgs:" << mPositionalArgumentList;
     dump();
 } // process()
@@ -105,46 +101,56 @@ void CommandLine::expandDirectories(const int recurseDepth)
     WANTUSE(recurseDepth)
     WARN << "Only recurseDepth=1 for  now";
 
-    QQStringList expandedArgs, ignoredArgs;
-    while (mRemainingArgumentList.notEmpty())
+    QStringList expandedArgs;
+#if 1
+    foreach (QString argIn, mPositionalArgumentList)
     {
-        QQString argIn = mRemainingArgumentList.takeFirst();
         if (QQFileInfo::tryIsFile(argIn))
         {
             expandedArgs << argIn;
-            EMIT(info(argIn, "File Continued"));
         }
         else if (QQFileInfo::tryIsDir(argIn))
         {
-            EMIT(info(argIn, "Expanding Directory"));
             QDir dir(argIn);
-            QStringList fileNames = dir.entryList(QDir::Files, QDir::NoSort);
-            DUMP << fileNames;
-            if ( ! fileNames.isEmpty())
-            {
-                ExpandDirResult edr;
-                edr.dir = dir;
-                edr.firstFileName = fileNames.first();
-                edr.fileCount = fileNames.size();
-                mExpandDirResultList << edr;
-            }
+            QStringList fileNames
+                = dir.entryList(QDir::Files, QDir::NoSort);
             foreach (QString fileName, fileNames)
             {
-                QQFileInfo fi(dir, fileName);
+                QFileInfo fi(dir, fileName);
                 expandedArgs << fi.absoluteFilePath();
-                EMIT(info(fi.absoluteFilePath(), "File Expanded"));
             }
         }
         else
         {
-            ignoredArgs << argIn;
             WARN << argIn << "not file or dir";
-            EMIT(warning(argIn, "Not Recognized"));
         }
     }
-    mRemainingArgumentList = ignoredArgs;
+#else
+    foreach (QQFileInfo fileInfoIn, mPositionalFileDirInfoList)
+    {
+        QString argIn = mPositionalArgumentList.takeFirst();
+        TRACE << argIn << fileInfoIn.absoluteFilePath()
+              << fileInfoIn.attributes();
+        if (fileInfoIn.isNull() ||  ! fileInfoIn.tryIsDir())
+        {
+            expandedArgs << argIn;
+            expandedInfo << fileInfoIn;
+            continue;
+        }
+        WEXPECT(fileInfoIn.tryIsDir());
+        QFileInfoList insertInfoList
+            =  fileInfoIn.dir().entryInfoList(QDir::Files);
+        TRACE << "insertInfoList:" << insertInfoList;
+        foreach (QFileInfo insertInfo, insertInfoList)
+        {
+            TRACE << "Expanded:" << insertInfo;
+            expandedArgs << insertInfo.absoluteFilePath();
+            expandedInfo << insertInfoList;
+        }
+    }
+#endif
     mPositionalArgumentList = expandedArgs;
-    TRACEQFI << expandedArgs.size() << "Output Files:";
+    TRACEQFI << "Output Files:";
     dumpPositionalArgs();
 }
 
@@ -152,110 +158,106 @@ void CommandLine::dump()
 {
     DUMP << ">>>CommandLine:";
     DUMP << "===exeArgumentList:";
-    foreach (QString exeArg, cmExeArgumentList) DUMP << "  " << exeArg;
+    foreach (QString exeArg, cmExeArgumentList)
+        DUMP << "  " << exeArg;
     DUMP << "---exeFileInfo:" << mExeFileInfo;
     DUMP << "---positionalArgumentList:";
     dumpPositionalArgs();
-    DUMP << "---Settings:";
-    STG->dump();
+    DUMP << "---Configuration:";
+    mConfiguration.dump();
 }
 
 
-void CommandLine::expandFileArguments(const QChar trigger)
+QStringList CommandLine::expandFileArguments(const QStringList arguments,
+                                             const QChar trigger)
 {
-    TRACEQFI << trigger;
-    QQStringList workingArgList;
-    foreach (QQString arg, mRemainingArgumentList)
+    TRACEQFI << arguments;
+    QStringList expanded;
+    foreach (QString arg, arguments)
     {
         if (arg.startsWith(trigger))
         {
-            QQFileInfo argFileInfo(arg.mid(1), QQString::NoFlag);
-            TRACE << "Expanding" << argFileInfo.absoluteFilePath() << argFileInfo.attributes();
-            WEXPECT(argFileInfo.exists());
-            WEXPECT(argFileInfo.isReadable());
-            WEXPECT(argFileInfo.isFile());
-            if (argFileInfo.tryIsFile())
-            {
-                EMIT(info(argFileInfo, "Processing"));
-                QQStringList expanded = readTxtFileArguments(argFileInfo);
-                TRACE << expanded;
-                workingArgList << expanded;
-            }
-            else
-            {
-                EMIT(warning(argFileInfo, "Not Readable"));
-            }
+            QFileInfo argFileInfo(arg.mid(1));
+            TRACE << "Expanding" << argFileInfo.absoluteFilePath();
+            TEXPECT(argFileInfo.exists());
+            TEXPECT(argFileInfo.isReadable());
+            TEXPECT(argFileInfo.isFile());
+            expanded << readTxtFileArguments(argFileInfo);
         }
         else
         {
-            EMIT(info(arg, "Continued"));
-            workingArgList << arg;
+            expanded << arg;
         }
+        TRACE << expanded;
     }
-    mRemainingArgumentList = workingArgList;
+    return expanded;
 }
 
-void CommandLine::extractDirectiveArguments()
+QStringList CommandLine::extractDirectiveArguments(
+        const QStringList &currentArgs)
 {
-    TRACEFN;
+    TRACEQFI << currentArgs;
     TODO(it)
+    return currentArgs;
 }
 
-void CommandLine::parseQtOptions()
+QStringList CommandLine::parseQtOptions(
+        const QStringList &currentArgs)
 {
-    TRACEFN;
     QCommandLineParser parser;
     if (mpInterface) mpInterface->setup(&parser);
     NEEDDO(Extract from parser)
+    return currentArgs;
 }
 
-void CommandLine::stripSettings(const Settings::Key &prefix, const QChar &trigger)
+QStringList CommandLine::stripConfiguration(
+        const QStringList &expandedArgs,
+        const MultiName &prefix,
+        const QChar &trigger)
 {
-    TRACEQFI << prefix() << trigger;
-    QQStringList remainingArgs;
-    while (mRemainingArgumentList.notEmpty())
-    {
-        QQString arg = mRemainingArgumentList.takeFirst();
+    TRACEQFI << expandedArgs << prefix() << trigger;
+    QStringList remainingArgs;
+    foreach (QString arg, expandedArgs)
         if (arg.startsWith(trigger))
-            parseSettingArgument(arg, prefix);
+            parseConfigArgument(arg, prefix);
         else
             remainingArgs << arg;
-    }
-    mRemainingArgumentList = remainingArgs;
+    TRACEQFI << remainingArgs;
+    return remainingArgs;
 }
 
-void CommandLine::parseSettingArgument(const QString &arg,
-                                      const Settings::Key &prefix)
+
+void CommandLine::parseConfigArgument(const QString &arg,
+                                      const MultiName &prefix)
 {
     TRACEQFI << arg << prefix();
     QStringList qsl = arg.split('=');
-    Settings::Key key = qsl[0].mid(1);
+    MultiName key = qsl[0].mid(1);
     key.prependName(prefix);
-    Settings::Value valu = (qsl.size() > 1) ? qsl[1] : "true";
-    STG->set(key, valu);
-    TRACE << key() << "=" << valu;
-    EMIT(info(QString("%1={%2}").arg(key).arg(valu), "Added"));
+    QVariant value = (qsl.size() > 1)
+            ? QVariant(qsl[1])
+            : QVariant(true);
+    mConfiguration.insert(key, value);
+    TRACE << key() << "=" << value;
 }
 
-QQStringList CommandLine::readTxtFileArguments(const QQFileInfo &argFileInfo)
+QStringList CommandLine::readTxtFileArguments(const QFileInfo &argFileInfo)
 {
-    TRACEQFI << argFileInfo.absoluteFilePath() << argFileInfo.attributes();
-    QQStringList workingArgs;
+    TRACEQFI << argFileInfo.absoluteFilePath();
+    QStringList newArgs;
     QFile file(argFileInfo.absoluteFilePath(), this);
-    EXPECT(file.open(QIODevice::ReadOnly | QIODevice::Text));
-    WEXPECT(file.isReadable());
-
+    WEXPECT(file.open(QIODevice::ReadOnly | QIODevice::Text))
+    WEXPECT(file.exists() && file.isReadable())
     while ( ! file.atEnd())
     {
         QByteArray fileLine = file.readLine().simplified();
-        TRACE << "fileLine: {>" << fileLine << "<}";
+        //TRACE << "fileLine: {>" << fileLine << "<}";
         if (fileLine.isEmpty() || fileLine.startsWith('#'))
             continue;
-        workingArgs << QQString(fileLine);
-        EMIT(info(QQString(fileLine), "Expanded"));
+        newArgs << fileLine;
     }
-    TRACE << file.fileName() << "workingArgs" << workingArgs;
-    return workingArgs;
+    TRACE << file.fileName() << "newArgs" << newArgs;
+    return newArgs;
 }
 
 void CommandLine::dumpPositionalArgs() const

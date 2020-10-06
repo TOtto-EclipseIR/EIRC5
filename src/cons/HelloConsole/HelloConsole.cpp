@@ -34,9 +34,9 @@ void HelloConsole::tellSystem()
 {
     TRACEFN;
     writeLine("Hello Console started "+baseDateTime().toString());
-    writeLine(CMD->exeFileInfo().absoluteFilePath());
+    writeLine(commandLine()->exeFileInfo().absoluteFilePath());
     writeLine("Command Line Arguments:");
-    writeLines(CMD->exeArguments(true));
+    writeLines(commandLine()->exeArguments(true));
 
     EMIT(systemTold());
 }

@@ -5,10 +5,8 @@
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QPointer>
-#include <QString>
 #include <QTimer>
 
-#define PTRSTRING(ptr) QString("%1=0x%2").arg(#ptr).arg(quintptr(ptr), sizeof(quintptr) / 4, 16, QChar('0'))
 #define QOBJNAME(pqobj) ((nullptr == pqobj) ? ("{null} " #pqobj) : ("QObject:" #pqobj + pqobj->objectName()))
 #define TIME QDateTime::currentDateTime().toString("hh:mm:ss.zzz")
 #define DEBUG(qmt, pfx) qmt() << pfx << TIME << __LINE__
@@ -25,14 +23,12 @@
 #define DEBUGXN(qmt, pfx, bexpr) { if (bexpr) qmt() << pfx << TIME << Q_FUNC_INFO << __LINE__  << "Expectation FAILED:" << #bexpr; }
 #define DEBUGXEQ(qmt, pfx, expt, var) { if (expt != var) qmt() << pfx << TIME << Q_FUNC_INFO << __LINE__ << "Expectation FAILED:" << #expt << expt << "==" << #var << var; }
 #define DEBUGXNE(qmt, pfx, expt, var) { if (expt == var) qmt() << pfx << TIME << Q_FUNC_INFO << __LINE__ << "Expectation FAILED:" << #expt << expt << "!=" << #var << var; }
-#define DEBUGXGT(qmt, pfx, expt, var) { if (expt <  var) qmt() << pfx << TIME << Q_FUNC_INFO << __LINE__ << "Expectation FAILED:" << #expt << expt << ">" << #var << var; }
 #define DEBUGXPTR(qmt, pfx, ptr) if (nullptr == ptr) qmt() << pfx << TIME << Q_FUNC_INFO << __LINE__ << "Pointer FAILED:" <<  #ptr;
 #define DEBUGPTR(qmt, pfx, ptr, expr)     if (ptr) ptr->expr else DEBUG(qmt, pfx) "Pointer" << #ptr << "FAILED for" << #expr;
 #define DEBUGFNR(qmt, pfx, expr) { qmt() << pfx << TIME << Q_FUNC_INFO << __LINE__ << "Return:" << #expr << QString(expr); return expr; }
 #define DEBUGRTV(qmt, pfx) { qmt() << pfx << TIME << Q_FUNC_INFO << __LINE__ << "Return(void)"; return; }
 #define DEBUGQUIT Q_ASSERT(false);
 #define DEBUGCON(qmt, pfx, src, sig, rec, slt) TSTALLOC(src); TSTALLOC(rec); if ( ! connect(src,sig,rec,slt)) DEBUG(qmt, pfx) << "Connect FAILED:" << #src << #sig << #rec << #slt;
-#define DEBUGDCON(qmt, pfx, src, sig, rec, slt) TSTALLOC(src); TSTALLOC(rec); if ( ! disconnect(src,sig,rec,slt)) DEBUG(qmt, pfx) << "Disconnect FAILED:" << #src << #sig << #rec << #slt;
 
 #define PINFO   "= INFO"
 #define PDUMP   "~ DUMP"
@@ -71,7 +67,6 @@
 #define TRACERTN(expr)          TRACE << "return" << #expr << expr;
 #define TRACEFNR(expr)          DEBUGFNR(qDebug, PTRACE, expr)
 #define TODO(msg)               DEBUGDO(qDebug, PTODO, msg)
-#define LATERDO(msg)            DEBUGDO(qDebug, PTODO, msg)
 #define TOUSE(msg)              DEBUGUSE(qDebug, PTODO, msg)
 #define TORTN(msg)              DEBUGRTN(qDebug, PTODO, msg)
 #define UNUSED(var)             Q_UNUSED(var)
@@ -99,13 +94,10 @@
 #define ERRORPSZ(psz)           DEBUGPSZ(qCritical, PERROR, psz);
 #define ERRORQST(qst)           DEBUGQST(qCritical, PERROR, qPrintable(qst));
 #define EXPECT(bexpr)           DEBUGEXP(qCritical, PERROR, bexpr)
-#define EXPECT(bexpr)           DEBUGEXP(qCritical, PERROR, bexpr)
 #define EXPECTNOT(bexpr)        DEBUGXN(qCritical, PERROR, bexpr)
 #define EXPECTEQ(expt, var)     DEBUGXEQ(qCritical, PERROR, expt, var)
 #define EXPECTNE(expt, var)     DEBUGXNE(qCritical, PERROR, expt, var)
-#define EXPECTGT(expt, var)     DEBUGXGT(qCritical, PERROR, expt, var)
 #define CONNECT(src, sig, dst, slt)    DEBUGCON(qCritical,  PERROR, src, sig, dst, slt)
-#define DISCONNECT(src, sig, dst, slt) DEBUGDCON(qCritical, PERROR, src, sig, dst, slt)
 #define NEEDDO(msg)             DEBUGDO(qCritical, PETODO, msg)
 #define NEEDUSE(msg)            DEBUGUSE(qCritical, PETODO, msg)
 #define NEEDRTN(msg)            DEBUGRTN(qCritical, PETODO, msg)
@@ -118,12 +110,12 @@
 #define ABORTFN()               DEBUGFN(qCritical, PABORT); DEBUGQUIT
 #define ABORTPSZ(psz)           DEBUGPSZ(qCritical, PABORT, psz); DEBUGQUIT
 #define ABORTQST(qst)           DEBUGQST(qCritical, PABORT, qPrintable(qst)); DEBUGQUIT
-#define BEXPECT(bexpr)          DEBUGEXP(qCritical, PABORT, bexpr); if ( ! bexpr) DEBUGQUIT
-#define BEXPECTNOT(bexpr)       DEBUGXN(qCritical, PABORT, bexpr); if (bexpr) DEBUGQUIT
-#define BEXPECTEQ(expt, var)    DEBUGXEQ(qCritical, PABORT, expt, var); if (expt != var) DEBUGQUIT
-#define BEXPECTNE(expt, var)    DEBUGXNE(qCritical, PABORT, expt, var); if (expt == var) DEBUGQUIT
+#define BEXPECT(bexpr)          DEBUGEXP(qCritical, PABORT, bexpr); DEBUGQUIT
+#define BCONNECT(src, sig, dst, slt)    DEBUGCON(qCritical,  PERROR, src, sig, dst, slt); DEBUGQUIT
+#define BEXPECTNOT(bexpr)       DEBUGXN(qCritical, PABORT, bexpr); DEBUGQUIT
+#define BEXPECTEQ(expt, var)    DEBUGXEQ(qCritical, PABORT, expt, var); DEBUGQUIT
+#define BEXPECTNE(expt, var)    DEBUGXNE(qCritical, PABORT, expt, var); DEBUGQUIT
 #define BEXPECTPTR(ptr)         DEBUGXPTR(qCritical, PABORT, ptr); DEBUGQUIT
-//#define BCONNECT(src, sig, dst, slt)    DEBUGCON(qCritical,  PERROR, src, sig, dst, slt); DEBUGQUIT
 #define MUSTDO(msg)             DEBUGDO(qCritical, PBTODO, msg); DEBUGQUIT
 #ifdef QT_DEBUG
 #define RMUSTDO(msg)            DEBUGDO(qCritical, PETODO, msg)
@@ -136,4 +128,4 @@
 
 #define TSTALLOC(ptr)           DEBUGXPTR(qCritical, PABORT, ptr);
 #define TRYALLOC(typ, var, nexpr) typ * var = new nexpr; TSTALLOC(var)
-//#define QOBJPTR(ptr)            ExeFlightRecorder::objectPointerString(#ptr, ptr)
+#define QOBJPTR(ptr)            ExeFlightRecorder::objectPointerString(#ptr, ptr)

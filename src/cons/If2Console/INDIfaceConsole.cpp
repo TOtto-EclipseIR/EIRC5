@@ -38,7 +38,7 @@ void INDIfaceConsole::initializeApplication()
               .arg(core()->applicationVersion())
               .arg(core()->organizationName()));
     writeLine("===Raw Executable Arguments:");
-    foreach (QString arg, CMD->exeArguments())
+    foreach (QString arg, commandLine()->exeArguments())
         writeLine("---{" + arg + "}");
 //    cvVersion opencvVersion;
   //  writeLine("==="+opencvVersion.toString());
@@ -51,10 +51,10 @@ void INDIfaceConsole::setupCommandLine()
 {
     TRACEFN
     If2CommandLine interface;
-    CMD->().set(&interface);
-    CMD->().process();
-    CMD->().set(nullptr);
-    CMD->().expandDirectories();
+    rCommandLine().set(&interface);
+    rCommandLine().process();
+    rCommandLine().set(nullptr);
+    rCommandLine().expandDirectories();
     EMIT(commandLineSetup());
     QTimer::singleShot(100, this, &INDIfaceConsole::setConfiguration);
 }
@@ -62,7 +62,7 @@ void INDIfaceConsole::setupCommandLine()
 void INDIfaceConsole::setConfiguration()
 {
     TRACEQFI << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>INDIfaceConsole::setConfiguration()";
-    mpConfig->set(CMD->configuration());
+    mpConfig->set(commandLine()->configuration());
 
     config()->configuration("Output").dump();
     config()->configuration("/Output").dump();
@@ -107,7 +107,7 @@ void INDIfaceConsole::initializeResources()
 void INDIfaceConsole::startProcessing()
 {
     TRACEFN
-    mImageFileQueue = CMD->positionalArgumentList();
+    mImageFileQueue = commandLine()->positionalArgumentList();
     TRACE << mImageFileQueue;
     TODO(?)
     QTimer::singleShot(100, this, &INDIfaceConsole::nextFile);
