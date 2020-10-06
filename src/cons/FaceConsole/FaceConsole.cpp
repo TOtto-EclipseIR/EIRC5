@@ -124,8 +124,10 @@ void FaceConsole::initializeResources()
 
     cvCascade::Parameters parms;
 #ifdef QTCV_SETTINGS_HACK
-    mMethodString = QString("ScaleFactor=%1,Neighbors=%2,MinQuality=%3,%4")
-            .arg(mScaleFactor).arg(mNeighbors).arg(mMinQuality)
+    cvCascade::Parameters params;
+    params.calculate(mScaleFactor, mNeighbors, mMinQuality);
+    mMethodString = QString("Factor=%1,Neighbors=%2,MinQuality=%3,%4")
+            .arg(params.factor()).arg(params.neighbors()).arg(mMinQuality)
             .arg(cascadeFileInfo.completeBaseName());
 #else
     parms.calculate(mPreScanProcessor.rectSettings().toMap(),

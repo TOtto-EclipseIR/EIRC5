@@ -23,7 +23,13 @@ void cvCascade::Parameters::calculate(const unsigned scaleFactor,
     mNeighbors = (neigh < 0) ? 1 : neigh;
     if (minQual)
     {
-        MUSTDO(recalculate);
+        mFactor = 1.060;
+        mNeighbors = neighborsForMinQuality(minQual);
+    }
+    else
+    {
+        mFactor = qBound(1.001, 1.0 + Settings::perMille(scaleFactor ? scaleFactor : 120), 1.999);
+        mNeighbors = (neigh < 0) ? 1 : neigh;
     }
 }
 #else

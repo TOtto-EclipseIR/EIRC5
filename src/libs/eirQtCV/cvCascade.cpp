@@ -276,6 +276,24 @@ BasicName cvCascade::typeName(cvCascade::Type type)
     return "{unknown}";
 }
 
+signed cvCascade::neighborsForMinQuality(const unsigned minQual)
+{
+    if (false)                      ;
+    else if (minQual > 975)     return 96;
+    else if (minQual > 950)     return 64;
+    else if (minQual > 900)     return 40;
+    else if (minQual > 850)     return 32;
+    else if (minQual > 800)     return 24;
+    else if (minQual > 750)     return 16;
+    else if (minQual > 700)     return 12;
+    else if (minQual > 650)     return 8;
+    else if (minQual > 600)     return 6;
+    else if (minQual > 500)     return 4;
+    else if (minQual > 400)     return 3;
+    else if (minQual > 200)     return 2;
+    else                        return 1;
+}
+
 #if 0
 bool cvCascade::loadCoreSize(const QFileInfo &cascadeXmlInfo)
 {

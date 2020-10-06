@@ -107,6 +107,9 @@ public:
 public: // static
     static BasicName typeName(Type type);
 
+private: // static
+    static signed neighborsForMinQuality(const unsigned minQual);
+
 private:
     Type cmType=nullType;
     QQFileInfo mCascadeXmlInfo;

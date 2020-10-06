@@ -1,0 +1,19 @@
+# file {EIRC repo}./src/cons/ /fodder.txt
+
+/Output/BaseDir=/INDIface/INDIout/console/fodder-Alpha4mq
+/Output/Dirs/PreScanRect=PreScanRect-%M
+/PreScan/RectFinder/Neighbors=64
+/PreScan/RectFinder/ScaleFactor=60
+/PreScan/RectGrouper/MinQuality=900
+/PreScan/RectGrouper/UnionGroupOverlap=500
+/PreScan/RectGrouper/UnionGroupOrphan=1
+
+### Face (Frontal) PreScan
+#/ObjectDetector/Resources/RectFinder/BaseDir=D:\github\3rdParty\opencv-4.4.0-msvc\opencv\build\etc\haarcascades
+/ObjectDetector/Resources/RectFinder/BaseDir=../detectors
+#/ObjectDetector/Resources/RectFinder/PreScan/XmlFile=v2/Aim8A001-32-NoSplit.xml
+#/ObjectDetector/Resources/RectFinder/PreScan/XmlFile=v2/haarcascade_frontalface_default_old.xml
+#/ObjectDetector/Resources/RectFinder/PreScan/XmlFile=v4/haarcascade_frontalface_alt.xml
+/ObjectDetector/Resources/RectFinder/PreScan/XmlFile=v4/haarcascade_frontalface_default.xml
+#/ObjectDetector/Resources/RectFinder/PreScan/XmlFile=v4/haarcascade_frontalface_alt2.xml
+#/ObjectDetector/Resources/RectFinder/PreScan/XmlFile=v4/haarcascade_frontalface_alt_tree.xml
