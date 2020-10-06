@@ -12,6 +12,7 @@
 #include <eirXfr/Debug.h>
 
 #include "cvBGRA.h"
+#include "cvSize.h"
 #include "cvString.h"
 
 cvMat::cvMat() {;}
@@ -21,18 +22,15 @@ cvMat::cvMat(const int rows, const int cols, const int type)
     TRACEQFI << rows << cols << type;
     mpCvMat = new cv::Mat(rows, cols, type);
     //EXPECT(isValid());
-    TRACE << dumpString();
+    TRACE << toDebugString();
 }
 
-cvMat::cvMat(const cv::Mat &otherMat)
+cvMat::cvMat(cv::Mat &otherMat)
 {
-    set(otherMat);
+    set(&otherMat);
 }
 
-cvMat::~cvMat()
-{
-    clear();
-}
+cvMat::~cvMat() { NEEDDO(clear()); }
 
 void cvMat::clear()
 {
@@ -74,14 +72,14 @@ size_t cvMat::depthInBytes() const
     return mat().elemSize();
 }
 
-size_t cvMat::depth() const
+int cvMat::depth() const
 {
-    return depthInBytes() * 8;
+    return int(depthInBytes() * 8);
 }
 
-size_t cvMat::stride() const
+int cvMat::stride() const
 {
-    return mat().step;
+    return int(mat().step);
 }
 
 bool cvMat::isContinuous() const
@@ -104,12 +102,12 @@ void *cvMat::data() const
     return mat().data;
 }
 
-quint8 *cvMat::ptr(const int row) const
+quint8 *cvMat::ptr(const int row)
 {
     return mat().ptr(row);
 }
 
-const quint8 *cvMat::cptr(const int row) const
+const quint8 *cvMat::ptr(const int row) const
 {
     return mat().ptr(row);
 }
@@ -144,48 +142,15 @@ QSize cvMat::size() const
     return QSize(cols(), rows());
 }
 
-void cvMat::set(const cv::Mat other)
+void cvMat::set(cv::Mat *other)
 {
-    mpCvMat = new cv::Mat(other);
+    mpCvMat = other;
 }
 
-void cvMat::setGrey(const QQImage &image)
-{
-    TRACEQFI << image;
-    EXPECTNOT(image.isNull());
-    clear();
-    if (image.isNull()) return;                             /* /=========\ */
-    QQImage greyImage = image.convertToFormat(QImage::Format_Grayscale8);
-    EXPECTEQ(8, greyImage.depth());
-    mpCvMat = new cv::Mat(image.height(), image.width(), CV_8UC1);
-    TSTALLOC(mpCvMat->ptr());
-    EXPECTEQ(greyImage.depth(), int(depth()));
-    if (greyImage.depth() != int(depth()))
-        return;                                             /* /=========\ */
-    if (isContinuous() && greyImage.stride() == int(stride()))
-    {
-        EXPECTEQ(greyImage.sizeInBytes(), int(sizeInBytes()));
-        if (greyImage.sizeInBytes() != int(sizeInBytes()))
-            return;                                             /* /=========\ */
-        std::memcpy(mpCvMat->ptr(), greyImage.bits(), sizeInBytes());
-    }
-    else
-    {
-        BEXPECTEQ(greyImage.rows(), rows());
-        for (int r = 0; r < rows(); ++r)
-        {
-            const quint8 *pImage = greyImage.scanLine(r);
-            quint8 *pMat = ptr(r);
-            std::memcpy(pMat, pImage, bytesPerLine());
-        }
-    }
-    mQFormat = QImage::Format_Grayscale8;
-    TRACERTV();
-}
 
 QQImage cvMat::toGreyImage() const
 {
-    TRACEQFI << dumpString();
+    TRACEQFI << toDebugString();
     EXPECTEQ(CV_8UC1, type());
     if (CV_8UC1 != type()) return QQImage();
 #if 1
@@ -212,7 +177,7 @@ QQImage cvMat::toGreyImage() const
         for (int r = 0; r < rows(); ++r)
         {
             quint8 *pImage = greyImage.scanLine(r);
-            const quint8 *pMat = cptr(r);
+            const quint8 *pMat = ptr(r);
             std::memcpy(pImage, pMat, greyImage.bytesPerLine());
         }
     }
@@ -228,10 +193,59 @@ QImage::Format cvMat::qformat() const
     return mQFormat;
 }
 
-QString cvMat::dumpString() const
+QString cvMat::toDebugString() const
 {
-    return QString("cvMat size=%1x%2 type=%3 total=%4 data=%5")
-            .arg(mat().size().width).arg(mat().size().height)
-            .arg(mat().type()).arg(sizeInBytes())
-            .arg(PTRSTRING(data()));
+    return toDebugString(mpCvMat);
 }
+
+// static
+cvMat cvMat::greyFromImage(const QQImage &image)
+{
+    TRACEQFI << image;
+    cvMat newMat(image.height(), image.width(), CV_8UC1);
+    TRACE << toDebugString(newMat.mpCvMat);
+    TSTALLOC(newMat.mat().data);
+    QQImage greyImage = image.convertToFormat(QImage::Format_Grayscale8);
+    EXPECTEQ(8, greyImage.depth());
+    EXPECTEQ(greyImage.size(), newMat.size());
+    EXPECTEQ(8, newMat.depth());
+    BEXPECTEQ(greyImage.depth(), newMat.depth());
+    if (greyImage.size() != newMat.size() || greyImage.depth() != newMat.depth())
+        return cvMat();                                             /* /=========\ */
+
+    if (newMat.isContinuous())
+    {
+        EXPECTEQ(greyImage.stride(), newMat.stride());
+        EXPECTEQ(greyImage.sizeInBytes(), newMat.sizeInBytes());
+    }
+    if (newMat.isContinuous()
+            && greyImage.stride() == newMat.stride()
+            && greyImage.sizeInBytes() == newMat.sizeInBytes())
+    {
+            std::memcpy(newMat.ptr(0), greyImage.bits(), newMat.sizeInBytes());
+    }
+    else
+    {
+        for (int r = 0; r < newMat.rows(); ++r)
+        {
+            const quint8 *pImage = greyImage.scanLine(r);
+            quint8 *pMat = newMat.ptr(r);
+            std::memcpy(pMat, pImage, newMat.bytesPerLine());
+        }
+    }
+    newMat.mQFormat = QImage::Format_Grayscale8;
+    return newMat;
+}
+
+// static
+QString cvMat::toDebugString(cv::Mat *mat)
+{
+    return (nullptr == mat)
+            ? "Null cv::Mat"
+            : QString("cvMat size=%1x%2 type=%3 depth=%4 total=%5 data=%5")
+                    .arg(mat->size().width).arg(mat->size().height)
+                    .arg(mat->type()).arg(mat->elemSize())
+                    .arg(mat->elemSize() * mat->total())
+                    .arg(PTRSTRING(mat->data));
+}
+

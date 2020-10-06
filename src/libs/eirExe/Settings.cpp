@@ -34,14 +34,8 @@ void Settings::insert(const QStringList &keyValueStrings)
     MUSTUSE(keyValueStrings);
 }
 
-void Settings::insert(const Settings::Map &keyValueStringMap)
-{
-    MUSTDO(it);
-    MUSTUSE(keyValueStringMap);
 
-}
-
-void Settings::insert(const QSettings::SettingsMap &keyVariantMap)
+void Settings::insert(const Map &keyVariantMap)
 {
     MUSTDO(it);
     MUSTUSE(keyVariantMap);
@@ -179,22 +173,44 @@ QStringList Settings::toStringList(const Key &groupKey)
     return qsl;
 }
 
+QStringList Settings::toStringList(const QSettings::SettingsMap &map)
+{
+    QStringList qsl;
+    foreach (QString key, map.keys())
+        qsl << QString("%1={%2}").arg(key).arg(map.value(key).toString());
+    return qsl;
+}
+
 void Settings::dump(const Key &groupKey)
 {
     foreach (QString s, toStringList(groupKey)) DUMP << s;
 }
 
-int Settings::signedInt(const Key &key, const signed &defaultValue) const
+void Settings::dump(const QSettings::SettingsMap &map)
+{
+    foreach (QString s, toStringList(map)) DUMP << s;
+}
+
+bool Settings::boolean(const Settings::Key &key, const bool &defaultValue) const
 {
     bool ok = contains(key);
-    signed result = get(key).toInt(&ok);
+    bool result = value(key).toBool();
+    return ok ? result : defaultValue;
+}
+
+int Settings::signedInt(const Key &key, const signed &defaultValue) const
+{
+    bool ok;
+    unsigned result = get(key).toInt(&ok);
+    ok &= contains(key);
     return ok ? result : defaultValue;
 }
 
 unsigned Settings::unsignedInt(const Key &key, const unsigned &defaultValue) const
 {
-    bool ok = contains(key);
+    bool ok;
     unsigned result = get(key).toUInt(&ok);
+    ok &= contains(key);
     return ok ? result : defaultValue;
 }
 
@@ -205,11 +221,27 @@ qreal Settings::real(const Key &key, const qreal &defaultValue) const
     return ok ? result : defaultValue;
 }
 
-qreal Settings::realPerMille(const Key &key, const int &defaultValue) const
+qreal Settings::realPerMille(const Key &key, const unsigned &defaultValue) const
 {
     bool ok = contains(key);
-    qreal result = get(key).toInt(&ok);
-    return qreal(ok ? result : defaultValue) / 1000.0;
+    qreal result = get(key).toUInt(&ok);
+    return perMille(ok ? result : defaultValue);
+}
+
+QQSize Settings::size(const Settings::Key &key, const QQSize &defaultValu) const
+{
+    QQSize resultSize = defaultValu;
+    if (contains(key))
+    {
+        QQString sizeString = get(key);
+        resultSize.set(sizeString);
+    }
+    return resultSize;
+}
+
+qreal Settings::perMille(const unsigned uValue)
+{
+    return qBound(0.001, qreal(uValue) / 1000.0, 0.999);
 }
 
 QString Settings::string(const Key &key, const Value &defaultValue) const

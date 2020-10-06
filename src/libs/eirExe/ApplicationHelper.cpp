@@ -13,10 +13,7 @@
 
 #include "../../version.h"
 
-ApplicationHelper::ApplicationHelper()
-{
-    TRACEFN;
-}
+ApplicationHelper::ApplicationHelper(const Flags flags) : mFlags(flags) { TRACEFN; }
 
 void ApplicationHelper::setFlags(const Flags flags)
 {

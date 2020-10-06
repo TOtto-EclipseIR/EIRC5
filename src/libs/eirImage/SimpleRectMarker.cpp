@@ -7,7 +7,7 @@
 
 #include <APP>
 #include <eirExe/Settings.h>
-#include <eirObjDet/ObjectDetector.h>
+#include <eirObjDet/del-ObjectDetector.h>
 #include <eirObjDet/ObjDetResultItem.h>
 #include <eirObjDet/ObjDetResultList.h>
 #include <eirQtCV/cvCascade.h>
@@ -26,9 +26,9 @@ void SimpleRectMarker::markAll(const Settings::Key &groupKey,
     TRACEQFI << rectList.size();
     QPainter painter(this);
     STG->beginGroup(groupKey);
-    QColor penColor = QColor(STG->string("PenColor","#7f00CCCC"));
-    qreal penWidth = STG->real("PenWidth", 1.0);
-    Qt::PenStyle penStyle = Qt::PenStyle(STG->unsignedInt("PenStyle", 1));
+    QColor penColor = QColor(STG->string("PenColor","#CC66FFFF"));
+    qreal penWidth = STG->real("PenWidth", 5.0);
+    Qt::PenStyle penStyle = Qt::PenStyle(STG->unsignedInt("PenStyle", 2));
     STG->endGroup();
     QBrush penBrush(penColor);
     QPen pen(penBrush, penWidth, penStyle);

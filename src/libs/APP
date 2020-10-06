@@ -5,6 +5,6 @@
 #include <eirExe/Settings.h>
 #include <eirXfr/Debug.h>
 
-Q_GLOBAL_STATIC(ApplicationHelper, APP);
+//Q_GLOBAL_STATIC(ApplicationHelper, APP);
 Q_GLOBAL_STATIC(CommandLine, CMD);
 Q_GLOBAL_STATIC(Settings, STG);

@@ -12,6 +12,7 @@ class QTemporaryFile;
 
 #include <eirType/MultiName.h>
 #include <eirType/QQFileInfo.h>
+#include <eirType/QQSize.h>
 #include <eirType/Rational.h>
 
 class ApplicationHelper;
@@ -22,7 +23,7 @@ class EIREXE_EXPORT Settings : public QSettings
 public:
     typedef MultiName Key;
     typedef QString Value;
-    typedef QMap<QString, QString> Map;
+    typedef QSettings::SettingsMap Map;
 
 public:
     explicit Settings(QObject *parent=nullptr);
@@ -30,8 +31,7 @@ public:
 public slots:
     void insert(const QQFileInfo &iniFileInfo);
     void insert(const QStringList &keyValueStrings);
-    void insert(const Map &keyValueStringMap);
-    void insert(const QSettings::SettingsMap &keyVariantMap);
+    void insert(const Map &keyVariantMap);
     void set(const Key &key, const Value &valu);
     void set(const Key &key, const QVariant &vari);
     virtual void setValue(const QString &key, const QVariant &vari);
@@ -61,16 +61,19 @@ public: // access
     Map extract() const;
     Map extract(const Key groupKey, const bool keepKey=false) const;
     QStringList toStringList(const Key &groupKey=Key());
+    static QStringList toStringList(const Map &map);
     void dump(const Key &groupKey=Key());
+    static void dump(const Map &map);
 
 public: // values
     bool boolean(const Key &key, const bool &defaultValue=false) const;
     int signedInt(const Key &key, const signed &defaultValue=0) const;
     unsigned unsignedInt(const Key &key, const unsigned &defaultValue=0) const;
     qreal real(const Key &key, const qreal &defaultValue=0) const;
-    qreal realPerMille(const Key &key, const int &defaultValue=0) const;
+    qreal realPerMille(const Key &key, const unsigned &defaultValue=0) const;
     QString string(const Key &key, const QString &defaultValu=QString()) const;
-
+    QQSize size(const Key &key, const QQSize &defaultValu=QQSize()) const;
+    static qreal perMille(const unsigned iValue);
 
     /*
         Rational rational(const QString &key, const Rational &defaultValue=Rational(0)) const;

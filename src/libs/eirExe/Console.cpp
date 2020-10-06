@@ -5,7 +5,8 @@
 #include <eirXfr/Debug.h>
 
 Console::Console(const ApplicationHelper::Flags flags)
-    : mpIn(new QFile(this))
+    : ApplicationHelper(flags)
+    , mpIn(new QFile(this))
     , mpOut(new QFile(this))
     , mpErr(new QFile(this))
 {
@@ -13,8 +14,10 @@ Console::Console(const ApplicationHelper::Flags flags)
     TSTALLOC(mpIn);
     TSTALLOC(mpOut);
     TSTALLOC(mpErr);
-    ApplicationHelper::setFlags(flags);
     setObjectName("Console");
+    mpIn->setObjectName("Console:stdin");
+    mpOut->setObjectName("Console:stdout");
+    mpErr->setObjectName("Console:stderr");
     EXPECT(mpIn->open(stdin, QIODevice::ReadOnly));
     EXPECT(mpOut->open(stdout, QIODevice::WriteOnly));
     EXPECT(mpErr->open(stderr, QIODevice::WriteOnly));

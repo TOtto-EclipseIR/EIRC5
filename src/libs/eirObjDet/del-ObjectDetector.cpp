@@ -1,4 +1,4 @@
-#include "ObjectDetector.h"
+#include "del-ObjectDetector.h"
 
 #include <QTimer>
 
@@ -15,7 +15,7 @@ QHash<cvCascadeType, ObjectDetector::This> ObjectDetector::smTypeDetectorHash;
 ObjectDetector::ObjectDetector(const cvCascade::Type type,
                                QObject *parent)
     : QObject(parent)
-    , mpCascade(type)
+    , mpCascade(new cvCascade(type))
     , cmpTimer(new QTimer(parent))
 {
     TRACEQFI << cvCascade::typeName(type)() << QOBJNAME(parent);
@@ -47,7 +47,7 @@ ObjectDetector *ObjectDetector::p(const cvCascadeType type)
 
 cvCascade *ObjectDetector::cascade()
 {
-    return &mpCascade;
+    return mpCascade;
 }
 
 bool ObjectDetector::load(const QQFileInfo cascadeFInfo)

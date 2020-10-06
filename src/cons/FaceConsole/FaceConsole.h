@@ -4,6 +4,7 @@
 #include <eirExe/Console.h>
 
 #include <eirType/QQDir.h>
+#include <eirObjDet/ObjDetProcessor.h>
 #include <eirObjDet/ObjDetResultList.h>
 
 class QCommandLineParser;
@@ -20,9 +21,9 @@ public slots:
 private slots:
     void processCommandLine();
     void setConfiguration();
+    void initializeResources();
     void setBaseOutputDir();
     void setOutputDirs();
-    void initializeResources();
     void startProcessing();
     void nextFile();
     void processCurrentFile();
@@ -53,6 +54,13 @@ signals:
     void processingComplete();
 
 private:
+    ObjDetProcessor mPreScanProcessor;
+#ifdef QTCV_SETTINGS_HACK
+    unsigned mScaleFactor=120;
+    signed mNeighbors=1;
+    unsigned mMinQuality=0;
+#endif
+    QQString mMethodString;
     QDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
     QQDir::Vector mMarkedFaceQualityDirs;

@@ -21,6 +21,7 @@ class QCommandLineParser;
 #include <eirType/QQStringList.h>
 #include <eirType/QQStringStdList.h>
 
+#include "ApplicationHelper.h"
 class CommandLineClientInterface;
 
 #include "Settings.h"
@@ -52,7 +53,7 @@ public:
     const QQFileInfo exeFileInfo() const;
 
 public slots:
-    void process(const bool expandDirs);
+    void process(const ApplicationHelper::Flags flags);
     void dump();
     void dumpPositionalArgs() const;
 

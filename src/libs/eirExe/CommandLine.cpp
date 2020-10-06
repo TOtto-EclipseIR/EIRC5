@@ -78,7 +78,7 @@ const QQFileInfo CommandLine::exeFileInfo() const
     return mExeFileInfo;
 }
 
-void CommandLine::process(const bool expandDirs)
+void CommandLine::process(const ApplicationHelper::Flags flags)
 {
     TRACEQFI << "ExeArgs:" << cmExeArgumentList;
     mRemainingArgumentList = cmExeArgumentList;
@@ -91,9 +91,9 @@ void CommandLine::process(const bool expandDirs)
     TRACE << "Settings:";
     DUMP << STG->toStringList();
     TRACE << "Post Settings:" << mRemainingArgumentList;
-    if (expandDirs) expandDirectories();
-    TRACE << "Expanded:" << mRemainingArgumentList;
-    mPositionalArgumentList = mRemainingArgumentList;
+    if (flags.testFlag(ApplicationHelper::ExpandCommandLineDirs)) expandDirectories();
+    TRACE << "Remaining:" << mRemainingArgumentList;
+    //mPositionalArgumentList = mRemainingArgumentList;
     TRACE << "PosArgs:" << mPositionalArgumentList;
     dump();
 } // process()
@@ -105,18 +105,21 @@ void CommandLine::expandDirectories(const int recurseDepth)
     WANTUSE(recurseDepth)
     WARN << "Only recurseDepth=1 for  now";
 
-    QStringList expandedArgs;
-    foreach (QString argIn, mPositionalArgumentList)
+    QQStringList expandedArgs, ignoredArgs;
+    while (mRemainingArgumentList.notEmpty())
     {
+        QQString argIn = mRemainingArgumentList.takeFirst();
         if (QQFileInfo::tryIsFile(argIn))
         {
             expandedArgs << argIn;
+            EMIT(info(argIn, "File Continued"));
         }
         else if (QQFileInfo::tryIsDir(argIn))
         {
+            EMIT(info(argIn, "Expanding Directory"));
             QDir dir(argIn);
-            QStringList fileNames
-                = dir.entryList(QDir::Files, QDir::NoSort);
+            QStringList fileNames = dir.entryList(QDir::Files, QDir::NoSort);
+            DUMP << fileNames;
             if ( ! fileNames.isEmpty())
             {
                 ExpandDirResult edr;
@@ -129,16 +132,19 @@ void CommandLine::expandDirectories(const int recurseDepth)
             {
                 QQFileInfo fi(dir, fileName);
                 expandedArgs << fi.absoluteFilePath();
+                EMIT(info(fi.absoluteFilePath(), "File Expanded"));
             }
         }
         else
         {
+            ignoredArgs << argIn;
             WARN << argIn << "not file or dir";
             EMIT(warning(argIn, "Not Recognized"));
         }
     }
+    mRemainingArgumentList = ignoredArgs;
     mPositionalArgumentList = expandedArgs;
-    TRACEQFI << "Output Files:";
+    TRACEQFI << expandedArgs.size() << "Output Files:";
     dumpPositionalArgs();
 }
 

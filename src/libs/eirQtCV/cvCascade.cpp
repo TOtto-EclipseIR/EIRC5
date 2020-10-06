@@ -39,26 +39,19 @@ BasicName cvCascade::typeName() const
 bool cvCascade::loadCascade(const QQFileInfo &cascadeXmlInfo)
 {
     TRACEQFI << typeName()() << cascadeXmlInfo.absoluteFilePath();
-    EXPECT(cascadeFileInfo().exists());
-    EXPECT(cascadeFileInfo().isFile());
-    EXPECT(cascadeFileInfo().isReadable());
-    if (mpClassifier->load(cvString(cascadeXmlInfo.absoluteFilePath())))
-        mCascadeXmlInfo = cascadeXmlInfo;
-    return ! mpClassifier->empty();
+    EXPECT(mpClassifier->load(cvString(cascadeXmlInfo.absoluteFilePath())));
+    mCascadeXmlInfo = cascadeXmlInfo;
+    return isLoaded();
 }
 
 bool cvCascade::isLoaded() const
 {
-<<<<<<< HEAD
-    return mpClassifier->empty();
+    return ! notLoaded();
 }
 
 bool cvCascade::notLoaded() const
 {
-    return ! isLoaded();
-=======
-    return ! mpClassifier->empty();
->>>>>>> c9081049be86ebf94694ac1f2bc2ffa3efd7435d
+    return mpClassifier->empty();
 }
 
 QSize cvCascade::coreSize() const
@@ -79,7 +72,8 @@ cv::CascadeClassifier *cvCascade::classifier()
 {
     return mpClassifier;
 }
-#if 1
+
+#if 0
 int cvCascade::detectRectangles(const Settings::Key &groupKey,
                                 const QQImage &inputImage,
                                 const bool showDetect,
@@ -94,8 +88,8 @@ int cvCascade::detectRectangles(const Settings::Key &groupKey,
     mDetectMat.clear();
     mRectList.clear();
 
-    mDetectMat.setGrey(inputImage);
-    DUMP << mDetectMat.dumpString();
+    mDetectMat = cvMat::greyFromImage(inputImage);
+    DUMP << mDetectMat.toDebugString();
     if (mDetectMat.isNull()) return -2; // null cvMat       /* /========\ */
     if (showDetect)
     {
@@ -104,7 +98,6 @@ int cvCascade::detectRectangles(const Settings::Key &groupKey,
     }
 
     if (notLoaded()) return -3;         // empty cascade    /* /========\ */
-
     mParameters.set(groupKey);
     mParameters.calculate(cmType, mDetectMat.size(), coreSize());
 #if 0
@@ -130,8 +123,67 @@ int cvCascade::detectRectangles(const Settings::Key &groupKey,
     foreach (cvRect cvrc, cvRectVector) mRectList << cvrc.toRect();
     return mRectList.size();
 }
+#endif
 
+int cvCascade::detectRectangles(const QSettings::SettingsMap rectSettings,
+                                #ifdef QTCV_SETTINGS_HACK
+                                    const unsigned scaleFactor,
+                                    const signed neighbors,
+                                    const unsigned minQuality,
+                                #endif
+
+                                const cvMat &greyInputMat,
+                                const bool showDetect,
+                                const QQRect &region)
+{
+    TRACEQFI << showDetect << region;
+    Settings::dump(rectSettings);
+    DUMP << mDetectMat.toDebugString();
+    TSTALLOC(mpClassifier);
+
+    mMethodString.clear();
+    mDetectMat.clear();
+    mRectList.clear();
+
+    EXPECTNOT(greyInputMat.isNull());
+    mDetectMat = greyInputMat;
+    if (mDetectMat.isNull()) return -2; // null cvMat       /* /========\ */
+    if (showDetect)
+    {
+        cv::imshow("DetectMat", mDetectMat.mat());
+        cv::waitKey(5000);
+    }
+
+    EXPECT(isLoaded());
+    if (notLoaded()) return -3;         // empty cascade    /* /========\ */
+#ifdef QTCV_SETTINGS_HACK
+    mParameters.calculate(scaleFactor, neighbors, minQuality);
 #else
+    mParameters.calculate(rectSettings, cmType, mDetectMat.size(), coreSize());
+#endif
+#if 0
+    cvSize minSize = mParameters.minSize();
+    cvSize maxSize = mParameters.maxSize();
+#else
+    NEEDDO(RemoveForFlight);
+    cvSize minSize(0,0);
+    cvSize maxSize(0,0);
+#endif
+    mMethodString = mParameters.methodString(mCascadeXmlInfo);
+    DUMPVAL(mMethodString);
+
+    std::vector<cv::Rect> cvRectVector;
+    classifier()->detectMultiScale(mDetectMat.mat(),
+                        cvRectVector,
+                        mParameters.factor(),
+                        mParameters.neighbors(),
+                        mParameters.flags(),
+                        minSize, maxSize);
+
+    foreach (cvRect cvrc, cvRectVector) mRectList << cvrc.toRect();
+    return mRectList.size();
+}
+#if 0
 int cvCascade::detectRectangles(Settings *rectFinderSettings,
                                 const QQImage &inputImage,
                                 const bool showDetect,
@@ -222,6 +274,24 @@ BasicName cvCascade::typeName(cvCascade::Type type)
             break;
     }
     return "{unknown}";
+}
+
+signed cvCascade::neighborsForMinQuality(const unsigned minQual)
+{
+    if (false)                      ;
+    else if (minQual > 975)     return 96;
+    else if (minQual > 950)     return 64;
+    else if (minQual > 900)     return 40;
+    else if (minQual > 850)     return 32;
+    else if (minQual > 800)     return 24;
+    else if (minQual > 750)     return 16;
+    else if (minQual > 700)     return 12;
+    else if (minQual > 650)     return 8;
+    else if (minQual > 600)     return 6;
+    else if (minQual > 500)     return 4;
+    else if (minQual > 400)     return 3;
+    else if (minQual > 200)     return 2;
+    else                        return 1;
 }
 
 #if 0

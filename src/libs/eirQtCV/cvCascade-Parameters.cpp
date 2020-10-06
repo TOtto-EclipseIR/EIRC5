@@ -14,22 +14,33 @@ void cvCascade::Parameters::set(const Settings::Key &groupKey)
     STG->dump(groupKey);
 }
 
+#ifdef QTCV_SETTINGS_HACK
+void cvCascade::Parameters::calculate(const unsigned scaleFactor,
+                                      const signed neigh,
+                                      const unsigned minQual)
+{
+    mFactor = qBound(1.001, 1.0 + Settings::perMille(scaleFactor ? scaleFactor : 120), 1.999);
+    mNeighbors = (neigh < 0) ? 1 : neigh;
+    if (minQual)
+    {
+        mFactor = 1.060;
+        mNeighbors = neighborsForMinQuality(minQual);
+    }
+    else
+    {
+        mFactor = qBound(1.001, 1.0 + Settings::perMille(scaleFactor ? scaleFactor : 120), 1.999);
+        mNeighbors = (neigh < 0) ? 1 : neigh;
+    }
+}
+#else
+
 void cvCascade::Parameters::calculate(const cvCascade::Type type,
                                       const QQSize imageSize,
                                       const QQSize coreSize)
 {
     TRACEQFI << cvCascade::typeName(type)() << imageSize << coreSize;
-    NEEDUSE(type);
 
-    qreal typeFactor = qQNaN(); // object portion of shoulder-to-shoulder
-    switch (type)
-    {
-    case PreScan:
-    case PreScanAll:
-    case Face:          typeFactor = 1.0 / 3.0;     break;
-    default:            MUSTDO(others);             break;
-    }
-    BEXPECTNOT(qIsNaN(typeFactor));
+    qreal typeFact = typeFactor(type); // object portion of shoulder-to-shoulder
 
 #if 0
     qreal coreWidth = coreSize.width();
@@ -64,7 +75,7 @@ void cvCascade::Parameters::calculate(const cvCascade::Type type,
 
     double fac = parseFactor();
     mFactor = qIsNull(fac) ? 1.160 : fac;
-    NEEDDO("Default Based on Image/Core size & MaxDetectors, etc.");
+    NEEDDO("Default Based on Image/Core size & MaxDetectors, etc."); NEEDUSE(typeFact);
 
     STG->beginGroup(mGroupKey);
     int neigh = STG->signedInt("Neighbors", 2);
@@ -72,6 +83,24 @@ void cvCascade::Parameters::calculate(const cvCascade::Type type,
     STG->endGroup();
     DUMP << dumpList();
 }
+
+void cvCascade::Parameters::calculate(const QSettings::SettingsMap &map, const cvCascade::Type type,
+                                      const QQSize imageSize, const QQSize coreSize)
+{
+    TRACEQFI << cvCascade::typeName(type)() << imageSize << coreSize;
+    Settings::dump(map);
+
+    qreal typeFact = typeFactor(type); // object portion of shoulder-to-shoulder
+    mMinSize.nullify();
+    mMaxSize.nullify();
+    unsigned fac = map.value("ScaleFactor", 120).toUInt();
+    mFactor = 1.0 + Settings::perMille(fac);
+    NEEDDO("Default Based on Image/Core size & MaxDetectors, etc."); NEEDUSE(typeFact);
+    QQString ns(map.value("Neighbors").toString(), QQString::Squeeze);
+    mNeighbors = ns.isEmpty() ? 1 : ns.toUInt();
+    DUMP << methodString(QQFileInfo());
+}
+#endif
 
 double cvCascade::Parameters::factor() const
 {
@@ -98,7 +127,7 @@ cvSize cvCascade::Parameters::maxSize() const
     return mMaxSize.isValid() ? mMaxSize : QQSize::null;
 }
 
-QString cvCascade::Parameters::methodString(const QFileInfo &cascadeXmlInfo) const
+QString cvCascade::Parameters::methodString(const QQFileInfo &cascadeXmlInfo) const
 {
     return QString("Factor=%1,Neighbors=%2,MinSize=%3x%4,MaxSize=%5x%6,%7")
                     .arg(factor(),5,'f',3).arg(neighbors())
@@ -110,6 +139,20 @@ QString cvCascade::Parameters::methodString(const QFileInfo &cascadeXmlInfo) con
 QVariant cvCascade::Parameters::toVariant() const
 {
     return QVariant::fromValue(*this);
+}
+
+qreal cvCascade::Parameters::typeFactor(const cvCascade::Type type)
+{
+    qreal resultFactor = qQNaN();
+    switch (type)
+    {
+    case PreScan:
+    case PreScanAll:
+    case Face:          resultFactor = 1.0 / 3.0;       break;
+    default:            MUSTDO(others);                 break;
+    }
+    BEXPECTNOT(qIsNaN(resultFactor));
+    return resultFactor;
 }
 
 double cvCascade::Parameters::parseFactor()
