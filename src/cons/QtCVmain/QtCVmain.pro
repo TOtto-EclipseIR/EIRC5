@@ -25,10 +25,10 @@ CONFIG(debug, debug|release) {
     DISTFILES *= $(QTCVLIBPATH)/../bin/opencv_world$(QTCVFILENAMEVER).dll
 }
 
-PRE_TARGETDEPS *= $$OURDEST/eirCascade2.lib
-PRE_TARGETDEPS *= $$OURDEST/eirQtCV2.lib
-LIBS *= -leirCascade2
-LIBS *= -leirQtCV2
+PRE_TARGETDEPS *= $$OURDEST/eirCascade5.lib
+PRE_TARGETDEPS *= $$OURDEST/eirQtCV5.lib
+LIBS *= -leirCascade5
+LIBS *= -leirQtCV5
 
 SOURCES += \
         main.cpp

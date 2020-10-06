@@ -1,0 +1,2 @@
+* 200916
+  * [ ] QSet template warning in QQRect_List_

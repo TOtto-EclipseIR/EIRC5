@@ -19,12 +19,12 @@ include(../../EIRC2.pri)
 #INCLUDEPATH *= F:\lang\OpenCV4\opencv\build\include
 
 
-LIBS *= -leirBase2
-LIBS *= -leirType2
-#LIBS *= -leirImage2
-LIBS *= -leirExe2
-#LIBS *= -leirHaar2
-LIBS *= F:\lang\OpenCV4\opencv\build\x64\vc15\lib\opencv_world430d.lib
+LIBS *= -leirBase5
+LIBS *= -leirType5
+#LIBS *= -leirImage5
+LIBS *= -leirExe5
+#LIBS *= -leirHaar5
+LIBS *= F:\lang\OpenCV4\opencv\build\x64\vc15\lib\opencv_world440d.lib
 
 SOURCES += \
         INDIfaceConsole.cpp \

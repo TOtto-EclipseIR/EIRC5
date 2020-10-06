@@ -1,11 +1,13 @@
 #pragma once
 #include "eirQtCV.h"
 
+#include <QColor>
 
 class cvBGRA
 {
 public:
     cvBGRA();
+    cvBGRA(const QColor color);
     cvBGRA(const quint32 u32);
     cvBGRA(quint8 * ptr);
     void set(const cvBGRA other);

@@ -19,9 +19,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include(../../EIRC2.pri)
 
-LIBS *= -leirBase2
-LIBS *= -leirType2
-#LIBS *= -leirObj2
+LIBS *= -leirBase5
+LIBS *= -leirType5
 
 SOURCES += \
     ApplicationHelper.cpp \
@@ -32,21 +31,20 @@ SOURCES += \
     BaseArgumentHandler.cpp \
     CommandLine.cpp \
     CommandLineClientInterface.cpp \
-    ConfigObject.cpp \
-    ConfigPak.cpp \
-    Configuration.cpp \
     Console.cpp \
     FileExtension.cpp \
     FileInfoQueue.cpp \
     FileName.cpp \
     FileWriteQueue.cpp \
     QQDirIterator.cpp \
+    Settings.cpp \
     StdStreams.cpp \
     XmlFile.cpp \
     eirExe.cpp
 
 HEADERS += \
     ../../version.h \
+    ../APP \
     ApplicationHelper.h \
     ArgumentId.h \
     ArgumentItem.h \
@@ -55,15 +53,13 @@ HEADERS += \
     BaseArgumentHandler.h \
     CommandLine.h \
     CommandLineClientInterface.h \
-    ConfigObject.h \
-    ConfigPak.h \
-    Configuration.h \
     Console.h \
     FileExtension.h \
     FileInfoQueue.h \
     FileName.h \
     FileWriteQueue.h \
     QQDirIterator.h \
+    Settings.h \
     StdStreams.h \
     XmlFile.h \
     eirExe_global.h \

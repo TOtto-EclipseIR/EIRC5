@@ -17,9 +17,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 include(../../EIRC2.pri)
 include(../../useExe.pri)
 
-LIBS *= -leirXfr2
-LIBS *= -leirType2
-LIBS *= -leirExe2
+LIBS *= -leirXfr5
+LIBS *= -leirType5
+LIBS *= -leirExe5
 
 SOURCES += \
         HelloConsole.cpp \

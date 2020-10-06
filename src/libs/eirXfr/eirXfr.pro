@@ -18,18 +18,40 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include(../../EIRC2.pri)
 
-#LIBS *= -leirBase2
-#LIBS *= -leirType2
+#LIBS *= -leir???5
 
 SOURCES += \
     HexDump.cpp \
     StartupDebug.cpp \
+    XerEntry.cpp \
+    XerEntryList.cpp \
+    XfrBaseEventReceiver.cpp \
+    XfrEntry.cpp \
+    XfrEvent.cpp \
+    XfrEventQueue.cpp \
+    XfrFilter.cpp \
+    XfrFlags.cpp \
+    XfrFunctionInfo.cpp \
+    XfrLevel.cpp \
+    XfrTrollEventReceiver.cpp \
     eirXfr.cpp \
 
 HEADERS += \
     Debug.h \
     HexDump.h \
     StartupDebug.h \
+    XerEntry.h \
+    XerEntryList.h \
+    XfrBaseEventReceiver.h \
+    XfrEntry.h \
+    XfrEvent.h \
+    XfrEventQueue.h \
+    XfrFilter.h \
+    XfrFlags.h \
+    XfrFunctionInfo.h \
+    XfrLevel.h \
+    XfrMacros.h \
+    XfrTrollEventReceiver.h \
     eirXfr_global.h \
     eirXfr.h \
 
@@ -38,3 +60,6 @@ unix {
     target.path = /usr/lib
 }
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    ../XFR

@@ -1,128 +1,256 @@
 #include "cvCascade.h"
 
+#include <QDomElement>
 #include <QColor>
+#include <QTextStream>
+#include <QDomElement>
 #include <QPainter>
 #include <QPixmap>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/objdetect.hpp>
+#include <opencv2/core/types.hpp>
 
+#include <eirExe/XmlFile.h>
 #include <eirXfr/Debug.h>
-#include <eirCascade/CascadeParameters.h>
 
+#include "cvRect.h"
 #include "cvString.h"
 
-cvCascade::cvCascade(const CascadeType &cascadeType)
-    : cmCascadeType(cascadeType)
+cvCascade::cvCascade(const cvCascade::Type &type)
+    : cmType(type)
+    , mpClassifier(new cv::CascadeClassifier())
 {
-    TRACEQFI << cascadeType.name();
+    TRACEQFI << type;
+    TSTALLOC(mpClassifier);
+    TODO(cv::redirectError);
 }
 
-void cvCascade::configure(const Configuration &config)
+cvCascade::Type cvCascade::type() const
 {
-    TRACEFN;
-    config.dump();
-    mCascadeConfig = config;
-    //mParameters.configureCascade(config);
+    return cmType;
 }
 
-CascadeType cvCascade::cascadeType() const
+BasicName cvCascade::typeName() const
 {
-    return cmCascadeType;
+    return typeName(cmType);
 }
 
-bool cvCascade::loadCascade(const QFileInfo &cascadeXmlInfo)
+bool cvCascade::loadCascade(const QQFileInfo &cascadeXmlInfo)
 {
-    TRACEQFI << cascadeType().name() << cascadeXmlInfo;
-    unload();
-    cv::CascadeClassifier * pcvcc = new cv::CascadeClassifier;
-    if (pcvcc->load(cvString(cascadeXmlInfo.absoluteFilePath())))
-    {
-        mpCascade = pcvcc;
-        mCascadeXmlInfo = cascadeXmlInfo;
-    }
-    EXPECTNOT(mpCascade->empty());
-    return nullptr != mpCascade;
-}
-
-bool cvCascade::notLoaded() const
-{
-    return mpCascade ? mpCascade->empty() : true;
+    TRACEQFI << typeName()() << cascadeXmlInfo.absoluteFilePath();
+    EXPECT(mpClassifier->load(cvString(cascadeXmlInfo.absoluteFilePath())));
+    mCascadeXmlInfo = cascadeXmlInfo;
+    return isLoaded();
 }
 
 bool cvCascade::isLoaded() const
 {
-    return mpCascade ? (! mpCascade->empty()) : false;
+    return ! notLoaded();
 }
 
-void cvCascade::unload()
+bool cvCascade::notLoaded() const
 {
-    if (mpCascade)
-    {
-        delete mpCascade;
-        mpCascade = nullptr;
-    }
-    mCascadeXmlInfo = QFileInfo();
-    mCoreSize = QSize();
+    return mpClassifier->empty();
 }
 
 QSize cvCascade::coreSize() const
 {
-    return mCoreSize;
+    TSTALLOC(mpClassifier);
+    cv::Size cvsz = mpClassifier->getOriginalWindowSize();
+    QSize qsz(cvsz.width, cvsz.height);
+    TRACEQFI << qsz;
+    return qsz;
 }
 
-QFileInfo cvCascade::cascadeFileInfo() const
+QQFileInfo cvCascade::cascadeFileInfo() const
 {
     return mCascadeXmlInfo;
 }
 
-cv::CascadeClassifier *cvCascade::cascade()
+cv::CascadeClassifier *cvCascade::classifier()
 {
-    return mpCascade;
+    return mpClassifier;
 }
 
-bool cvCascade::imreadInputMat(const QQFileInfo &inputFileInfo)
+#if 0
+int cvCascade::detectRectangles(const Settings::Key &groupKey,
+                                const QQImage &inputImage,
+                                const bool showDetect,
+                                const QQRect &region)
 {
-    TRACEQFI << inputFileInfo;
-    mInputMat.imread(inputFileInfo.absoluteFilePath(), cv::IMREAD_COLOR);
-    TRACE << mInputMat.dumpString();
-    EXPECT(mInputMat.isValid());
-    return mInputMat.isValid();
-}
+    TRACEQFI << inputImage << region;
+    TSTALLOC(mpClassifier);
 
-cvCascade::RectList cvCascade::detect()
-{
-    TRACEQFI << mInputMat.dumpString();
-    TODO(inputSize&coreSize);
-    CascadeParameters parms(mCascadeConfig);
-    parms.calculate(mInputMat.toSize(), QSize(32,32));
-    QSize minSize = parms.minSize();
-    QSize maxSize = parms.maxSize();
-    cvMat detectMat(mInputMat.rows(), mInputMat.cols(), CV_8UC1);
-    mInputMat.makeGrey(detectMat.mat());
-    mDetectMat.set(detectMat.mat());
+    EXPECTNOT(inputImage.isNull());
+    if (inputImage.isNull()) return -1; // null image       /* /========\ */
+    mMethodString.clear();
+    mDetectMat.clear();
+    mRectList.clear();
+
+    mDetectMat = cvMat::greyFromImage(inputImage);
+    DUMP << mDetectMat.toDebugString();
+    if (mDetectMat.isNull()) return -2; // null cvMat       /* /========\ */
+    if (showDetect)
+    {
+        cv::imshow("DetectMat", mDetectMat.mat());
+        cv::waitKey(5000);
+    }
+
+    if (notLoaded()) return -3;         // empty cascade    /* /========\ */
+    mParameters.set(groupKey);
+    mParameters.calculate(cmType, mDetectMat.size(), coreSize());
+#if 0
+    cvSize minSize = mParameters.minSize();
+    cvSize maxSize = mParameters.maxSize();
+#else
+    NEEDDO(RemoveForFlight);
+    cvSize minSize(0,0);
+    cvSize maxSize(0,0);
+#endif
+    mMethodString = mParameters.methodString(mCascadeXmlInfo);
+    DUMPVAL(mMethodString);
+
     std::vector<cv::Rect> cvRectVector;
-    cvCascade::RectList results;
-    makeMethodString(parms);
-    TRACE << methodString();
 
-    mpCascade->detectMultiScale(detectMat.mat(),
+    classifier()->detectMultiScale(mDetectMat.mat(),
                         cvRectVector,
-                        parms.factor(),
-                        parms.neighbors(),
-                        parms.flags(),
+                        mParameters.factor(),
+                        mParameters.neighbors(),
+                        mParameters.flags(),
+                        minSize, maxSize);
+
+    foreach (cvRect cvrc, cvRectVector) mRectList << cvrc.toRect();
+    return mRectList.size();
+}
+#endif
+
+int cvCascade::detectRectangles(const QSettings::SettingsMap rectSettings,
+                                #ifdef QTCV_SETTINGS_HACK
+                                    const unsigned scaleFactor,
+                                    const signed neighbors,
+                                    const unsigned minQuality,
+                                #endif
+
+                                const cvMat &greyInputMat,
+                                const bool showDetect,
+                                const QQRect &region)
+{
+    TRACEQFI << showDetect << region;
+    Settings::dump(rectSettings);
+    DUMP << mDetectMat.toDebugString();
+    TSTALLOC(mpClassifier);
+
+    mMethodString.clear();
+    mDetectMat.clear();
+    mRectList.clear();
+
+    EXPECTNOT(greyInputMat.isNull());
+    mDetectMat = greyInputMat;
+    if (mDetectMat.isNull()) return -2; // null cvMat       /* /========\ */
+    if (showDetect)
+    {
+        cv::imshow("DetectMat", mDetectMat.mat());
+        cv::waitKey(5000);
+    }
+
+    EXPECT(isLoaded());
+    if (notLoaded()) return -3;         // empty cascade    /* /========\ */
+#ifdef QTCV_SETTINGS_HACK
+    mParameters.calculate(scaleFactor, neighbors, minQuality);
+#else
+    mParameters.calculate(rectSettings, cmType, mDetectMat.size(), coreSize());
+#endif
+#if 0
+    cvSize minSize = mParameters.minSize();
+    cvSize maxSize = mParameters.maxSize();
+#else
+    NEEDDO(RemoveForFlight);
+    cvSize minSize(0,0);
+    cvSize maxSize(0,0);
+#endif
+    mMethodString = mParameters.methodString(mCascadeXmlInfo);
+    DUMPVAL(mMethodString);
+
+    std::vector<cv::Rect> cvRectVector;
+    classifier()->detectMultiScale(mDetectMat.mat(),
+                        cvRectVector,
+                        mParameters.factor(),
+                        mParameters.neighbors(),
+                        mParameters.flags(),
+                        minSize, maxSize);
+
+    foreach (cvRect cvrc, cvRectVector) mRectList << cvrc.toRect();
+    return mRectList.size();
+}
+#if 0
+int cvCascade::detectRectangles(Settings *rectFinderSettings,
+                                const QQImage &inputImage,
+                                const bool showDetect,
+                                const QQRect &region)
+{
+    TRACEQFI << inputImage << region;
+    rectFinderSettings->dump();
+
+    EXPECTNOT(inputImage.isNull());
+    if (inputImage.isNull()) return -1; // null image       /* /========\ */
+    mMethodString.clear();
+    mDetectMat.clear();
+    mRectList.clear();
+
+    mDetectMat.setGrey(inputImage);
+    DUMP << mDetectMat.dumpString();
+    if (mDetectMat.isNull()) return -2; // null cvMat       /* /========\ */
+    if (showDetect)
+    {
+        cv::imshow("DetectMat", mDetectMat.mat());
+        cv::waitKey(5000);
+    }
+
+    EXPECTNE(nullptr, mpClassifier);
+    if (nullptr == mpClassifier)
+        return -3;                                          /* /========\ */
+
+    mParameters.set(rectFinderSettings);
+    mParameters.calculate(cmType, mDetectMat.size(), coreSize());
+#if 0
+    QSize minSize = mParameters.minSize();
+    QSize maxSize = mParameters.maxSize();
+#else
+    NEEDDO(RemoveForFlight);
+    QSize minSize(0,0);
+    QSize maxSize(0,0);
+#endif
+    mMethodString = mParameters.methodString(mCascadeXmlInfo);
+    DUMPVAL(mMethodString);
+
+    std::vector<cv::Rect> cvRectVector;
+    classifier()->detectMultiScale(mDetectMat.mat(),
+                        cvRectVector,
+                        mParameters.factor(),
+                        mParameters.neighbors(),
+                        mParameters.flags(),
                         cv::Size(minSize.width(), minSize.height()),
                         cv::Size(maxSize.width(), maxSize.height()));
 
     foreach (cv::Rect cvrc, cvRectVector)
-    {
-        QRect qrc(cvrc.x, cvrc.y, cvrc.width, cvrc.height);
-        results << qrc;
-    }
+        mRectList << QQRect(cvrc.x, cvrc.y, cvrc.width, cvrc.height);
+    return mRectList.size();
+}
+#endif
+cvMat cvCascade::detectMat() const
+{
+    return mDetectMat;
+}
 
-    TRACE << results.size() << "Rectangles";
-    mRectList = results;
-    return results;
+QQImage cvCascade::detectImage() const
+{
+    return mDetectMat.toGreyImage();
+}
+
+QQRectList cvCascade::rectList() const
+{
+    return mRectList;
 }
 
 QString cvCascade::methodString() const
@@ -130,52 +258,105 @@ QString cvCascade::methodString() const
     return mMethodString;
 }
 
-QString cvCascade::imwriteMarkedImage(QQFileInfo markFileInfo)
+cvCascade::Parameters cvCascade::parameters() const
 {
-    TRACEQFI << markFileInfo;
-    cv::Mat markMat;
-    mInputMat.mat().copyTo(markMat);
+    return mParameters;
+}
+
+BasicName cvCascade::typeName(cvCascade::Type type)
+{
+    switch (type)
+    {
+        case nullType:      return "{null}";
+        case PreScan:       return "PreScan";
+        default:
+            MUSTDO(type);
+            break;
+    }
+    return "{unknown}";
+}
+
+signed cvCascade::neighborsForMinQuality(const unsigned minQual)
+{
+    if (false)                      ;
+    else if (minQual > 975)     return 96;
+    else if (minQual > 950)     return 64;
+    else if (minQual > 900)     return 40;
+    else if (minQual > 850)     return 32;
+    else if (minQual > 800)     return 24;
+    else if (minQual > 750)     return 16;
+    else if (minQual > 700)     return 12;
+    else if (minQual > 650)     return 8;
+    else if (minQual > 600)     return 6;
+    else if (minQual > 500)     return 4;
+    else if (minQual > 400)     return 3;
+    else if (minQual > 200)     return 2;
+    else                        return 1;
+}
 
 #if 0
-    foreach (QRect qrc, mRectList)
-        cv::rectangle(markMat,
-                      cv::Rect(qrc.left(), qrc.top(), qrc.width(), qrc.height()),
-                      cv::Scalar(255, 255, 0),
-                      3);
-#else
-    RMUSTDO(RemoveForFlight);
-    foreach (QRect qrc, mRectList)
-        cv::rectangle(markMat,
-                      cv::Rect(qrc.left(), qrc.top(), qrc.width(), qrc.height()),
-                      cv::Scalar(255, 0, 0),
-                      1);
+bool cvCascade::loadCoreSize(const QFileInfo &cascadeXmlInfo)
+{
+    TRACEQFI << cmType << cascadeXmlInfo;
+    mCoreSize = QSize();
 
+    XmlFile xmlFile(cascadeXmlInfo.absoluteFilePath());
+    bool loaded = xmlFile.load();
+    EXPECT(loaded);
+    if ( ! loaded) return loaded;
+
+    QDomElement rootDE = xmlFile.rootElement();
+    DUMPVAL(rootDE.tagName());
+    QDomElement topDE = rootDE.firstChildElement();
+    DUMPVAL(topDE.tagName());
+    DUMPVAL(topDE.attribute("type_id"));
+
+    int cascadeVersion = determineVersion(topDE);
+    QSize sz;
+    switch (cascadeVersion)
+    {
+    case 2:     sz = getSize2(topDE);       break;
+    case 4:     sz = getSize2(topDE);       break;
+    default:    return false;
+    }
+
+    DUMPVAL(sz);
+    if (sz.isValid()) mCoreSize = sz;
+    return mCoreSize.isValid();
+}
+
+int cvCascade::determineVersion(const QDomElement topDE)
+{
+    TRACEQFI << topDE.text();
+    int ver = -1;
+    QString typeId = topDE.attribute("type_id");
+    if (typeId == "opencv-haar-classifier")
+        ver = 2;
+    else if (typeId == "opencv-cascade-classifier")
+        ver = 4;
+    EXPECTNE(-1, ver);
+    return ver;
+}
+
+QQSize cvCascade::getSize2(const QDomElement topDE)
+{
+    TRACEQFI << topDE.text();
+    int width = -1, height = -1;
+    QDomElement sizeDE = topDE.firstChildElement("size");
+    QString sizeText = sizeDE.text();
+    QTextStream ts(&sizeText);
+    ts >> width >> height;
+    return QQSize(width, height);
+}
+
+QQSize cvCascade::getSize4(const QDomElement topDE)
+{
+    TRACEQFI << topDE.text();
+    int width = -1, height = -1;
+    QDomElement heightDE = topDE.firstChildElement("height");
+    QDomElement widthDE  = topDE.firstChildElement("width");
+    height = heightDE.text().toInt();
+    width  = widthDE.text().toInt();
+    return QQSize(width, height);
+}
 #endif
-
-    markFileInfo.replace("%M", methodString());
-    return  cv::imwrite(cvString(markFileInfo.absoluteFilePath()), markMat)
-            ? markFileInfo.absoluteFilePath()
-            : "Error writing MarkedRect file";
-}
-
-bool cvCascade::getCoreSize(const QFileInfo &cascadeXmlInfo)
-{
-    TRACEQFI << cascadeXmlInfo;
-    mCoreSize = QSize(32, 32);
-    NEEDDO(it);
-    return false;
-}
-
-void cvCascade::makeMethodString(const CascadeParameters &parms)
-{
-    TRACEFN;
-    parms.dumpList();
-    mMethodString = QString("Factor=%1,Neighbors=%2"
-                            ",MinSize=%3x%4,MaxSize=%5x%6,%7")
-            .arg(parms.factor()).arg(parms.neighbors())
-            .arg(parms.minSize().width()).arg(parms.minSize().height())
-            .arg(parms.maxSize().width()).arg(parms.maxSize().height())
-            .arg(mCascadeXmlInfo.completeBaseName());
-
-}
-

@@ -1,6 +1,17 @@
 #include "cvBGRA.h"
 
+#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/core/types.hpp>
+
+#include <eirXfr/Debug.h>
+
 cvBGRA::cvBGRA() : mU32(0) {;}
+
+cvBGRA::cvBGRA(const QColor color)
+{
+    MUSTUSE(color);
+}
 cvBGRA::cvBGRA(const quint32 u32) : mU32(u32) {;}
 cvBGRA::cvBGRA(quint8 *ptr) : mU32(*(quint32 *)(ptr))  {;}
 

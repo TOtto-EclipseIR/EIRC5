@@ -72,3 +72,11 @@ QDomElement XmlFile::rootElement() const
     return mRootElement;
 }
 
+
+QStringList XmlFile::dumpList(const QDomNamedNodeMap &namedNodeMap)
+{
+    QStringList nameList;
+    for (int ix = 0; ix < namedNodeMap.length(); ++ix)
+        nameList << QString("%1. %2").arg(ix+1).arg(namedNodeMap.item(ix).nodeName());
+    return nameList;
+}

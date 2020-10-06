@@ -1,2 +1,4 @@
-# file {EIRC repo}./src/cons/If2Console/Input01.txt
+# file {EIRC repo}./resource/config/Input01.txt
+
+
 

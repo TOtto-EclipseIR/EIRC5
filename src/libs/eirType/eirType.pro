@@ -1,4 +1,4 @@
-QT -= gui
+# QT -= gui ### QImage
 
 TEMPLATE = lib
 DEFINES += EIRTYPE_LIBRARY
@@ -18,7 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include(../../EIRC2.pri)
 
-LIBS *= -leirBase2
+LIBS *= -leirBase5
 
 SOURCES += \
     ArgumentItem.cpp \
@@ -26,12 +26,25 @@ SOURCES += \
     FunctionInfo.cpp \
     Id.cpp \
     MultiName.cpp \
+    Palette.cpp \
+    QQByteArray.cpp \
+    QQColor.cpp \
     QQDir.cpp \
+    QQFile.cpp \
     QQFileInfo.cpp \
     QQFileInfoList.cpp \
+    QQImage.cpp \
+    QQPoint.cpp \
     QQRect.cpp \
     QQRectF.cpp \
     QQRectList.cpp \
+    QQSize.cpp \
+    QQString.cpp \
+    QQStringList.cpp \
+    QQStringStdList.cpp \
+    Rational.cpp \
+    Real.cpp \
+    RealMath.cpp \
     Region.cpp \
     Sortable.cpp \
     BitFlags.cpp \
@@ -46,11 +59,10 @@ SOURCES += \
     Boolean.cpp \
     Milliseconds.cpp \
     Success.cpp \
-    UInt128.cpp \
-    Uid.cpp \
     eirType.cpp \
 
 HEADERS += \
+    ../../version.h \
     ArgumentItem.h \
     BitFlags.h \
     DProperty.h \
@@ -65,12 +77,25 @@ HEADERS += \
     NamedArray.h \
     NamedEnum.h \
     NamedMap.h \
+    Palette.h \
+    QQByteArray.h \
+    QQColor.h \
     QQDir.h \
+    QQFile.h \
     QQFileInfo.h \
     QQFileInfoList.h \
+    QQImage.h \
+    QQPoint.h \
     QQRect.h \
     QQRectF.h \
     QQRectList.h \
+    QQSize.h \
+    QQString.h \
+    QQStringList.h \
+    QQStringStdList.h \
+    Rational.h \
+    Real.h \
+    RealMath.h \
     Region.h \
     Sortable.h \
     Value.h \
@@ -85,8 +110,6 @@ HEADERS += \
     DualMap.h \
     Milliseconds.h \
     Success.h \
-    UInt128.h \
-    Uid.h \
     eirType_global.h \
     eirType.h \
 

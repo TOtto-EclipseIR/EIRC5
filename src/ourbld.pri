@@ -4,11 +4,11 @@ OURBLD = "{???}"
 windows:OURBLD = "windows"
 
 contains(QMAKE_TARGET.arch, x86_64):{
-    OURBLD = "win64-msvc"
+    OURBLD = "win64V"
 #    message( "Building for 64 bit")
 }
 ! contains(QMAKE_TARGET.arch, x86_64):{
-    OURBLD = "win32-msvc"
+    OURBLD = "win32V"
 #    message( "Building for 64 bit")
 }
 #message(OURBLD = $$OURBLD)

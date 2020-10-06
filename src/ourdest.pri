@@ -12,7 +12,7 @@ CONFIG(release, debug|release|profile) {
 CONFIG(profile, debug|release|profile) {
     OURDEST = $$replace(OURDEST, <dbg>, pro)
 }
-OURDEST = $$replace(OURDEST, <ver>, $$EIRC2_VER_STRING)
+OURDEST = $$replace(OURDEST, <ver>, $$EIRC5_VER_STRING)
 DESTDIR = $$OURDEST
 LIBS *= -L$$OURDEST
 
