@@ -12,6 +12,13 @@ cvCascade *ObjDetProcessor::cascade()
     return mpCascade;
 }
 
+void ObjDetProcessor::configure(const Settings::Key key)
+{
+    TRACEQFI << key();
+    mRectSettings.read(key + "/RectFinder");
+    mGroupSettings.read(key + "/RectGrouper");
+}
+
 void ObjDetProcessor::configure(const Settings::Key rectKey, const Settings::Key groupKey)
 {
     TRACEQFI << rectKey() << groupKey();

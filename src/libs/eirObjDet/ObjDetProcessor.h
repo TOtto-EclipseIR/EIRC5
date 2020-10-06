@@ -18,6 +18,7 @@ public:
     cvCascadeType type() const;
     cvCascade * cascade();
 
+    void configure(const Settings::Key key);
     void configure(const Settings::Key rectKey, const Settings::Key groupKey);
     void setImage(const QQImage &inputImage);
     int findRects(const bool showMat=false, const QQRect &region=QQRect());

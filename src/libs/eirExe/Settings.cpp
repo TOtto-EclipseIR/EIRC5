@@ -200,15 +200,17 @@ bool Settings::boolean(const Settings::Key &key, const bool &defaultValue) const
 
 int Settings::signedInt(const Key &key, const signed &defaultValue) const
 {
-    bool ok = contains(key);
-    signed result = get(key).toInt(&ok);
+    bool ok;
+    unsigned result = get(key).toInt(&ok);
+    ok &= contains(key);
     return ok ? result : defaultValue;
 }
 
 unsigned Settings::unsignedInt(const Key &key, const unsigned &defaultValue) const
 {
-    bool ok = contains(key);
+    bool ok;
     unsigned result = get(key).toUInt(&ok);
+    ok &= contains(key);
     return ok ? result : defaultValue;
 }
 

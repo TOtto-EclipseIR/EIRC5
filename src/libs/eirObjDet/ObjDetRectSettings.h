@@ -15,6 +15,9 @@ public:
     ObjDetRectSettings &operator=(const ObjDetRectSettings &);
     ~ObjDetRectSettings();
 
+    signed neighbors() const;
+    unsigned scaleFactor() const;
+
     void read(const Settings::Key rectKey);
     QSettings::SettingsMap toMap(const Settings::Key rectKey=Settings::Key()) const;
     void dump(const Settings::Key rectKey=Settings::Key()) const;
