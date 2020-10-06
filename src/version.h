@@ -4,8 +4,8 @@
 #define VER_MAJOR 5
 #define VER_MINOR 9
 #define VER_RELEASE 0xA4
-#define VER_BRANCH 5
-#define VER_STRING "v5.09-Alpha4+0005"
+#define VER_BRANCH 0
+#define VER_STRING "v5.09-Alpha4"
 #define VER_TRUNKNAME "develop"
 #define VER_MINI  VER_RELEASE
 #define VER_MICRO VER_BRANCH
