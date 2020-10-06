@@ -45,6 +45,8 @@ void FaceConsole::initializeApplication()
             this, &FaceConsole::nextFile);
     CONNECT(this, &FaceConsole::processed,
             this, &FaceConsole::nextFile);
+    CONNECT(this, &FaceConsole::processFailed,
+            this, &FaceConsole::nextFile);
     CONNECT(this, &FaceConsole::processingComplete,
             qApp, &QCoreApplication::quit);
     CONNECT(this, &FaceConsole::resourseInitFailed,
@@ -96,10 +98,67 @@ void FaceConsole::setConfiguration()
     TRACEFN;
     writeLine("---Configuration:");
     writeLines(STG->toStringList());
-    cvCascade::Parameters parms;
-    parms.calculate(STG->extract("/PreScan/RectFinder"), cvCascadeType::PreScan, QQSize(), QQSize());
+#ifdef QTCV_SETTINGS_HACK
+    STG->beginGroup("PreScan");
+    mScaleFactor = STG->unsignedInt("RectFinder/ScaleFactor", 0);
+    mNeighbors = STG->unsignedInt("RectFinder/Neighbors", -1);
+    mMinQuality = STG->unsignedInt("RectGrouper/MinQuality", 0);
+    STG->endGroup();
+#else
+    mPreScanProcessor.configure("/PreScan");
+    mPreScanProcessor.rectSettings().dump();
+    mPreScanProcessor.groupSettings().dump();
+#endif
     EMIT(configurationSet());
+    QTimer::singleShot(100, this, &FaceConsole::initializeResources);
+}
+
+void FaceConsole::initializeResources()
+{
+    TRACEFN;
+    STG->beginGroup("/ObjectDetector/Resources/RectFinder");
+    QQDir baseCascadeDir(STG->string("BaseDir"));
+    QString cascadeFileName = STG->string("PreScan/XmlFile");
+    QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
+    STG->endGroup();
+
+    cvCascade::Parameters parms;
+#ifdef QTCV_SETTINGS_HACK
+    mMethodString = QString("ScaleFactor=%1,Neighbors=%2,MinQuality=%3,%4")
+            .arg(mScaleFactor).arg(mNeighbors).arg(mMinQuality)
+            .arg(cascadeFileInfo.completeBaseName());
+#else
+    parms.calculate(mPreScanProcessor.rectSettings().toMap(),
+                    cvCascadeType::PreScan, QQSize(), QQSize());
+    mMethodString = parms.methodString(cascadeFileInfo);
+#endif
+
+    TRACE << baseCascadeDir << baseCascadeDir.exists() << baseCascadeDir.isReadable();
+    EXPECT(baseCascadeDir.exists());
+    EXPECT(baseCascadeDir.isReadable());
+    TRACE << cascadeFileInfo.absoluteFilePath() << cascadeFileInfo.exists()
+          << cascadeFileInfo.isReadable() << cascadeFileInfo.isFile();
+    EXPECTNOT(cascadeFileInfo.notExists());
+    EXPECTNOT(cascadeFileInfo.notReadable());
+    EXPECTNOT(cascadeFileInfo.notFile());
+
+    write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
+    EXPECT(mPreScanProcessor.cascade()->loadCascade(cascadeFileInfo));
+    if (mPreScanProcessor.cascade()->isLoaded())
+    {
+        writeLine("done");
+    }
+    else
+    {
+        writeLine("error");
+        writeErr("***Cascade file load reported failed: "
+                 + cascadeFileInfo.absoluteFilePath());
+    }
+
+    EMIT(resoursesInitd());
     QTimer::singleShot(100, this, &FaceConsole::setBaseOutputDir);
+
+    NEEDDO(cascade()->configure);
 }
 
 void FaceConsole::setBaseOutputDir()
@@ -125,7 +184,8 @@ void FaceConsole::setOutputDirs()
     TRACEFN;
     bool created = false;
     mMarkedRectOutputDir.setNull(true);
-    QString markedRectDirString(STG->string("Output/Dirs/MarkedRect"));
+    QQString markedRectDirString(STG->string("Output/Dirs/PreScanRect"));
+    markedRectDirString.replace("%M", mMethodString);
     DUMPVAL(markedRectDirString);
     if (markedRectDirString.isEmpty())
     {
@@ -165,6 +225,7 @@ void FaceConsole::setOutputDirs()
     {
         writeLine("---"+mMarkedRectOutputDir.absolutePath()
                   + (created ? " created" : " exists"));
+#if 0
         for (int q00 = 0; q00 < 10; ++q00)
         {
             QDir q00Dir = mMarkedRectOutputDir;
@@ -175,52 +236,13 @@ void FaceConsole::setOutputDirs()
             else
                 writeErr("***"+q00Dir.absolutePath()+" cannot be created");
         }
+#endif
     }
 
     NEEDDO(OtherDirs);
     TODO(BackToImageIO);
     EMIT(outputDirsSet());
-    QTimer::singleShot(100, this, &FaceConsole::initializeResources);
-}
-
-void FaceConsole::initializeResources()
-{
-    TRACEFN;
-//    new ObjectDetector(cvCascade::PreScan, this);
-  //  TSTALLOC(ObjectDetector::p(cvCascade::PreScan));
-
-    STG->beginGroup("/ObjectDetector/Resources/RectFinder");
-    QQDir baseCascadeDir(STG->string("BaseDir"));
-    QString cascadeFileName = STG->string("PreScan/XmlFile");
-    QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
-    STG->endGroup();
-
-    TRACE << baseCascadeDir << baseCascadeDir.exists() << baseCascadeDir.isReadable();
-    EXPECT(baseCascadeDir.exists());
-    EXPECT(baseCascadeDir.isReadable());
-    TRACE << cascadeFileInfo.absoluteFilePath() << cascadeFileInfo.exists()
-          << cascadeFileInfo.isReadable() << cascadeFileInfo.isFile();
-    EXPECTNOT(cascadeFileInfo.notExists());
-    EXPECTNOT(cascadeFileInfo.notReadable());
-    EXPECTNOT(cascadeFileInfo.notFile());
-
-    write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
-    EXPECT(mPreScanProcessor.cascade()->loadCascade(cascadeFileInfo));
-    if (mPreScanProcessor.cascade()->isLoaded())
-    {
-        writeLine("done");
-    }
-    else
-    {
-        writeLine("error");
-        writeErr("***Cascade file load reported failed: "
-                 + cascadeFileInfo.absoluteFilePath());
-    }
-
-    EMIT(resoursesInitd());
     QTimer::singleShot(100, this, &FaceConsole::startProcessing);
-
-    NEEDDO(cascade()->configure);
 }
 
 void FaceConsole::startProcessing()
@@ -258,12 +280,16 @@ void FaceConsole::processCurrentFile()
     if (inputImage.isNull())
     {
         writeLine("***Invalid Image File");
-        EMIT(processed(QFileInfo(mCurrentFileInfo),0));
+        EMIT(processFailed(QFileInfo(mCurrentFileInfo), "Invalid Image File"));
     }
 
 #if 1
     mPreScanProcessor.setImage(inputImage);
+#ifdef QTCV_SETTINGS_HACK
+    int rectCount = mPreScanProcessor.findRects(mScaleFactor, mNeighbors, mMinQuality);
+#else
     int rectCount = mPreScanProcessor.findRects();
+#endif
     EXPECTNOT(rectCount < 0);
     if (rectCount < 0)
         writeErr("***PreScanProcessor findRects() failed, code = " + QString::number(rectCount));
@@ -282,7 +308,6 @@ void FaceConsole::processCurrentFile()
             writeLine("   " + rectFileInfo.absoluteFilePath() + " saved");
     }
 
-    EMIT(processed(QFileInfo(mCurrentFileInfo),0));
 #else
     int rectCount = cmpPreScanDetector->cascade()->detectRectangles(preScanConfig, inputImage);
     DUMPVAL(rectCount);
@@ -336,16 +361,7 @@ void FaceConsole::processCurrentFile()
     }
 #endif
 
-    EMIT(processed(QFileInfo(mCurrentFileInfo),
-             mCurrentRectangles.size()));
-    NEEDDO(processFailed());
-    /*
-    else
-    {
-        EMIT(processFailed(mCurrentFileInfo, "Error locating face objects"));
-    }
-    */
-    NEEDDO(more);
+    EMIT(processed(QFileInfo(mCurrentFileInfo), mCurrentRectangles.size()));
 }
 
 void FaceConsole::finishProcessing()

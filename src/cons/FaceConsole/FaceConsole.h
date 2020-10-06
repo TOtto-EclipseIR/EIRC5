@@ -21,9 +21,9 @@ public slots:
 private slots:
     void processCommandLine();
     void setConfiguration();
+    void initializeResources();
     void setBaseOutputDir();
     void setOutputDirs();
-    void initializeResources();
     void startProcessing();
     void nextFile();
     void processCurrentFile();
@@ -55,6 +55,12 @@ signals:
 
 private:
     ObjDetProcessor mPreScanProcessor;
+#ifdef QTCV_SETTINGS_HACK
+    unsigned mScaleFactor=120;
+    signed mNeighbors=1;
+    unsigned mMinQuality=0;
+#endif
+    QQString mMethodString;
     QDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
     QQDir::Vector mMarkedFaceQualityDirs;

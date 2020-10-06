@@ -21,7 +21,14 @@ public:
     void configure(const Settings::Key key);
     void configure(const Settings::Key rectKey, const Settings::Key groupKey);
     void setImage(const QQImage &inputImage);
-    int findRects(const bool showMat=false, const QQRect &region=QQRect());
+    int findRects(
+        #ifdef QTCV_SETTINGS_HACK
+            const unsigned mScaleFactor,
+            const signed mNeighbors,
+            const unsigned mMinQuality,
+        #endif
+            const bool showMat=false,
+                  const QQRect &region=QQRect());
     int groupRects();
 
     ObjDetRectSettings rectSettings() const { return mRectSettings; }

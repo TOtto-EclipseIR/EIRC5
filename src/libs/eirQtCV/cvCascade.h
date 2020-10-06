@@ -40,6 +40,9 @@ public:
     public:
         Parameters();
         void set(const Settings::Key &groupKey);
+#ifdef QTCV_SETTINGS_HACK
+        void calculate(const unsigned scaleFactor, const signed neigh, const unsigned minQual);
+#else
         void calculate(const Type type,
                        const QQSize imageSize,
                        const QQSize coreSize);
@@ -47,12 +50,13 @@ public:
                        const Type type,
                        const QQSize imageSize,
                        const QQSize coreSize);
+#endif
         double factor() const;
         int neighbors() const;
         int flags() const;
         cvSize minSize() const;
         cvSize maxSize() const;
-        QString methodString(const QFileInfo &cascadeXmlInfo) const;
+        QString methodString(const QQFileInfo &cascadeXmlInfo) const;
         QVariant toVariant() const;
         static qreal typeFactor(const cvCascade::Type type);
         QStringList dumpList() const;
@@ -80,15 +84,20 @@ public:
     QSize coreSize() const;
     QQFileInfo cascadeFileInfo() const;
     cv::CascadeClassifier *classifier();
-
+#ifdef QTCV_SETTINGS_HACK
+    int detectRectangles(const QSettings::SettingsMap rectSettings,
+                         const unsigned scaleFactor,
+                         const signed neighbors,
+                         const unsigned minQuality,
+                         const cvMat &greyInputMat,
+                         const bool showDetect=false,
+                         const QQRect &region=QQRect());
+#else
     int detectRectangles(const Settings::Key &groupKey,
                          const QQImage &inputImage,
                          const bool showDetect=false,
                          const QQRect &region=QQRect());
-    int detectRectangles(const QSettings::SettingsMap rectSettings,
-                         const cvMat &greyInputMat,
-                         const bool showDetect=false,
-                         const QQRect &region=QQRect());
+#endif
     cvMat detectMat() const;
     QQImage detectImage() const;
     QQRectList rectList() const;
@@ -97,12 +106,7 @@ public:
 
 public: // static
     static BasicName typeName(Type type);
-#if 0
-private: // static
-    int determineVersion(const QDomElement topDE);
-    QQSize getSize2(const QDomElement topDE);
-    QQSize getSize4(const QDomElement topDE);
-#endif
+
 private:
     Type cmType=nullType;
     QQFileInfo mCascadeXmlInfo;

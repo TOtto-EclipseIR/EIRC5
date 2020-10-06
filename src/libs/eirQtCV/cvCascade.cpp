@@ -72,7 +72,8 @@ cv::CascadeClassifier *cvCascade::classifier()
 {
     return mpClassifier;
 }
-#if 1
+
+#if 0
 int cvCascade::detectRectangles(const Settings::Key &groupKey,
                                 const QQImage &inputImage,
                                 const bool showDetect,
@@ -97,7 +98,6 @@ int cvCascade::detectRectangles(const Settings::Key &groupKey,
     }
 
     if (notLoaded()) return -3;         // empty cascade    /* /========\ */
-
     mParameters.set(groupKey);
     mParameters.calculate(cmType, mDetectMat.size(), coreSize());
 #if 0
@@ -123,8 +123,15 @@ int cvCascade::detectRectangles(const Settings::Key &groupKey,
     foreach (cvRect cvrc, cvRectVector) mRectList << cvrc.toRect();
     return mRectList.size();
 }
+#endif
 
 int cvCascade::detectRectangles(const QSettings::SettingsMap rectSettings,
+                                #ifdef QTCV_SETTINGS_HACK
+                                    const unsigned scaleFactor,
+                                    const signed neighbors,
+                                    const unsigned minQuality,
+                                #endif
+
                                 const cvMat &greyInputMat,
                                 const bool showDetect,
                                 const QQRect &region)
@@ -149,8 +156,11 @@ int cvCascade::detectRectangles(const QSettings::SettingsMap rectSettings,
 
     EXPECT(isLoaded());
     if (notLoaded()) return -3;         // empty cascade    /* /========\ */
-
-    mParameters.calculate(cmType, mDetectMat.size(), coreSize());
+#ifdef QTCV_SETTINGS_HACK
+    mParameters.calculate(scaleFactor, neighbors, minQuality);
+#else
+    mParameters.calculate(rectSettings, cmType, mDetectMat.size(), coreSize());
+#endif
 #if 0
     cvSize minSize = mParameters.minSize();
     cvSize maxSize = mParameters.maxSize();
@@ -173,8 +183,7 @@ int cvCascade::detectRectangles(const QSettings::SettingsMap rectSettings,
     foreach (cvRect cvrc, cvRectVector) mRectList << cvrc.toRect();
     return mRectList.size();
 }
-
-#else
+#if 0
 int cvCascade::detectRectangles(Settings *rectFinderSettings,
                                 const QQImage &inputImage,
                                 const bool showDetect,

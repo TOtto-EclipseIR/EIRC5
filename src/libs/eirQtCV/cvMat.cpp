@@ -206,20 +206,23 @@ cvMat cvMat::greyFromImage(const QQImage &image)
     TRACE << toDebugString(newMat.mpCvMat);
     TSTALLOC(newMat.mat().data);
     QQImage greyImage = image.convertToFormat(QImage::Format_Grayscale8);
-    EXPECTEQ(1, greyImage.depth());
+    EXPECTEQ(8, greyImage.depth());
     EXPECTEQ(greyImage.size(), newMat.size());
-    EXPECTEQ(1, newMat.depth());
+    EXPECTEQ(8, newMat.depth());
     BEXPECTEQ(greyImage.depth(), newMat.depth());
     if (greyImage.size() != newMat.size() || greyImage.depth() != newMat.depth())
-        return cvMat();
+        return cvMat();                                             /* /=========\ */
 
     if (newMat.isContinuous())
     {
         EXPECTEQ(greyImage.stride(), newMat.stride());
         EXPECTEQ(greyImage.sizeInBytes(), newMat.sizeInBytes());
-        if (greyImage.sizeInBytes() != newMat.sizeInBytes())
-            return cvMat();                                         /* /=========\ */
-        std::memcpy(newMat.ptr(0), greyImage.bits(), newMat.sizeInBytes());
+    }
+    if (newMat.isContinuous()
+            && greyImage.stride() == newMat.stride()
+            && greyImage.sizeInBytes() == newMat.sizeInBytes())
+    {
+            std::memcpy(newMat.ptr(0), greyImage.bits(), newMat.sizeInBytes());
     }
     else
     {
