@@ -2,22 +2,38 @@
 
 #include <eirXfr/Debug.h>
 
-RectangleFinder::RectangleFinder(QObject *parent) : QObject(parent)
+RectangleFinder::RectangleFinder(const cvCascade::Type cascadeType, const Settings::Key finderKey, QObject *parent)
+    : QObject(parent)
+    , cmType(cascadeType)
+    , cmFinderKey(finderKey)
+    , cmCascade(cascadeType)
 {
+    TRACEQFI << cvCascade::typeName(cascadeType)() << finderKey() << QOBJNAME(parent);
+    setObjectName("RectangleFinder:"+cvCascade::typeName(cascadeType));
+    CONNECT(this, &RectangleFinder::ctord,
+            this, &RectangleFinder::initialize);
     MUSTDO(it);
+    EMIT(ctord());
 }
 
-void RectangleFinder::setCascadeBaseDir(const QString &cascadeBaseDirName)
+void RectangleFinder::initialize()
 {
-    MUSTUSE(cascadeBaseDirName);
+    TRACEQFI << QOBJNAME(parent());
+
+    MUSTDO(it);
+    EMIT(initialized());
 }
 
-void RectangleFinder::loadCascade(const cvCascade::Type type, const QString &cascadeXmlFileName)
+void RectangleFinder::setCascadeBaseDir()
 {
-    MUSTUSE(type); MUSTUSE(cascadeXmlFileName);
+    TRACEQFI << QOBJNAME(parent());
+
+    MUSTDO(it);
+    EMIT(baseDirSet());
 }
 
-void RectangleFinder::enqueue(const cvCascade::Type type)
+void RectangleFinder::loadCascade(const QString &cascadeXmlFileName)
 {
-    MUSTUSE(type);
+    MUSTUSE(cascadeXmlFileName);
 }
+

@@ -17,23 +17,27 @@ LIBS *= -leirExe5
 LIBS *= -leirQtCV5
 
 SOURCES += \
-    ObjDetGroupSettings.cpp \
+    ObjDetCatalog.cpp \
     ObjDetManager.cpp \
     ObjDetProcessor.cpp \
-    ObjDetRectSettings.cpp \
     ObjDetResultItem.cpp \
     ObjDetResultList.cpp \
+    ObjectDetection.cpp \
+    RectFinderCatalog.cpp \
+    RectFinderCatalogEntry.cpp \
     RectangleFinder.cpp \
     RectangleGrouper.cpp \
     eirObjDet.cpp
 
 HEADERS += \
-    ObjDetGroupSettings.h \
+    ObjDetCatalog.h \
     ObjDetManager.h \
     ObjDetProcessor.h \
-    ObjDetRectSettings.h \
     ObjDetResultItem.h \
     ObjDetResultList.h \
+    ObjectDetection.h \
+    RectFinderCatalog.h \
+    RectFinderCatalogEntry.h \
     RectangleFinder.h \
     RectangleGrouper.h \
     eirObjDet_global.h \

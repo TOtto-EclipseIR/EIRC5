@@ -5,7 +5,7 @@
 #message(QTCVINCLUDEPATH = $$(QTCVINCLUDEPATH))
 ###message(PATH = $$(PATH))
 
-DEFINES *= QTCV_SETTINGS_HACK
+#DEFINES *= QTCV_SETTINGS_HACK
 include(version.pri)
 include(ourbld.pri)
 include(ourdest.pri)

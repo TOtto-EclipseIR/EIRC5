@@ -3,32 +3,40 @@
 
 #include <QObject>
 
-#include <QDir>
-#include <QFileInfo>
 #include <QString>
-#include <QUuid>
-#include <QDir>
 
+#include <eirType/QQDir.h>
 #include <eirQtCV/cvCascade.h>
+
+#include "RectFinderCatalog.h"
 
 class EIROBJDET_EXPORT RectangleFinder : public QObject
 {
     Q_OBJECT
 public:
-    explicit RectangleFinder(QObject *parent = nullptr);
+    explicit RectangleFinder(const cvCascade::Type cascadeType, const Settings::Key finderKey, QObject *parent = nullptr);
+    QDir baseDir() const;
     bool isLoaded(const cvCascade::Type type);
 
 public slots:
-    void setCascadeBaseDir(const QString &cascadeBaseDirName);
-    void loadCascade(const cvCascade::Type type,
-                     const QString &cascadeXmlFileName);
-    void enqueue(const cvCascade::Type type);
+    void initialize();
+    void setCascadeBaseDir();
+    void readCatalogs();
+    void loadCascade(const QString &cascadeXmlFileName);
 
 signals:
-    void cascadeBaseDirSet(cvCascade::Type type,
-                           QDir cascadeBaseDir);
+    void ctord();
+    void initialized();
+    void baseDirSet(cvCascade::Type type, QDir cascadeBaseDir);
     void cascadeLoaded(cvCascade::Type type,
                        QFileInfo cascadeXmlFileInfo);
+
+private:
+    const cvCascadeType cmType;
+    const Settings::Key cmFinderKey;
+    const cvCascade cmCascade;
+    QQDir mBaseDir;
+    RectFinderCatalog mCatalog;
 
 };
 

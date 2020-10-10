@@ -2,28 +2,22 @@
 
 #include <eirXfr/Debug.h>
 
-ObjDetProcessor::ObjDetProcessor(const cvCascade::Type cascadeType)
-    : cmType(cascadeType) , mpCascade(new cvCascade(cmType)) {;}
-
-
-cvCascade *ObjDetProcessor::cascade()
+ObjDetProcessor::ObjDetProcessor(const cvCascade::Type cascadeType, const Settings::Key objDetKey, QObject * parent)
+    : QObject(parent)
+    , cmType(cascadeType)
+    , cmObjDetKey(objDetKey)
+    , cmpRectFinder(new RectangleFinder(cmType, cmObjDetKey+"RectFinder", parent))
+    , cmpRectGrouper(new RectangleGrouper(cmType, cmObjDetKey+"RectGrouper", parent))
 {
-    TSTALLOC(mpCascade);
-    return mpCascade;
-}
-
-void ObjDetProcessor::configure(const Settings::Key key)
-{
-    TRACEQFI << key();
-    mRectSettings.read(key + "/RectFinder");
-    mGroupSettings.read(key + "/RectGrouper");
+    TRACEQFI << cvCascade::typeName(cmType)() << cmObjDetKey() << QOBJNAME(parent);
+    setObjectName("ObjDetProcessor");
+    MUSTDO(more);
 }
 
 void ObjDetProcessor::configure(const Settings::Key rectKey, const Settings::Key groupKey)
 {
     TRACEQFI << rectKey() << groupKey();
-    mRectSettings.read(rectKey);
-    mGroupSettings.read(groupKey);
+    mRectKey = rectKey, mGroupKey = groupKey;
 }
 
 void ObjDetProcessor::setImage(const QQImage &inputImage)
@@ -35,24 +29,12 @@ void ObjDetProcessor::setImage(const QQImage &inputImage)
     BEXPECTEQ(1, mGreyInputMat.depthInBytes());
 }
 
-int ObjDetProcessor::findRects(
-        #ifdef QTCV_SETTINGS_HACK
-            const unsigned mScaleFactor,
-            const signed mNeighbors,
-            const unsigned mMinQuality,
-        #endif
-        const bool showMat, const QQRect &region)
+int ObjDetProcessor::findRects(const bool showMat, const QQRect &region)
 {
     TRACEFN; TOUSE(region);
     TRACE << mGreyInputMat.toDebugString();
     mRectList.clear();
-    int rectCount = cascade()->detectRectangles(mRectSettings.toMap(),
-                                            #ifdef QTCV_SETTINGS_HACK
-                                                  mScaleFactor,
-                                                  mNeighbors,
-                                                  mMinQuality,
-                                            #endif
-                                                mGreyInputMat, showMat, region);
+    int rectCount = cascade()->detectRectangles(mGreyInputMat, mRectKey, showMat, region);
     mRectList = cascade()->rectList();
     return rectCount;
 }
