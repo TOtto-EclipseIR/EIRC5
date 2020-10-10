@@ -1,4 +1,4 @@
-#include "ObjDetGroupSettings.h"
+#include "del-ObjDetGroupSettings.h"
 
 #include <QString>
 

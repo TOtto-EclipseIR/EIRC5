@@ -50,7 +50,7 @@ bool ObjDetResultItem::isOrphan(const int threshold) const
 
 void ObjDetResultItem::calculate(const cvCascade *cascade)
 {
-    TRACEQFI << mAccumulator << mUnitedRect;
+    TRACEQFI << mAccumulator << mUnitedRect; TOUSE(cascade);
     TODO(UnSmell);
     EXPECTNOT(isEmpty());
     EXPECTNOT(isOrphan());
@@ -64,8 +64,9 @@ void ObjDetResultItem::calculate(const cvCascade *cascade)
 
     qreal qualityF = log(count()) * 900.0 / 4.0;
     qualityF *= averageOverlap();
-    Rational widthFactor(mResultRect.width(), cascade->detectImage().width());
-    qualityF *= 0.5 + widthFactor.toReal();
+    TODO(redoWidth);
+//    Rational widthFactor(mResultRect.width(), cascade->detectImage().width());
+  //  qualityF *= 0.5 + widthFactor.toReal();
     TODO(Alpha4:ScaleFromMinToMaxWidth);
     TODO(Adjust for Factor);
     mQuality = qBound(1, qRound(qualityF), 999);

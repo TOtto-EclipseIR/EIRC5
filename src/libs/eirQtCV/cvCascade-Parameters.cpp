@@ -8,100 +8,6 @@
 
 cvCascade::Parameters::Parameters() { TRACEFN; }
 
-void cvCascade::Parameters::set(const Settings::Key &groupKey)
-{
-    TRACEFN;
-    STG->dump(groupKey);
-}
-
-#ifdef QTCV_SETTINGS_HACK
-void cvCascade::Parameters::calculate(const unsigned scaleFactor,
-                                      const signed neigh,
-                                      const unsigned minQual)
-{
-    mFactor = qBound(1.001, 1.0 + Settings::perMille(scaleFactor ? scaleFactor : 120), 1.999);
-    mNeighbors = (neigh < 0) ? 1 : neigh;
-    if (minQual)
-    {
-        mFactor = 1.060;
-        mNeighbors = neighborsForMinQuality(minQual);
-    }
-    else
-    {
-        mFactor = qBound(1.001, 1.0 + Settings::perMille(scaleFactor ? scaleFactor : 120), 1.999);
-        mNeighbors = (neigh < 0) ? 1 : neigh;
-    }
-}
-#else
-
-void cvCascade::Parameters::calculate(const cvCascade::Type type,
-                                      const QQSize imageSize,
-                                      const QQSize coreSize)
-{
-    TRACEQFI << cvCascade::typeName(type)() << imageSize << coreSize;
-
-    qreal typeFact = typeFactor(type); // object portion of shoulder-to-shoulder
-
-#if 0
-    qreal coreWidth = coreSize.width();
-    qreal imageWidth = imageSize.width();
-    qreal minWidth = coreWidth;
-    qreal maxWidth = imageSize.minDimension() - coreSize.width();
-    unsigned minAcross = qMax(1U, mConfig.unsignedInt("MinAcross", 1));
-    unsigned maxAcross = qMax(1U, mConfig.unsignedInt("MaxAcross", 32));
-    DUMP << minAcross << maxAcross;
-    if (true || minAcross < 1)
-    {
-        maxWidth = imageWidth;
-        maxWidth /= qreal(minAcross);
-        maxWidth *= typeFactor;
-        TRACE << minAcross << typeFactor << maxWidth << imageWidth;
-    }
-    if (true || maxAcross < 1)
-    {
-        minWidth = imageWidth;
-        minWidth /= qreal(maxAcross);
-        minWidth *= typeFactor;
-        minWidth = qMax(minWidth, coreWidth);
-        TRACE << minAcross << typeFactor << maxWidth << imageWidth;
-    }
-    mMinSize.setByWidth(minWidth, coreSize.aspect());
-    mMaxSize.setByWidth(maxWidth, coreSize.aspect());
-#else
-    mMinSize.nullify();
-    mMaxSize.nullify();
-#endif
-    DUMP << mMinSize << mMaxSize;
-
-    double fac = parseFactor();
-    mFactor = qIsNull(fac) ? 1.160 : fac;
-    NEEDDO("Default Based on Image/Core size & MaxDetectors, etc."); NEEDUSE(typeFact);
-
-    STG->beginGroup(mGroupKey);
-    int neigh = STG->signedInt("Neighbors", 2);
-    mNeighbors = (neigh >= 0) ? neigh : 2;
-    STG->endGroup();
-    DUMP << dumpList();
-}
-
-void cvCascade::Parameters::calculate(const QSettings::SettingsMap &map, const cvCascade::Type type,
-                                      const QQSize imageSize, const QQSize coreSize)
-{
-    TRACEQFI << cvCascade::typeName(type)() << imageSize << coreSize;
-    Settings::dump(map);
-
-    qreal typeFact = typeFactor(type); // object portion of shoulder-to-shoulder
-    mMinSize.nullify();
-    mMaxSize.nullify();
-    unsigned fac = map.value("ScaleFactor", 120).toUInt();
-    mFactor = 1.0 + Settings::perMille(fac);
-    NEEDDO("Default Based on Image/Core size & MaxDetectors, etc."); NEEDUSE(typeFact);
-    QQString ns(map.value("Neighbors").toString(), QQString::Squeeze);
-    mNeighbors = ns.isEmpty() ? 1 : ns.toUInt();
-    DUMP << methodString(QQFileInfo());
-}
-#endif
-
 double cvCascade::Parameters::factor() const
 {
     return mFactor;
@@ -125,6 +31,26 @@ cvSize cvCascade::Parameters::minSize() const
 cvSize cvCascade::Parameters::maxSize() const
 {
     return mMaxSize.isValid() ? mMaxSize : QQSize::null;
+}
+
+void cvCascade::Parameters::setFactor(const qreal &factor)
+{
+    mFactor = factor;
+}
+
+void cvCascade::Parameters::setNeighbors(const unsigned &neighbors)
+{
+    mNeighbors = neighbors;
+}
+
+void cvCascade::Parameters::setMinSize(const cvSize &minSize)
+{
+    mMinSize = minSize;
+}
+
+void cvCascade::Parameters::setMaxSize(const cvSize &maxSize)
+{
+    mMaxSize = maxSize;
 }
 
 QString cvCascade::Parameters::methodString(const QQFileInfo &cascadeXmlInfo) const
@@ -155,24 +81,26 @@ qreal cvCascade::Parameters::typeFactor(const cvCascade::Type type)
     return resultFactor;
 }
 
-double cvCascade::Parameters::parseFactor()
+signed cvCascade::Parameters::neighborsForMinQuality(const unsigned minQual)
 {
-    double result=qQNaN();
-    STG->beginGroup(mGroupKey);
-    double f = STG->realPerMille("Factor");
-    STG->endGroup();
-    if (f >= 1.001 && f <= 2.000)
-        result = 0.0;
-    else if (f > 1.0 && f < 999.0)
-        result = 1.000 + f / 1000.0;
-    else
-        result = 0.0; // let algo decide
-    TRACE << f << result;
-    BEXPECTNOT(qIsNaN(result));
-    return result;
+    if (false)                      ;
+    else if (minQual > 975)     return 96;
+    else if (minQual > 950)     return 64;
+    else if (minQual > 900)     return 40;
+    else if (minQual > 850)     return 32;
+    else if (minQual > 800)     return 24;
+    else if (minQual > 750)     return 16;
+    else if (minQual > 700)     return 12;
+    else if (minQual > 650)     return 8;
+    else if (minQual > 600)     return 6;
+    else if (minQual > 500)     return 4;
+    else if (minQual > 400)     return 3;
+    else if (minQual > 200)     return 2;
+    else                        return 1;
 }
 
-QStringList cvCascade::Parameters::dumpList() const
+
+QStringList cvCascade::Parameters::toDebugStringList() const
 {
     QStringList qsl;
     qsl << QString("%1 = %2").arg("factor").arg(factor());

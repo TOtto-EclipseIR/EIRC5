@@ -21,6 +21,7 @@ SOURCES += \
     cvCascade.cpp \
     cvMat.cpp \
     cvRect.cpp \
+    cvRectVector.cpp \
     cvSize.cpp \
     cvString.cpp \
     cvVersion.cpp \
@@ -31,6 +32,7 @@ HEADERS += \
     cvCascade.h \
     cvMat.h \
     cvRect.h \
+    cvRectVector.h \
     cvSize.h \
     cvString.h \
     cvVersion.h \

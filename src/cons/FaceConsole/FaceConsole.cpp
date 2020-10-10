@@ -98,17 +98,11 @@ void FaceConsole::setConfiguration()
     TRACEFN;
     writeLine("---Configuration:");
     writeLines(STG->toStringList());
-#ifdef QTCV_SETTINGS_HACK
     STG->beginGroup("PreScan");
     mScaleFactor = STG->unsignedInt("RectFinder/ScaleFactor", 0);
-    mNeighbors = STG->unsignedInt("RectFinder/Neighbors", -1);
+    mNeighbors = STG->signedInt("RectFinder/Neighbors", -1);
     mMinQuality = STG->unsignedInt("RectGrouper/MinQuality", 0);
     STG->endGroup();
-#else
-    mPreScanProcessor.configure("/PreScan");
-    mPreScanProcessor.rectSettings().dump();
-    mPreScanProcessor.groupSettings().dump();
-#endif
     EMIT(configurationSet());
     QTimer::singleShot(100, this, &FaceConsole::initializeResources);
 }
@@ -121,19 +115,6 @@ void FaceConsole::initializeResources()
     QString cascadeFileName = STG->string("PreScan/XmlFile");
     QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
     STG->endGroup();
-
-    cvCascade::Parameters parms;
-#ifdef QTCV_SETTINGS_HACK
-    cvCascade::Parameters params;
-    params.calculate(mScaleFactor, mNeighbors, mMinQuality);
-    mMethodString = QString("Factor=%1,Neighbors=%2,MinQuality=%3,%4")
-            .arg(params.factor()).arg(params.neighbors()).arg(mMinQuality)
-            .arg(cascadeFileInfo.completeBaseName());
-#else
-    parms.calculate(mPreScanProcessor.rectSettings().toMap(),
-                    cvCascadeType::PreScan, QQSize(), QQSize());
-    mMethodString = parms.methodString(cascadeFileInfo);
-#endif
 
     TRACE << baseCascadeDir << baseCascadeDir.exists() << baseCascadeDir.isReadable();
     EXPECT(baseCascadeDir.exists());
@@ -285,13 +266,8 @@ void FaceConsole::processCurrentFile()
         EMIT(processFailed(QFileInfo(mCurrentFileInfo), "Invalid Image File"));
     }
 
-#if 1
     mPreScanProcessor.setImage(inputImage);
-#ifdef QTCV_SETTINGS_HACK
-    int rectCount = mPreScanProcessor.findRects(mScaleFactor, mNeighbors, mMinQuality);
-#else
-    int rectCount = mPreScanProcessor.findRects();
-#endif
+    int rectCount = mPreScanProcessor.findRects(true);
     EXPECTNOT(rectCount < 0);
     if (rectCount < 0)
         writeErr("***PreScanProcessor findRects() failed, code = " + QString::number(rectCount));
@@ -310,58 +286,6 @@ void FaceConsole::processCurrentFile()
             writeLine("   " + rectFileInfo.absoluteFilePath() + " saved");
     }
 
-#else
-    int rectCount = cmpPreScanDetector->cascade()->detectRectangles(preScanConfig, inputImage);
-    DUMPVAL(rectCount);
-    mCurrentRectangles = cmpPreScanDetector->cascade()->rectList();
-    BEXPECTNOT(rectCount < 0);
-    WEXPECTNOT(0 == rectCount);
-    EXPECTEQ(rectCount, mCurrentRectangles.size());
-    qreal unionGroupOverlap = cmpConfigObject->configuration("/PreScan/RectFinder")
-            .realPermille("UnionGroupOverlap", 500);
-    qreal unionGroupOrphan = cmpConfigObject->configuration("/PreScan/RectFinder")
-            .unsignedInt("UnionGroupOrphan", 1);
-    mCurrentResults = cmpPreScanDetector->groupByUnion(mCurrentRectangles,
-                                                       unionGroupOverlap,
-                                                       unionGroupOrphan);
-    writeLine(QString("   %1 PreScan rectangles found, %2 Candidate Faces, %3 Orphans")
-              .arg(rectCount).arg(mCurrentResults.count())
-              .arg(mCurrentResults.orphanCount()));
-    QQFileInfo markedRectOutputFileInfo(mMarkedRectOutputDir,
-            mCurrentFileInfo.completeBaseName()+"-%M@.png", QQString::Squeeze);
-    markedRectOutputFileInfo.replace("@", Milliseconds::baseDateStamp());
-    markedRectOutputFileInfo.replace("%M", cmpPreScanDetector->cascade()->methodString());
-    markedRectOutputFileName = markedRectOutputFileInfo.absoluteFilePath();
-    //SimpleRectMarker rectMarker(inputImage);
-    SimpleRectMarker rectMarker(cmpPreScanDetector->cascade()->detectImage());
-    rectMarker.mark(Configuration(), mCurrentResults, rectMarker.qualityWheel(), true);
-    QQImage markedImage = rectMarker;
-    if (markedImage.save(markedRectOutputFileName))
-        writeLine(QString("   %1 written").arg(markedRectOutputFileName));
-    HeatmapMarker heatMarker(inputImage);
-    heatMarker.mark(Configuration(), mCurrentResults);
-    QQImage heatImage = heatMarker;
-    QQFileInfo heatRectOutputFileInfo(mMarkedRectOutputDir,
-            mCurrentFileInfo.completeBaseName()+"-heat.png", QQString::Squeeze);
-    if (heatImage.save(heatRectOutputFileInfo.absoluteFilePath(QQString::Squeeze)))
-        writeLine("   " + heatRectOutputFileInfo.absoluteFilePath() + " written");
-
-    foreach (ObjDetResultItem item, mCurrentResults.list())
-    {
-        QQImage faceImage = markedImage.copy(item.resultRect() * 1.25);
-        QString faceName = QString("%1-R%2Q%3.PNG")
-                .arg(mCurrentFileInfo.completeBaseName(QQString::Squeeze))
-                .arg(item.rank(), 2, 10, QChar('0'))
-                .arg(item.quality(), 3, 10, QChar('0'));
-        QQFileInfo faceInfo(mMarkedFaceQualityDirs.at(item.quality() / 100), faceName);
-        if (faceImage.width() < 256)
-            faceImage = faceImage.scaledToWidth(256, Qt::SmoothTransformation);
-        bool saved = faceImage.save(faceInfo.absoluteFilePath());
-        TRACE << saved << faceInfo << faceImage;
-        if (saved)
-            writeLine(QString("   %1 written").arg(faceInfo.filePath()));
-    }
-#endif
 
     EMIT(processed(QFileInfo(mCurrentFileInfo), mCurrentRectangles.size()));
 }

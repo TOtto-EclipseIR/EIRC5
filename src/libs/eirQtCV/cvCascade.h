@@ -40,29 +40,25 @@ public:
     public:
         Parameters();
         void set(const Settings::Key &groupKey);
-#ifdef QTCV_SETTINGS_HACK
-        void calculate(const unsigned scaleFactor, const signed neigh, const unsigned minQual);
-#else
-        void calculate(const Type type,
-                       const QQSize imageSize,
-                       const QQSize coreSize);
-        void calculate(const QSettings::SettingsMap &map,
-                       const Type type,
-                       const QQSize imageSize,
-                       const QQSize coreSize);
-#endif
+        //void calculate(const Type type, const QQSize imageSize, const QQSize coreSize);
         double factor() const;
         int neighbors() const;
         int flags() const;
         cvSize minSize() const;
         cvSize maxSize() const;
+
+        void setFactor(const qreal &factor);
+        void setNeighbors(const unsigned &neighbors);
+        void setMinSize(const cvSize &minSize);
+        void setMaxSize(const cvSize &maxSize);
+
         QString methodString(const QQFileInfo &cascadeXmlInfo) const;
         QVariant toVariant() const;
         static qreal typeFactor(const cvCascade::Type type);
-        QStringList dumpList() const;
+        QStringList toDebugStringList() const;
 
-    private:
-        double parseFactor();
+    private: // static
+        static signed neighborsForMinQuality(const unsigned minQual);
 
     private:
         Settings::Key mGroupKey;
@@ -73,7 +69,6 @@ public:
         cvSize mMaxSize;
     };
 
-
 public:
     cvCascade(const Type &type);
     Type type() const;
@@ -83,42 +78,17 @@ public:
     bool notLoaded() const;
     QSize coreSize() const;
     QQFileInfo cascadeFileInfo() const;
-    cv::CascadeClassifier *classifier();
-#ifdef QTCV_SETTINGS_HACK
-    int detectRectangles(const QSettings::SettingsMap rectSettings,
-                         const unsigned scaleFactor,
-                         const signed neighbors,
-                         const unsigned minQuality,
-                         const cvMat &greyInputMat,
-                         const bool showDetect=false,
-                         const QQRect &region=QQRect());
-#else
-    int detectRectangles(const Settings::Key &groupKey,
-                         const QQImage &inputImage,
-                         const bool showDetect=false,
-                         const QQRect &region=QQRect());
-#endif
-    cvMat detectMat() const;
-    QQImage detectImage() const;
-    QQRectList rectList() const;
-    QString methodString() const;
-    Parameters parameters() const;
+    cv::CascadeClassifier *classifier() const;
+    QQRectList detectRectangles(const cvMat greyMat, const Parameters &parms,
+                         const bool showDetect=false, const QQRect &region=QQRect()) const;
 
 public: // static
     static BasicName typeName(Type type);
-
-private: // static
-    static signed neighborsForMinQuality(const unsigned minQual);
 
 private:
     Type cmType=nullType;
     QQFileInfo mCascadeXmlInfo;
     cv::CascadeClassifier *mpClassifier=nullptr;
-    // side-effects of detectRectangles()
-    cvMat mDetectMat;
-    QQRectList mRectList;
-    QString mMethodString;
-    Parameters mParameters;
 };
 Q_DECLARE_METATYPE(cvCascade::Parameters);
 typedef cvCascade::Type cvCascadeType;

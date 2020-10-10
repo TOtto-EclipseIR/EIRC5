@@ -55,11 +55,9 @@ signals:
 
 private:
     ObjDetProcessor mPreScanProcessor;
-#ifdef QTCV_SETTINGS_HACK
     unsigned mScaleFactor=120;
     signed mNeighbors=1;
     unsigned mMinQuality=0;
-#endif
     QQString mMethodString;
     QDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
