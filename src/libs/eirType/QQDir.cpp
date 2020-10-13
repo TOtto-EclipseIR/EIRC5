@@ -37,6 +37,11 @@ void QQDir::setNull(const bool nowNull)
     mNull = nowNull;
 }
 
+bool QQDir::isExistingReadable() const
+{
+    return exists() && isReadable();
+}
+
 bool QQDir::mkpath(const QString &dirPath)
 {
     TRACEQFI << dirPath;

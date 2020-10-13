@@ -18,6 +18,7 @@ public:
     bool isNull() const;
     bool notNull() const;
     void setNull(const bool nowNull);
+    bool isExistingReadable() const;
 
     bool mkpath(const QString &dirPath);
     bool cd(const QString &dirName);

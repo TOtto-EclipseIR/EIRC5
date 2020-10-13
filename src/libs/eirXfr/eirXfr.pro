@@ -42,6 +42,7 @@ HEADERS += \
     StartupDebug.h \
     XerEntry.h \
     XerEntryList.h \
+    XerReturn.h \
     XfrBaseEventReceiver.h \
     XfrEntry.h \
     XfrEvent.h \

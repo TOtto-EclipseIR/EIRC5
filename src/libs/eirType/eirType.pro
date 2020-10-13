@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 include(../../EIRC2.pri)
 
+LIBS *= -leirXfr5
 LIBS *= -leirBase5
 
 SOURCES += \

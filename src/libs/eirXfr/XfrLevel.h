@@ -39,8 +39,8 @@ public:
     { return level(name) >= level("Test") && level(name) < level("Warning"); }
     static bool isWarning(const Name name)
     { return level(name) >= level("Warning") && level(name) < level("Error"); }
-    static bool isError(const Name name)
-    { return level(name) >= level("Error") && level(name) < level("Fatal"); }
+    static bool isError(const Name name, bool exact=false)
+    { return level(name) >= level("Error") && level(name) < (exact ? level("Fatal") : level("Maximum")); }
     static bool isFatal(const Name name)
     { return level(name) >= level("Fatal") && level(name) < level("Maximum"); }
 

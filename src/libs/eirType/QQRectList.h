@@ -11,6 +11,7 @@
 #include <QVector>
 
 #include <eirBase/Typedefs.h>
+#include <eirXfr/XerReturn.h>
 
 class EIRTYPE_EXPORT QQRectList : public QList<QQRect>
 {
@@ -25,3 +26,6 @@ public:
     operator QVariant() const;
 };
 Q_DECLARE_METATYPE(QQRectList);
+
+//template class XerReturn<QQRectList>;
+

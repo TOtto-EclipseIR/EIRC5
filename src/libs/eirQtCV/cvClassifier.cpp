@@ -15,11 +15,15 @@ bool cvClassifier::loadCascade(const QQFileInfo &xmlFileInfo)
     return load(cvString(xmlFileInfo.filePath()));
 }
 
-QQRectList cvClassifier::detectRectangles(const cvMat greyMat, const Parameters &parms,
+XerReturn<QQRectList> cvClassifier::detectRectangles(const cvMat greyMat, const Parameters &parms,
                                 const bool showDetect, const QQRect &region)
 {
     TRACEQFI << showDetect << region;
-    if (greyMat.isNull() || notLoaded()) return QQRectList();           /* /========\ */
+    XerReturn<QQRectList> rtnPair;
+    if (greyMat.isNull())
+        return rtnPair.set(XerEntry::from(Q_FUNC_INFO, "Error", "Grey cv::Mat", "Is Null"));
+    if (notLoaded())
+        return rtnPair.set(XerEntry::from(Q_FUNC_INFO, "Error", "Detector Cascade", "Is Not Loaded"));
 
     if (showDetect)
     {
@@ -36,7 +40,7 @@ QQRectList cvClassifier::detectRectangles(const cvMat greyMat, const Parameters 
                         parms.minSize(),
                         parms.maxSize());
 
-    return rectVec.toRectList();
+    return rtnPair.set(rectVec.toRectList());
 }
 
 
