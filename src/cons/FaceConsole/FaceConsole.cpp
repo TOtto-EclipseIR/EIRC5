@@ -11,13 +11,15 @@
 #include <eirImage/HeatmapMarker.h>
 #include <eirImage/SimpleRectMarker.h>
 #include <eirQtCV/cvVersion.h>
+#include <eirQtCV/cvClassifier.h>
+#include <eirQtCV/cvClassifierPool.h>
 #include <eirType/Success.h>
 #include <eirXfr/Debug.h>
 #include <eirXfr/StartupDebug.h>
 
 FaceConsole::FaceConsole()
     : Console(ExpandCommandLineDirs)
-    , mPreScanProcessor(ObjDetProcessor(cvCascadeType::PreScan))
+//    , mPreScanProcessor(ObjDetProcessor(cvClassifier::PreScan))
 {
     TRACEFN;
     //setObjectName("FaceConsole");
@@ -98,11 +100,13 @@ void FaceConsole::setConfiguration()
     TRACEFN;
     writeLine("---Configuration:");
     writeLines(STG->toStringList());
+    /*
     STG->beginGroup("PreScan");
     mScaleFactor = STG->unsignedInt("RectFinder/ScaleFactor", 0);
     mNeighbors = STG->signedInt("RectFinder/Neighbors", -1);
     mMinQuality = STG->unsignedInt("RectGrouper/MinQuality", 0);
     STG->endGroup();
+    */
     EMIT(configurationSet());
     QTimer::singleShot(100, this, &FaceConsole::initializeResources);
 }
@@ -126,6 +130,7 @@ void FaceConsole::initializeResources()
     EXPECTNOT(cascadeFileInfo.notFile());
 
     write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
+/*
     EXPECT(mPreScanProcessor.cascade()->loadCascade(cascadeFileInfo));
     if (mPreScanProcessor.cascade()->isLoaded())
     {
@@ -137,7 +142,7 @@ void FaceConsole::initializeResources()
         writeErr("***Cascade file load reported failed: "
                  + cascadeFileInfo.absoluteFilePath());
     }
-
+*/
     EMIT(resoursesInitd());
     QTimer::singleShot(100, this, &FaceConsole::setBaseOutputDir);
 
@@ -265,7 +270,7 @@ void FaceConsole::processCurrentFile()
         writeLine("***Invalid Image File");
         EMIT(processFailed(QFileInfo(mCurrentFileInfo), "Invalid Image File"));
     }
-
+/*
     mPreScanProcessor.setImage(inputImage);
     int rectCount = mPreScanProcessor.findRects(true);
     EXPECTNOT(rectCount < 0);
@@ -285,7 +290,7 @@ void FaceConsole::processCurrentFile()
         if (rectMarker.save(rectFileInfo.absoluteFilePath()))
             writeLine("   " + rectFileInfo.absoluteFilePath() + " saved");
     }
-
+*/
 
     EMIT(processed(QFileInfo(mCurrentFileInfo), mCurrentRectangles.size()));
 }

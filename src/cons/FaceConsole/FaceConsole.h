@@ -54,14 +54,16 @@ signals:
     void processingComplete();
 
 private:
+    /*
     ObjDetProcessor mPreScanProcessor;
     unsigned mScaleFactor=120;
     signed mNeighbors=1;
     unsigned mMinQuality=0;
+    */
     QQString mMethodString;
     QDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
-    QQDir::Vector mMarkedFaceQualityDirs;
+    //QQDir::Vector mMarkedFaceQualityDirs;
     int mCurrentFileCount=0;
     QQFileInfo mCurrentFileInfo;
     QQRectList mCurrentRectangles;

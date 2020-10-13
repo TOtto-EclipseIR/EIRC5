@@ -18,7 +18,7 @@ public:
 public:
     cvSize();
     cvSize(const QSize qsz);
-    cvSize(const cv::Size cvsz);
+    cvSize(const cv::Size other);
     cvSize(const int w, const int h);
     void nullify();
     void set(const QSize qsz);

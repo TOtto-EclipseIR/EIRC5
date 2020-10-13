@@ -7,10 +7,9 @@
 
 #include <APP>
 #include <eirExe/Settings.h>
-#include <eirObjDet/del-ObjectDetector.h>
 #include <eirObjDet/ObjDetResultItem.h>
 #include <eirObjDet/ObjDetResultList.h>
-#include <eirQtCV/cvCascade.h>
+#include <eirQtCV/cvClassifier.h>
 #include <eirType/QQSize.h>
 #include <eirXfr/Debug.h>
 

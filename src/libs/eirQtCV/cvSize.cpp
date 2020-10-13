@@ -3,6 +3,7 @@
 
 cvSize::cvSize() : cv::Size() {;}
 cvSize::cvSize(const QSize qsz) : cv::Size(qsz.width(), qsz.height()) {;}
+cvSize::cvSize(const cv::Size other) : cv::Size(other) {;}
 cvSize::cvSize(const int w, const int h) : cv::Size(w, h) {;}
 
 void cvSize::nullify()

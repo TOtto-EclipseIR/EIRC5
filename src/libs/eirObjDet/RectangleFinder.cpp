@@ -41,6 +41,14 @@ void RectangleFinder::setCascadeBaseDir()
     EMIT(baseDirSet(cmType, QQDir()));
 }
 
+void RectangleFinder::readCatalogs()
+{
+    TRACEQFI << QOBJNAME(parent());
+
+    MUSTDO(it);
+    EMIT(catalogsRead());
+}
+
 void RectangleFinder::loadCascade(const QString &cascadeXmlFileName)
 {
     MUSTUSE(cascadeXmlFileName);
