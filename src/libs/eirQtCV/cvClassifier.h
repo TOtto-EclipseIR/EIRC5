@@ -8,6 +8,7 @@
 #include <eirExe/Settings.h>
 #include <eirType/QQRect.h>
 #include <eirType/QQRectList.h>
+#include <eirXfr/XerReturn.h>
 
 #include "cvMat.h"
 #include "cvSize.h"
@@ -67,8 +68,8 @@ public:
     bool notLoaded() const              { return empty(); }
     QQSize coreSize() const             { return cvSize(getOriginalWindowSize()).toSize(); }
     QQFileInfo cascadeFileInfo() const  { return mCascadeXmlInfo; }
-    QQRectList detectRectangles(const cvMat greyMat,  const Parameters &parms,
-                                const bool showDetect=false,  const QQRect &region=QQRect());
+    XerReturn<QQRectList> detectRectangles(const cvMat greyMat,  const Parameters &parms,
+                                           const bool showDetect=false,  const QQRect &region=QQRect());
 public: // static
     static BasicName typeName(Type type);
 

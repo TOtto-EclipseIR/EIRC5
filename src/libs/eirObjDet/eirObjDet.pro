@@ -11,6 +11,7 @@ CONFIG += c++11
 
 include(../../EIRC2.pri)
 INCLUDEPATH *= $(QTCVINCLUDEPATH)
+LIBS *= -leirXfr5
 LIBS *= -leirBase5
 LIBS *= -leirType5
 LIBS *= -leirExe5

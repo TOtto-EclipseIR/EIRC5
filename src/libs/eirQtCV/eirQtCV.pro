@@ -11,14 +11,13 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 include(../../EIRC2.pri)
 include(../../opencv4.pri)
 
+LIBS *= -leirXfr5
 LIBS *= -leirBase5
 LIBS *= -leirType5
 LIBS *= -leirExe5
 
 SOURCES += \
     cvBGRA.cpp \
-#    cvCascade-Parameters.cpp \
- #   cvCascade.cpp \
     cvClassifier.cpp \
     cvClassifierPool.cpp \
     cvMat.cpp \
@@ -31,7 +30,6 @@ SOURCES += \
 
 HEADERS += \
     cvBGRA.h \
-  #  cvCascade.h \
     cvClassifier.h \
     cvClassifierPool.h \
     cvMat.h \

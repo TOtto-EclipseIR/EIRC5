@@ -1,27 +1,20 @@
 #include "ObjDetProcessor.h"
 
+#include <APP>
 #include <eirXfr/Debug.h>
 
 ObjDetProcessor::ObjDetProcessor(const cvClassifier::Type cascadeType, const Settings::Key objDetKey, QObject * parent)
     : QObject(parent)
     , cmType(cascadeType)
+    , cmResourceKey(objDetKey+"Resources")
     , cmObjDetTypeKey(objDetKey+cvClassifier::typeName(cascadeType))
-    , mpRectFinder(new RectangleFinder(cmType, cmObjDetTypeKey+"RectFinder", parent))
+    , mpRectFinder(new RectangleFinder(cmType, objDetKey+"Resources/RectFinder",
+                                       cmObjDetTypeKey+"RectFinder", parent))
     , mpRectGrouper(new RectangleGrouper(cmType, cmObjDetTypeKey+"RectGrouper", parent))
 {
     TRACEQFI << cvClassifier::typeName(cmType)() << cmObjDetTypeKey() << QOBJNAME(parent);
     setObjectName("ObjDetProcessor");
     MUSTDO(more);
-}
-
-RectangleFinder *ObjDetProcessor::finder()
-{
-    return mpRectFinder;
-}
-
-RectangleGrouper *ObjDetProcessor::grouper()
-{
-    return mpRectGrouper;
 }
 
 void ObjDetProcessor::setImage(const QQImage &inputImage)
@@ -35,11 +28,24 @@ void ObjDetProcessor::setImage(const QQImage &inputImage)
 
 int ObjDetProcessor::findRects(const bool showMat, const QQRect &region)
 {
-    TRACEFN; TOUSE(region);
+    TRACEQFI << showMat << region;
+    TOUSE(region);
     TRACE << mGreyInputMat.toDebugString();
-    mRectList.clear();
-    finder()->findRectangles(mGreyInputMat, showMat, region);
-    return mRectList.count();
+    XerReturn<QQRectList> rtnerr = finder()->findRectangles(mGreyInputMat, showMat, region);
+    if (rtnerr.isError())
+    {
+        mError = rtnerr.error();
+        return -1;
+    }
+    else if (rtnerr.isSuccess())
+    {
+        mRectList = rtnerr.result();
+        return mRectList.count();
+    }
+    else
+    {
+        return -2;
+    }
 }
 
 int ObjDetProcessor::groupRects()

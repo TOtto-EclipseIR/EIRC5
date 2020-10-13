@@ -1,3 +1,34 @@
 #include "ObjectDetection.h"
 
-ObjectDetection::ObjectDetection(QObject *parent) : QObject(parent) {;}
+#include <QCoreApplication>
+
+#include <eirXfr/Debug.h>
+
+#include "ObjDetProcessor.h"
+
+ObjectDetection::ObjectDetection()
+    : QObject(qApp->parent())
+{
+    TRACEFN;
+    setObjectName("ObjectDetection");
+}
+
+ObjDetProcessor *ObjectDetection::newProcessor(const cvClassifier::Type type)
+{
+    TRACEQFI << cvClassifier::typeName(type)();
+    ObjDetProcessor * oldProc = processor(type);
+    if (oldProc)
+    {
+        oldProc->deleteLater();
+        mTypeProcessorMap.remove(type);
+    }
+    ObjDetProcessor * newProc = new ObjDetProcessor(type, mObjDetKey, this);
+    TSTALLOC(newProc);
+    mTypeProcessorMap.insert(type, newProc);
+    return newProc;
+}
+
+ObjDetProcessor *ObjectDetection::processor(const cvClassifier::Type type)
+{
+    return mTypeProcessorMap[type];
+}

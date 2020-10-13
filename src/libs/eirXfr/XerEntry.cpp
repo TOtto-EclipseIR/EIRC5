@@ -4,18 +4,9 @@
 
 #include "Debug.h"
 
-XerEntry::UidMap XerEntry::smMap;
 
-XerEntry::XerEntry()
-    : mUid(QUuid::createUuid())
-{
-    smMap.insert(uid(), this);
-}
-
-XerEntry::~XerEntry()
-{
-    smMap.remove(uid());
-}
+XerEntry::XerEntry() : mUid(QUuid::createUuid()) {;}
+XerEntry::~XerEntry() {;}
 
 XerEntry XerEntry::from(const char *qFuncInfo, const char *levelName,
                         const QString &what, const QString &why,
