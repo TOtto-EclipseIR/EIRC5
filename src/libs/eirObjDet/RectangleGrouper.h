@@ -4,18 +4,18 @@
 #include <QObject>
 
 #include <eirExe/Settings.h>
-#include <eirQtCV/cvCascade.h>
+#include <eirQtCV/cvClassifier.h>
 
 class EIROBJDET_EXPORT RectangleGrouper : public QObject
 {
     Q_OBJECT
 public:
-    explicit RectangleGrouper(const cvCascade::Type cascadeType, const Settings::Key grouperKey, QObject *parent = nullptr);
+    explicit RectangleGrouper(const cvClassifier::Type cascadeType, const Settings::Key grouperKey, QObject *parent = nullptr);
 
 signals:
 
 private:
-    cvCascadeType cmType;
+    cvClassifier::Type cmType;
     Settings::Key cmGrouperKey;
 
 };

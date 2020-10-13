@@ -2,14 +2,14 @@
 
 #include <eirXfr/Debug.h>
 
-ObjDetProcessor::ObjDetProcessor(const cvCascade::Type cascadeType, const Settings::Key objDetKey, QObject * parent)
+ObjDetProcessor::ObjDetProcessor(const cvClassifier::Type cascadeType, const Settings::Key objDetKey, QObject * parent)
     : QObject(parent)
     , cmType(cascadeType)
-    , cmObjDetTypeKey(objDetKey+cvCascade::typeName(cascadeType))
+    , cmObjDetTypeKey(objDetKey+cvClassifier::typeName(cascadeType))
     , mpRectFinder(new RectangleFinder(cmType, cmObjDetTypeKey+"RectFinder", parent))
     , mpRectGrouper(new RectangleGrouper(cmType, cmObjDetTypeKey+"RectGrouper", parent))
 {
-    TRACEQFI << cvCascade::typeName(cmType)() << cmObjDetTypeKey() << QOBJNAME(parent);
+    TRACEQFI << cvClassifier::typeName(cmType)() << cmObjDetTypeKey() << QOBJNAME(parent);
     setObjectName("ObjDetProcessor");
     MUSTDO(more);
 }

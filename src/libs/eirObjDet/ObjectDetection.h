@@ -4,7 +4,7 @@
 
 #include <QMap>
 
-#include <eirQtCV/cvCascade.h>
+#include <eirQtCV/cvClassifier.h>
 
 #include "ObjDetProcessor.h"
 
@@ -13,12 +13,12 @@ class ObjectDetection : public QObject
     Q_OBJECT
 public:
     explicit ObjectDetection(QObject *parent = nullptr);
-    ObjDetProcessor * processor(const cvCascadeType type);
+    ObjDetProcessor * processor(const cvClassifier::Type type);
 
 signals:
     
 private:
-    QMap<cvCascadeType, ObjDetProcessor*> mTypeProcessorMap;
+    QMap<cvClassifier::Type, ObjDetProcessor*> mTypeProcessorMap;
 
 };
 

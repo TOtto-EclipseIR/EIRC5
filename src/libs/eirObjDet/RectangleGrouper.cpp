@@ -2,12 +2,12 @@
 
 #include <eirXfr/Debug.h>
 
-RectangleGrouper::RectangleGrouper(const cvCascade::Type cascadeType, const Settings::Key grouperKey, QObject *parent)
+RectangleGrouper::RectangleGrouper(const cvClassifier::Type cascadeType, const Settings::Key grouperKey, QObject *parent)
     : QObject(parent)
     , cmType(cascadeType)
     , cmGrouperKey(grouperKey)
 {
-    TRACEQFI << cvCascade::typeName(cascadeType)() << grouperKey() << QOBJNAME(parent);
-    setObjectName("RectangleGrouper:"+cvCascade::typeName(cascadeType));
+    TRACEQFI << cvClassifier::typeName(cascadeType)() << grouperKey() << QOBJNAME(parent);
+    setObjectName("RectangleGrouper:"+cvClassifier::typeName(cascadeType));
     MUSTDO(it)
 }

@@ -6,7 +6,7 @@
 #include <QString>
 
 #include <eirType/QQDir.h>
-#include <eirQtCV/cvCascade.h>
+#include <eirQtCV/cvClassifier.h>
 
 #include "RectFinderCatalog.h"
 
@@ -14,9 +14,10 @@ class EIROBJDET_EXPORT RectangleFinder : public QObject
 {
     Q_OBJECT
 public:
-    explicit RectangleFinder(const cvCascade::Type cascadeType, const Settings::Key finderKey, QObject *parent = nullptr);
+    explicit RectangleFinder(QObject *parent = nullptr);
+    explicit RectangleFinder(const cvClassifier::Type cascadeType, const Settings::Key finderKey, QObject *parent = nullptr);
     QDir baseDir() const;
-    bool isLoaded(const cvCascade::Type type);
+    bool isLoaded(const cvClassifier::Type type);
 
 public slots:
     void initialize();
@@ -30,16 +31,15 @@ signals:
     void initialized();
     void catalogsRead();
     void catalogRead(const QQFileInfo qqfi);
-    void baseDirSet(cvCascade::Type type, QDir cascadeBaseDir);
-    void cascadeLoaded(cvCascade::Type type,
+    void baseDirSet(cvClassifier::Type type, QDir cascadeBaseDir);
+    void cascadeLoaded(cvClassifier::Type type,
                        QFileInfo cascadeXmlFileInfo);
 
 private:
-    const cvCascadeType cmType;
+    const cvClassifier::Type cmType;
     const Settings::Key cmFinderKey;
-    const cvCascade cmCascade;
-    cvCascade::Parameters mParameters;
+    cvClassifier::Parameters mParameters;
     QQDir mBaseDir;
-
+    RectFinderCatalog mCatalog;
 };
 

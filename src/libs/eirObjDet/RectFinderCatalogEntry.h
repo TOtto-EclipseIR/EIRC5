@@ -7,13 +7,15 @@
 #include <QTransform>
 
 #include <eirBase/Uuid.h>
-#include <eirQtCV/cvCascade.h>
+#include <eirQtCV/cvClassifier.h>
 #include <eirType/MultiName.h>
 #include <eirType/QQSize.h>
 #include <eirType/QQString.h>
 
+typedef cvClassifier::Type classifierType;
+
 #define CATALOGENTRY_DATAPROPS(TND) \
-    TND(cvCascadeType, CascadeType, cvCascadeType::nullType) \
+    TND(classifierType, CascadeType, classifierType::nullType) \
     TND(bool, IsDefault, false) \
     TND(int, Version, 0) \
     TND(MultiName, Name, MultiName()) \

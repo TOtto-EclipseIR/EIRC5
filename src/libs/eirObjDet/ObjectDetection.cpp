@@ -1,7 +1,3 @@
 #include "ObjectDetection.h"
 
-ObjectDetection::ObjectDetection(QObject *parent) 
-    : QObject(parent)
-{
-
-}
+ObjectDetection::ObjectDetection(QObject *parent) : QObject(parent) {;}

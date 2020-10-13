@@ -5,7 +5,7 @@
 #include <QPair>
 
 #include <eirBase/Uuid.h>
-#include <eirQtCV/cvCascade.h>
+#include <eirQtCV/cvClassifier.h>
 #include <eirType/DualMap.h>
 #include <eirType/QQFileInfo.h>
 #include <eirXfr/XerEntry.h>
@@ -18,16 +18,16 @@ public:
     class CascadeName
     {
         CascadeName();
-        CascadeName(const cvCascadeType type, const MultiName &name);
-        void set(const cvCascadeType type, const MultiName &name);
-        void setType(const cvCascadeType type);
+        CascadeName(const cvClassifier::Type type, const MultiName &name);
+        void set(const cvClassifier::Type type, const MultiName &name);
+        void setType(const cvClassifier::Type type);
         void setName(const MultiName &name);
 
-        cvCascadeType type() const;
+        cvClassifier::Type type() const;
         MultiName name() const;
 
     private:
-        QPair<cvCascadeType, MultiName> mCascadeName;
+        QPair<cvClassifier::Type, MultiName> mCascadeName;
     };
 
 public:
@@ -37,13 +37,13 @@ public:
     void addEntry(const Settings::Key entryKey);
     XerEntry writeCatalog(const QQFileInfo &catalogFileInfo);
 
-    Uuid::List typeEntries(const cvCascadeType type) const;
-    Uuid defaultCascade(const cvCascadeType type) const;
+    Uuid::List typeEntries(const cvClassifier::Type type) const;
+    Uuid defaultCascade(const cvClassifier::Type type) const;
     MultiName cascadeName(const Uuid id) const;
     RectFinderCatalogEntry entry(const Uuid uid) const;
 
 private:
-    QMap<cvCascadeType, Uuid> mTypeUidDefaultMap;
+    QMap<cvClassifier::Type, Uuid> mTypeUidDefaultMap;
     QMap<Uuid, RectFinderCatalogEntry> mUidEntryMap;
     DualMap<Uuid, CascadeName> mUidCascadeNameDMap;
 };

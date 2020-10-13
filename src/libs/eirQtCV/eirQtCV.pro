@@ -17,8 +17,10 @@ LIBS *= -leirExe5
 
 SOURCES += \
     cvBGRA.cpp \
-    cvCascade-Parameters.cpp \
-    cvCascade.cpp \
+#    cvCascade-Parameters.cpp \
+ #   cvCascade.cpp \
+    cvClassifier.cpp \
+    cvClassifierPool.cpp \
     cvMat.cpp \
     cvRect.cpp \
     cvRectVector.cpp \
@@ -29,7 +31,9 @@ SOURCES += \
 
 HEADERS += \
     cvBGRA.h \
-    cvCascade.h \
+  #  cvCascade.h \
+    cvClassifier.h \
+    cvClassifierPool.h \
     cvMat.h \
     cvRect.h \
     cvRectVector.h \

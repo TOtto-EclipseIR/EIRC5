@@ -6,10 +6,10 @@
 #include <eirXfr/Debug.h>
 
 ObjDetResultItem::ObjDetResultItem() {;}
-ObjDetResultItem::ObjDetResultItem(const cvCascade::Parameters &parms)
+ObjDetResultItem::ObjDetResultItem(const cvClassifier::Parameters &parms)
     : mParameters(parms) {;}
 
-void ObjDetResultItem::setParameters(const cvCascade::Parameters &parms)
+void ObjDetResultItem::setParameters(const cvClassifier::Parameters &parms)
 {
     mParameters = parms;
 }
@@ -48,9 +48,9 @@ bool ObjDetResultItem::isOrphan(const int threshold) const
     return mAccumulatedRects.size() <= threshold;
 }
 
-void ObjDetResultItem::calculate(const cvCascade *cascade)
+void ObjDetResultItem::calculate(const cvClassifier *classifier)
 {
-    TRACEQFI << mAccumulator << mUnitedRect; TOUSE(cascade);
+    TRACEQFI << mAccumulator << mUnitedRect; TOUSE(classifier);
     TODO(UnSmell);
     EXPECTNOT(isEmpty());
     EXPECTNOT(isOrphan());

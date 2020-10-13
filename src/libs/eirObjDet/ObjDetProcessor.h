@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include <eirExe/Settings.h>
-#include <eirQtCV/cvCascade.h>
+#include <eirQtCV/cvClassifier.h>
 #include <eirQtCV/cvMat.h>
 #include <eirType/QQImage.h>
 #include <eirType/QQRectList.h>
@@ -18,8 +18,8 @@ class EIROBJDET_EXPORT ObjDetProcessor : public QObject
 {
     Q_OBJECT
 public:
-    ObjDetProcessor(const cvCascadeType cascadeType, const Settings::Key objDetKey, QObject * parent=nullptr);
-    cvCascadeType type() const;
+    ObjDetProcessor(const cvClassifier::Type cascadeType, const Settings::Key objDetKey, QObject * parent=nullptr);
+    cvClassifier::Type type() const;
     RectangleFinder *finder();
     RectangleGrouper *grouper();
 
@@ -33,7 +33,7 @@ public:
     ObjDetResultList resultList() const { return mResultList; }
 
 private:
-    const cvCascadeType cmType=cvCascadeType::nullType;
+    const cvClassifier::Type cmType=cvClassifier::nullType;
     const Settings::Key cmObjDetTypeKey;
     RectangleFinder * mpRectFinder=nullptr;
     RectangleGrouper * mpRectGrouper=nullptr;

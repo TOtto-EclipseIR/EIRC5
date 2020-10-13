@@ -21,11 +21,11 @@ void ObjDetResultList::appendOrphan(const QQRectList rect)
     mOrphanRects.append(rect);
 }
 
-void ObjDetResultList::append(ObjDetResultItem item, const cvCascade *cascade)
+void ObjDetResultList::append(ObjDetResultItem item, const cvClassifier *classifier)
 {
     EXPECTNOT(item.isEmpty());
     EXPECTNOT(item.isOrphan());
-    item.calculate(cascade);
+    item.calculate(classifier);
     if ( ! item.isEmpty() && ! item.isOrphan())
         mQualityItemMap.insert( - item.quality(), item);
 }
