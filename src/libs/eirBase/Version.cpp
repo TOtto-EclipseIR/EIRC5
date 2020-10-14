@@ -5,6 +5,7 @@ void Version::dtor() {;}
 
 Version::Version(const quint16 major, const quint16 minor, const quint16 mini, const quint16 micro,
                  const quint16 branch, const quint16 release, const QString string)
+    : data(new VersionData)
 {
     setMajor(major);
     setMinor(minor);

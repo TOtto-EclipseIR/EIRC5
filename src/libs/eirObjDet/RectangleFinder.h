@@ -9,6 +9,7 @@
 #include <eirType/QQFileInfo.h>
 #include <eirType/QQRectList.h>
 #include <eirQtCV/cvClassifier.h>
+#include <eirQtCV/cvClassifierPool.h>
 
 #include "RectFinderCatalog.h"
 
@@ -19,8 +20,10 @@ public:
     explicit RectangleFinder(QObject *parent = nullptr);
     explicit RectangleFinder(const cvClassifier::Type cascadeType, const Settings::Key resourceKey,
                              const Settings::Key finderKey, QObject *parent = nullptr);
-    QDir baseDir() const;
-    bool isLoaded() const;
+    cvClassifier::Parameters parameters() const;
+    QQString methodString() const;
+    QQDir baseDir() const       { return mBaseDir; }
+    bool isLoaded() const       { return classifierPool->r(cmType).empty(); }
     XerReturn<QQRectList> findRectangles(const cvMat greyMat, const bool showDetect=false, const QQRect &region=QQRect());
 
 public slots:
@@ -47,6 +50,9 @@ signals:
     void cascadeLoaded(cvClassifier::Type type, QFileInfo cascadeXmlFileInfo);
     void setupFinished(const cvClassifier::Type type);
 
+private:
+    void configure();
+    QQRectList preScanMergeRects(const QQRectList &rawRects);
 
 private:
     const cvClassifier::Type cmType;

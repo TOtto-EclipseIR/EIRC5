@@ -11,7 +11,11 @@ public:
 
 public:
     XfrLevel();
-    XfrLevel(const Level level);
+    XfrLevel(const Level lvl);
+    XfrLevel(const Name &nam);
+    void set(const Level lvl);
+    void set(const Name &nam);
+    void clear();
     bool isNull() const;
     bool notNull() const;
     bool isValid() const;

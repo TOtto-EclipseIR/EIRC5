@@ -13,6 +13,11 @@ XfrFunctionInfo::XfrFunctionInfo(const char *qFuncInfo)
     parse();
 }
 
+void XfrFunctionInfo::clear()
+{
+    Q_ASSERT_X(false, "XfrFunctionInfo::clear()", "MUSTDO");
+}
+
 bool XfrFunctionInfo::isNull() const
 {
     return getPrettyFunction().isEmpty();

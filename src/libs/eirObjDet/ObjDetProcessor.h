@@ -22,14 +22,23 @@ public:
     cvClassifier::Type type() const         { return cmType; }
     RectangleFinder *finder()               { return mpRectFinder; }
     RectangleGrouper *grouper()             { return mpRectGrouper; }
-    QQDir detectorBaseDir();
+    QQDir detectorBaseDir()                 { return finder()->baseDir(); }
 
+public slots:
+    void initialize();
+    void reset();
+
+signals:
+    void setupFinished();
+
+public:
     void setImage(const QQImage &inputImage);
     XerReturn<QQRectList> findRects(const bool showMat=false, const QQRect &region=QQRect());
     int groupRects();
 
     QImage inputImage() const               { return mInputImage; }
     QImage detectImage() const              { return mGreyInputMat.toGreyImage(); }
+    QQString methodString() const           { return mMethodString; }
     QQRectList rectList() const             { return mRectList; }
     ObjDetResultList resultList() const     { return mResultList; }
     bool isError() const                    { return mError.isError(); }
@@ -44,6 +53,7 @@ private:
     XerEntry mError;
     QQImage mInputImage;
     cvMat mGreyInputMat;
+    QQString mMethodString;
     QQRectList mRectList;
     ObjDetResultList mResultList;
 };

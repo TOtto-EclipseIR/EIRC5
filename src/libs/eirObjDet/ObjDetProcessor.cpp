@@ -14,7 +14,25 @@ ObjDetProcessor::ObjDetProcessor(const cvClassifier::Type cascadeType, const Set
 {
     TRACEQFI << cvClassifier::typeName(cmType)() << cmObjDetTypeKey() << QOBJNAME(parent);
     setObjectName("ObjDetProcessor");
-    MUSTDO(more);
+    finder()->initialize();
+}
+
+void ObjDetProcessor::initialize()
+{
+    TRACEQFI << cvClassifier::typeName(cmType)();
+    classifierPool->r(cmType).initialize();
+    reset();
+}
+
+void ObjDetProcessor::reset()
+{
+    TRACEQFI << cvClassifier::typeName(cmType)();
+    mError.clear();
+    mInputImage.nullify();
+    mGreyInputMat.clear();
+    mMethodString.clear();
+    mRectList.clear();
+    mResultList.clear();
 }
 
 void ObjDetProcessor::setImage(const QQImage &inputImage)
@@ -30,8 +48,12 @@ XerReturn<QQRectList> ObjDetProcessor::findRects(const bool showMat, const QQRec
 {
     TRACEQFI << showMat << region;
     TOUSE(region);
+    XerReturn<QQRectList> rtnerr;
     TRACE << mGreyInputMat.toDebugString();
-    return finder()->findRectangles(mGreyInputMat, showMat, region);
+
+    rtnerr = finder()->findRectangles(mGreyInputMat, showMat, region);
+    mMethodString = finder()->methodString();
+    return rtnerr;
 }
 
 int ObjDetProcessor::groupRects()

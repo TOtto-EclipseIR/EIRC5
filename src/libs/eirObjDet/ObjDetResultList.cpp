@@ -6,6 +6,15 @@
 ObjDetResultList::ObjDetResultList() {;}
 ObjDetResultList::~ObjDetResultList() {;}
 
+void ObjDetResultList::clear()
+{
+    TRACEFN;
+    mQualityItemMap.clear();
+    mRankedList.clear();
+    mOrphanRects.clear();
+    mMaxCount = 0;
+}
+
 void ObjDetResultList::set(const QVariant &variant)
 {
     *this = variant.value<ObjDetResultList>();

@@ -13,7 +13,7 @@ ObjectDetection::ObjectDetection()
     setObjectName("ObjectDetection");
 }
 
-ObjDetProcessor *ObjectDetection::newProcessor(const cvClassifier::Type type)
+void ObjectDetection::newProcessor(const cvClassifier::Type type)
 {
     TRACEQFI << cvClassifier::typeName(type)();
     ObjDetProcessor * oldProc = processor(type);
@@ -25,10 +25,14 @@ ObjDetProcessor *ObjectDetection::newProcessor(const cvClassifier::Type type)
     ObjDetProcessor * newProc = new ObjDetProcessor(type, mObjDetKey, this);
     TSTALLOC(newProc);
     mTypeProcessorMap.insert(type, newProc);
-    return newProc;
 }
 
 ObjDetProcessor *ObjectDetection::processor(const cvClassifier::Type type)
 {
     return mTypeProcessorMap[type];
+}
+
+void ObjectDetection::initialize()
+{
+    MUSTDO(it)
 }

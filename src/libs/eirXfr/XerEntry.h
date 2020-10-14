@@ -19,12 +19,15 @@ public:
     bool isNull() const             { return XfrLevel::level("NoLevel") == mLevel.level();}
     bool notNull() const            { return ! isNull(); }
     bool isError() const            { return XfrLevel::isError(mLevel.name()); }
+    void clear();
     QUuid uid() const               { return mUid; }
     XfrLevel level() const          { return mLevel; }
     QString what() const            { return mWhat; }
     QString why() const             { return mWhy; }
     QString where() const           { return mWhere; }
     QString how() const             { return mHow; }
+    QString funcInfo() const        { return mFuncInfo.getPrettyFunction(); }
+    QString toString() const;
 
 private:
     QUuid mUid;

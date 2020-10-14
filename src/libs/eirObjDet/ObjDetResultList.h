@@ -14,6 +14,7 @@ class EIROBJDET_EXPORT ObjDetResultList
 public:
     ObjDetResultList();
     ~ObjDetResultList();
+    void clear();
     void set(const QVariant &variant);
     QList<ObjDetResultItem> list() const;
     ObjDetResultItem at(const int rank) const;

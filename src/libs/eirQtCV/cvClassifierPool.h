@@ -9,10 +9,13 @@ class EIRQTCV_EXPORT cvClassifierPool
 {
 public:
     cvClassifierPool();
+    void initialize();
     cvClassifier &r(const cvClassifier::Type type);
+    BasicName::List typeNameList() const;
+    QStringList statusStrings() const;
 
 private:
-    QVector<cvClassifier> mClassifierVector;
+    cvClassifier mClassifierArray[cvClassifier::sizeType];
 };
 Q_GLOBAL_STATIC(cvClassifierPool, classifierPool)
 

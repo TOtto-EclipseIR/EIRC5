@@ -28,8 +28,7 @@ public slots:
     void write(const QString &qs, const bool andFlush=true);
     void writeLine(const QString &qs, const bool andFlush=true);
     void writeLines(const QStringList &qsl, const bool andFlush=true, const QString prefix=QString());
-    void writeErr(const QString &qs,
-                  const bool andFlush=true);
+    void writeErr(const QString &qs, const bool andFlush=true);
     void writeErrs(const QStringList &qsl);
 
     void setForkQtDebug(bool mForkQtDebug);

@@ -3,11 +3,12 @@
 #include <QObject>
 #include <eirExe/Console.h>
 
-#include <eirType/QQDir.h>
-#include <eirObjDet/ObjDetProcessor.h>
-#include <eirObjDet/ObjDetResultList.h>
-
 class QCommandLineParser;
+
+#include <eirType/QQDir.h>
+#include <eirObjDet/ObjectDetection.h>
+#include <eirObjDet/ObjDetResultList.h>
+#include <eirQtCV/cvVersion.h>
 
 class FaceConsole : public Console
 {
@@ -49,18 +50,14 @@ signals:
     void resoursesInitd();
     void resourseInitFailed(const qint8 retcode, const QString &errmsg);
     void processingStarted();
-    void processed(QFileInfo fileInfo, int rectCount);
-    void processFailed(QFileInfo fileInfo, QString errorString);
+    void processed(const QFileInfo &fileInfo, const int rectCount);
+    void processFailed(const QFileInfo &fileInfo, const QString &errorString);
+    void processEmpty(const QFileInfo &fileInfo, const QString &methodString);
     void processingComplete();
 
 private:
-    /*
-    ObjDetProcessor mPreScanProcessor;
-    unsigned mScaleFactor=120;
-    signed mNeighbors=1;
-    unsigned mMinQuality=0;
-    */
-    QQString mMethodString;
+    bool mWriteInfo=true;
+    //QQString mMethodString;
     QDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
     //QQDir::Vector mMarkedFaceQualityDirs;

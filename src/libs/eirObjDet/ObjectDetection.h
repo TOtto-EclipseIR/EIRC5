@@ -1,4 +1,5 @@
 #pragma once
+#include "eirObjDet.h"
 
 #include <QObject>
 
@@ -9,15 +10,19 @@
 
 class ObjDetProcessor;
 
-class ObjectDetection : public QObject
+class EIROBJDET_EXPORT ObjectDetection : public QObject
 {
     Q_OBJECT
 public:
     explicit ObjectDetection();
-    ObjDetProcessor *newProcessor(const cvClassifier::Type type);
     ObjDetProcessor *processor(const cvClassifier::Type type);
 
+public slots:
+    void initialize();
+    void newProcessor(const cvClassifier::Type type);
+
 signals:
+    void setupFinished();
     
 private:
     QMap<cvClassifier::Type, ObjDetProcessor*> mTypeProcessorMap;

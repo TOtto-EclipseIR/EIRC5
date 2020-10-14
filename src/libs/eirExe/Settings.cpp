@@ -239,6 +239,7 @@ QQSize Settings::size(const Settings::Key &key, const QQSize &defaultValu) const
     return resultSize;
 }
 
+// static
 qreal Settings::perMille(const unsigned uValue)
 {
     return qBound(0.001, qreal(uValue) / 1000.0, 0.999);

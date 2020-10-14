@@ -10,8 +10,7 @@
 #include <eirExe/Settings.h>
 #include <eirImage/HeatmapMarker.h>
 #include <eirImage/SimpleRectMarker.h>
-#include <eirQtCV/cvVersion.h>
-#include <eirQtCV/cvClassifier.h>
+#include <eirObjDet/ObjDetProcessor.h>
 #include <eirQtCV/cvClassifierPool.h>
 #include <eirType/Success.h>
 #include <eirXfr/Debug.h>
@@ -19,10 +18,10 @@
 
 FaceConsole::FaceConsole()
     : Console(ExpandCommandLineDirs)
-//    , mPreScanProcessor(ObjDetProcessor(cvClassifier::PreScan))
 {
     TRACEFN;
-    //setObjectName("FaceConsole");
+    setObjectName("FaceConsole");
+    mWriteInfo = false;
     QTimer::singleShot(500, this, &FaceConsole::initializeApplication);
     TRACERTV();
 }
@@ -38,9 +37,12 @@ void FaceConsole::initializeApplication()
               .arg(qApp->applicationName())
               .arg(qApp->applicationVersion())
               .arg(locale.toString(QDateTime::currentDateTime())));
-    writeLine("   with Open Source Computer Vision library (OpenCV) " + cvv.getString());
+    writeLine("   with Open Source Computer Vision library (OpenCV) " + cvv.string());
     writeLine("---Arguments:");
     writeLines(arguments(), true, "   ");
+    BasicName::List classifierTypeNames = classifierPool->typeNameList();
+    writeLine("---Available Cascade Types:");
+    foreach (BasicName name, classifierTypeNames) writeLine("   "+name());
     CONNECT(this, &FaceConsole::resourseInitFailed,
             qApp, &QCoreApplication::quit);
     CONNECT(this, &FaceConsole::processingStarted,
@@ -74,13 +76,7 @@ void FaceConsole::initializeApplication()
     EMIT(applicationInitd());
     QTimer::singleShot(100, this, &FaceConsole::processCommandLine);
 }
-/*
-void FaceConsole::enqueueNext()
-{
-    TRACEQFI << CMD->firstPositionalArgument();
-    QString fileNameArgument = CMD->firstPositionalArgument();
-}
-*/
+
 void FaceConsole::processCommandLine()
 {
     TRACEFN;
@@ -114,6 +110,13 @@ void FaceConsole::setConfiguration()
 void FaceConsole::initializeResources()
 {
     TRACEFN;
+    OBJD->newProcessor(cvClassifier::PreScan);
+    writeLine(QString("---Cascade Classifier: %1 %2")
+              .arg(classifierPool->r(cvClassifier::PreScan)
+                   .cascadeFileInfo().absoluteFilePath())
+              .arg(OBJD->processor(cvClassifier::PreScan)->
+                   finder()->isLoaded() ? "loaded" : "ERROR"));
+#if 0
     STG->beginGroup("/ObjectDetector/Resources/RectFinder");
     QQDir baseCascadeDir(STG->string("BaseDir"));
     QString cascadeFileName = STG->string("PreScan/XmlFile");
@@ -143,9 +146,9 @@ void FaceConsole::initializeResources()
                  + cascadeFileInfo.absoluteFilePath());
     }
 */
+#endif
     EMIT(resoursesInitd());
     QTimer::singleShot(100, this, &FaceConsole::setBaseOutputDir);
-
     NEEDDO(cascade()->configure);
 }
 
@@ -173,7 +176,6 @@ void FaceConsole::setOutputDirs()
     bool created = false;
     mMarkedRectOutputDir.setNull(true);
     QQString markedRectDirString(STG->string("Output/Dirs/PreScanRect"));
-    markedRectDirString.replace("%M", mMethodString);
     DUMPVAL(markedRectDirString);
     if (markedRectDirString.isEmpty())
     {
@@ -259,6 +261,7 @@ void FaceConsole::nextFile()
 void FaceConsole::processCurrentFile()
 {
     TRACEQFI << mCurrentFileInfo << mCurrentFileInfo.isReadable();
+    ObjDetProcessor *proc = OBJD->processor(cvClassifier::PreScan);
     QImage rectImage;
     QString markedRectOutputFileName;
 
@@ -270,29 +273,43 @@ void FaceConsole::processCurrentFile()
         writeLine("***Invalid Image File");
         EMIT(processFailed(QFileInfo(mCurrentFileInfo), "Invalid Image File"));
     }
-/*
-    mPreScanProcessor.setImage(inputImage);
-    int rectCount = mPreScanProcessor.findRects(true);
-    EXPECTNOT(rectCount < 0);
-    if (rectCount < 0)
-        writeErr("***PreScanProcessor findRects() failed, code = " + QString::number(rectCount));
-    else if (0 == rectCount)
-        writeErr("***PreScanProcessor findRects() zero results");
-    else
-        writeLine("   " + QString::number(rectCount) + " PreScan rectangles found");
 
-    if (rectCount > 0)
+    proc->setImage(inputImage);
+    XerReturn<QQRectList> rtnerr = proc->findRects();
+    if (rtnerr.isNull())
     {
-        SimpleRectMarker rectMarker(inputImage);
-        rectMarker.markAll("Marker/PreScanRect", mPreScanProcessor.rectList());
-        QQFileInfo rectFileInfo(mMarkedRectOutputDir,
-                                mCurrentFileInfo.completeBaseName(QQString::Squeeze), "png");
-        if (rectMarker.save(rectFileInfo.absoluteFilePath()))
-            writeLine("   " + rectFileInfo.absoluteFilePath() + " saved");
+        writeErr("***Error: Null Result");
+        EMIT(processFailed(mCurrentFileInfo, proc->methodString()));
+        return;
     }
-*/
-
-    EMIT(processed(QFileInfo(mCurrentFileInfo), mCurrentRectangles.size()));
+    if (rtnerr.isError())
+    {
+        writeErr("***Error: "+rtnerr.error().toString());
+        EMIT(processFailed(mCurrentFileInfo, rtnerr.error().toString()));
+        return;
+    }
+    if (rtnerr.isSuccess())
+    {
+        mCurrentRectangles = proc->rectList();
+        if (mCurrentRectangles.isEmpty())
+        {
+            writeLine("   No PreScan Rectangles Detected");
+            EMIT(processEmpty(mCurrentFileInfo, proc->methodString()));
+            return;
+        }
+        else
+        {
+            writeLine(QString("    %1 PreScan Rectangles Detected"));
+            EMIT(processed(mCurrentFileInfo, mCurrentRectangles.size()));
+            SimpleRectMarker rectMarker(inputImage);
+            rectMarker.markAll("Marker/PreScanRect", mCurrentRectangles);
+            QQFileInfo rectFileInfo(mMarkedRectOutputDir,
+                    mCurrentFileInfo.completeBaseName(QQString::Squeeze), "png");
+            if (rectMarker.save(rectFileInfo.absoluteFilePath()))
+                writeLine("   " + rectFileInfo.absoluteFilePath() + " saved");
+            return;
+        }
+    }
 }
 
 void FaceConsole::finishProcessing()
@@ -354,5 +371,6 @@ void FaceConsole::catchCommandLineWarning(const QString what, const QString why)
 void FaceConsole::catchCommandLineInfo(const QString what, const QString why)
 {
     TRACEQFI << what << why;
-    writeErr(QString("...%1 is %2").arg(what).arg(why));
+    if (mWriteInfo)
+        writeErr(QString("...%1 is %2").arg(what).arg(why));
 }

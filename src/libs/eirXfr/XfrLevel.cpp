@@ -7,10 +7,31 @@ XfrLevel::XfrLevel()
     staticCtor();
 }
 
-XfrLevel::XfrLevel(const Level level)
-    : mLevel(level)
+XfrLevel::XfrLevel(const Level lvl)
+    : mLevel(lvl)
 {
     staticCtor();
+}
+
+XfrLevel::XfrLevel(const XfrLevel::Name &nam)
+    : mLevel(level(nam))
+{
+    staticCtor();
+}
+
+void XfrLevel::set(const XfrLevel::Level lvl)
+{
+    mLevel = lvl;
+}
+
+void XfrLevel::set(const XfrLevel::Name &nam)
+{
+    mLevel = XfrLevel::level(nam);
+}
+
+void XfrLevel::clear()
+{
+    mLevel = 0;
 }
 
 bool XfrLevel::isNull() const

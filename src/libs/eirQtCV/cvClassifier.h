@@ -48,8 +48,8 @@ public:
         static qreal typeFactor(const cvClassifierType type);
         QStringList toDebugStringList() const;
 
-    private: // static
-        static signed neighborsForMinQuality(const unsigned minQual);
+    public: // static
+        static signed neighborsForPreScanQuality(const unsigned minQual);
 
     private:
         Settings::Key mGroupKey;
@@ -65,6 +65,7 @@ public:
     Type type() const                   { return mType; }
     BasicName typeName() const          { return typeName(mType); }
 
+    void initialize();
     bool loadCascade(const QQFileInfo &xmlFileInfo);
     bool isLoaded() const               { return ! notLoaded(); }
     bool notLoaded() const              { return empty(); }

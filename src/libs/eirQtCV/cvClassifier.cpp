@@ -9,6 +9,11 @@
 
 cvClassifier::cvClassifier(const cvClassifierType &type) : mType(type) {;}
 
+void cvClassifier::initialize()
+{
+    MUSTDO(what);
+}
+
 bool cvClassifier::loadCascade(const QQFileInfo &xmlFileInfo)
 {
     mCascadeXmlInfo = xmlFileInfo;
@@ -19,11 +24,11 @@ XerReturn<QQRectList> cvClassifier::detectRectangles(const cvMat greyMat, const 
                                 const bool showDetect, const QQRect &region)
 {
     TRACEQFI << showDetect << region;
-    XerReturn<QQRectList> rtnPair;
+    XerReturn<QQRectList> rtnerr;
     if (greyMat.isNull())
-        return rtnPair.set(XerEntry::from(Q_FUNC_INFO, "Error", "Grey cv::Mat", "Is Null"));
+        return rtnerr.set(XerEntry::from(Q_FUNC_INFO, "Error", "Grey cv::Mat", "Is Null"));
     if (notLoaded())
-        return rtnPair.set(XerEntry::from(Q_FUNC_INFO, "Error", "Detector Cascade", "Is Not Loaded"));
+        return rtnerr.set(XerEntry::from(Q_FUNC_INFO, "Error", "Detector Cascade", "Is Not Loaded"));
 
     if (showDetect)
     {
@@ -40,7 +45,7 @@ XerReturn<QQRectList> cvClassifier::detectRectangles(const cvMat greyMat, const 
                         parms.minSize(),
                         parms.maxSize());
 
-    return rtnPair.set(rectVec.toRectList());
+    return rtnerr.set(rectVec.toRectList());
 }
 
 
@@ -49,11 +54,18 @@ BasicName cvClassifier::typeName(cvClassifier::Type type)
 {
     switch (type)
     {
-        case nullType:      return "{null}";
-        case PreScan:       return "PreScan";
-        default:
-            MUSTDO(type);
-            break;
+    case nullType:      return "{null}";
+    case PreScan:       return "PreScan";
+    case PreScanAll:    return "PreScanAll";
+    case Face:          return "Face";
+    case LeftEye:       return "LeftEye";
+    case RighttEye:     return "RighttEye";
+    case BothEyes:      return "BothEyes";
+    case Nose:          return "Nose";
+    case Mouth:         return "Mouth";
+    case LeftProfile:   return "LeftProfile";
+    case RightProfile:  return "RightProfile";
+    case sizeType:      break;
     }
     return "{unknown}";
 }
@@ -135,7 +147,7 @@ qreal cvClassifier::Parameters::typeFactor(const cvClassifier::Type type)
     return resultFactor;
 }
 
-signed cvClassifier::Parameters::neighborsForMinQuality(const unsigned minQual)
+signed cvClassifier::Parameters::neighborsForPreScanQuality(const unsigned minQual)
 {
     if (false)                      ;
     else if (minQual > 975)     return 96;

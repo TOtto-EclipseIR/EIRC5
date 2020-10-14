@@ -10,7 +10,7 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 include(../../EIRC2.pri)
-INCLUDEPATH *= $(QTCVINCLUDEPATH)
+include(../../opencv4.pri)
 LIBS *= -leirXfr5
 LIBS *= -leirBase5
 LIBS *= -leirType5

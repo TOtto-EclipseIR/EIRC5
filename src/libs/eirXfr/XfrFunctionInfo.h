@@ -58,6 +58,7 @@ public:
 
 public:
     XfrFunctionInfo(const char * qFuncInfo);
+    void clear();
     bool isNull() const;
     bool setArgumentNames(const QStringList argNames);
     bool setArgumentName(const int index, const QStringList argNames);
