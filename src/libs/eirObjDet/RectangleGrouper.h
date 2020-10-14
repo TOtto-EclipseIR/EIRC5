@@ -12,11 +12,14 @@ class EIROBJDET_EXPORT RectangleGrouper : public QObject
 public:
     explicit RectangleGrouper(const cvClassifier::Type cascadeType, const Settings::Key grouperKey, QObject *parent = nullptr);
 
+public slots:
+    void initialize();
+
 signals:
+    void setupFinished(const cvClassifier::Type type);
 
 private:
     cvClassifier::Type cmType;
     Settings::Key cmGrouperKey;
-
 };
 

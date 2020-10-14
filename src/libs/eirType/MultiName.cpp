@@ -126,7 +126,11 @@ BasicName MultiName::segmentAt(const int index) const
 
 MultiName &MultiName::append(const BasicName &segment)
 {
+    TRACEQFI << segment() << "append() to" << toString();
+    TRACE << BasicName::toStringList(mBasicSegmentNames);
     mBasicSegmentNames.append(segment);
+    TRACE << BasicName::toStringList(mBasicSegmentNames);
+    TRACE << toString();
     return *this;
 }
 

@@ -23,7 +23,7 @@ public:
     cvClassifier::Parameters parameters() const;
     QQString methodString() const;
     QQDir baseDir() const       { return mBaseDir; }
-    bool isLoaded() const       { return classifierPool->r(cmType).empty(); }
+    bool isLoaded() const       { return gspClassifierPool->r(cmType).empty(); }
     XerReturn<QQRectList> findRectangles(const cvMat greyMat, const bool showDetect=false, const QQRect &region=QQRect());
 
 public slots:
@@ -52,6 +52,7 @@ signals:
 
 private:
     void configure();
+    void configurePreScan();
     QQRectList preScanMergeRects(const QQRectList &rawRects);
 
 private:

@@ -30,6 +30,7 @@ public slots:
 
 signals:
     void setupFinished();
+    void resetd();
 
 public:
     void setImage(const QQImage &inputImage);

@@ -24,8 +24,8 @@ public:
     bool notEmpty() const;
     void clear();
     QString fromBack(const QString &stuffAndName);
-    QString toString(void) const;
     QByteArray toByteArray() const;
+    QString toString(void) const;
     operator QString (void) const;
     QString operator () (void) const;
     QVariant toVariant(void) const;

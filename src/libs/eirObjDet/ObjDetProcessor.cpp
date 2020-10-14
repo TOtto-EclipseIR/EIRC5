@@ -8,20 +8,23 @@ ObjDetProcessor::ObjDetProcessor(const cvClassifier::Type cascadeType, const Set
     , cmType(cascadeType)
     , cmResourceKey(objDetKey+"Resources")
     , cmObjDetTypeKey(objDetKey+cvClassifier::typeName(cascadeType))
-    , mpRectFinder(new RectangleFinder(cmType, objDetKey+"Resources/RectFinder",
+    , mpRectFinder(new RectangleFinder(cmType, cmResourceKey+"RectFinder",
                                        cmObjDetTypeKey+"RectFinder", parent))
     , mpRectGrouper(new RectangleGrouper(cmType, cmObjDetTypeKey+"RectGrouper", parent))
 {
     TRACEQFI << cvClassifier::typeName(cmType)() << cmObjDetTypeKey() << QOBJNAME(parent);
     setObjectName("ObjDetProcessor");
-    finder()->initialize();
 }
 
 void ObjDetProcessor::initialize()
 {
-    TRACEQFI << cvClassifier::typeName(cmType)();
-    classifierPool->r(cmType).initialize();
+    TRACEQFI << cvClassifier::typeName(cmType)() << QOBJNAME(this);
+    CONNECT(this, &ObjDetProcessor::setupFinished,
+            finder(), &RectangleFinder::initialize);
+    CONNECT(this, &ObjDetProcessor::setupFinished,
+            grouper(), &RectangleGrouper::initialize);
     reset();
+    EMIT(setupFinished());
 }
 
 void ObjDetProcessor::reset()
@@ -33,6 +36,7 @@ void ObjDetProcessor::reset()
     mMethodString.clear();
     mRectList.clear();
     mResultList.clear();
+    EMIT(resetd());
 }
 
 void ObjDetProcessor::setImage(const QQImage &inputImage)

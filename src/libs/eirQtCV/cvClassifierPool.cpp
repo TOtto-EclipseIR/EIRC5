@@ -6,14 +6,15 @@
 cvClassifier gPreScanClassifier(cvClassifier::PreScan);
 cvClassifier gFaceClassifier(cvClassifier::Face);
 
-cvClassifierPool::cvClassifierPool()
-{
-    mClassifierArray[cvClassifier::PreScan] = gPreScanClassifier;
-    mClassifierArray[cvClassifier::Face] = gFaceClassifier;
-}
+cvClassifierPool::cvClassifierPool() { TRACEFN;}
 
 void cvClassifierPool::initialize()
 {
+    TRACEFN;
+    gPreScanClassifier.initialize();
+    gFaceClassifier.initialize();
+    mClassifierArray[cvClassifier::PreScan] = gPreScanClassifier;
+    mClassifierArray[cvClassifier::Face] = gFaceClassifier;
     MUSTDO(what);
 }
 

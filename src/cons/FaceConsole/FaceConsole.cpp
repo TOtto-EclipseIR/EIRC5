@@ -40,9 +40,12 @@ void FaceConsole::initializeApplication()
     writeLine("   with Open Source Computer Vision library (OpenCV) " + cvv.string());
     writeLine("---Arguments:");
     writeLines(arguments(), true, "   ");
-    BasicName::List classifierTypeNames = classifierPool->typeNameList();
+    BasicName::List classifierTypeNames = gspClassifierPool->typeNameList();
     writeLine("---Available Cascade Types:");
     foreach (BasicName name, classifierTypeNames) writeLine("   "+name());
+
+    OBJD->set("/ObjectDetect");
+
     CONNECT(this, &FaceConsole::resourseInitFailed,
             qApp, &QCoreApplication::quit);
     CONNECT(this, &FaceConsole::processingStarted,
@@ -112,7 +115,7 @@ void FaceConsole::initializeResources()
     TRACEFN;
     OBJD->newProcessor(cvClassifier::PreScan);
     writeLine(QString("---Cascade Classifier: %1 %2")
-              .arg(classifierPool->r(cvClassifier::PreScan)
+              .arg(gspClassifierPool->r(cvClassifier::PreScan)
                    .cascadeFileInfo().absoluteFilePath())
               .arg(OBJD->processor(cvClassifier::PreScan)->
                    finder()->isLoaded() ? "loaded" : "ERROR"));

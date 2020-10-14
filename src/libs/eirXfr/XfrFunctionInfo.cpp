@@ -15,7 +15,8 @@ XfrFunctionInfo::XfrFunctionInfo(const char *qFuncInfo)
 
 void XfrFunctionInfo::clear()
 {
-    Q_ASSERT_X(false, "XfrFunctionInfo::clear()", "MUSTDO");
+    qDebug() << Q_FUNC_INFO;
+    *this = XfrFunctionInfo("");
 }
 
 bool XfrFunctionInfo::isNull() const

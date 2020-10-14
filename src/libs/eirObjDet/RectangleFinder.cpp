@@ -2,7 +2,6 @@
 
 #include <APP>
 #include <eirExe/Settings.h>
-#include <eirQtCV/cvClassifierPool.h>
 #include <eirXfr/Debug.h>
 
 
@@ -35,7 +34,7 @@ cvClassifier::Parameters RectangleFinder::parameters() const
 
 QQString RectangleFinder::methodString() const
 {
-    return parameters().methodString(classifierPool->
+    return parameters().methodString(gspClassifierPool->
                                      r(cmType).cascadeFileInfo());
 }
 
@@ -43,21 +42,21 @@ void RectangleFinder::initialize()
 {
     TRACEQFI << QOBJNAME(parent());
     CONNECT(this, &RectangleFinder::initialized,
+            this, &RectangleFinder::readCatalogs);
+    CONNECT(this, &RectangleFinder::catalogsRead,
             this, &RectangleFinder::setDetectorsBaseDir);
-    TODO(readCatalogs);
     CONNECT(this, &RectangleFinder::baseDirSetup,
             this, &RectangleFinder::loadCascade);
     CONNECT(this, &RectangleFinder::cascadeLoaded,
             this, &RectangleFinder::finishSetup);
-    DUMP << Qt::endl << classifierPool->statusStrings().join("\r\n");
+    DUMP << Qt::endl << gspClassifierPool->statusStrings().join("\r\n");
     EMIT(initialized(cmType));
 }
 
 void RectangleFinder::readCatalogs()
 {
     TRACEQFI << QOBJNAME(parent());
-
-    MUSTDO(it);
+    TODO(it);
     EMIT(catalogsRead(cmType));
 }
 
@@ -76,7 +75,7 @@ void RectangleFinder::loadCascade()
     QQString xmlFileName = STG->string(cmResourceKey+cvClassifier::typeName(cmType)+"XmlFile");
     if ( ! xmlFileName.isEmpty())
         loadCascadeFile(xmlFileName);
-    DUMP << Qt::endl << classifierPool->statusStrings().join('\n');
+    DUMP << Qt::endl << gspClassifierPool->statusStrings().join('\n');
 }
 
 void RectangleFinder::finishSetup()
@@ -91,7 +90,7 @@ XerReturn<QQRectList> RectangleFinder::findRectangles(const cvMat greyMat, const
     TRACEQFI << greyMat.toDebugString() << showDetect << region;
     XerReturn<QQRectList> rtnerr;
     configure();
-    rtnerr = classifierPool->r(cmType).detectRectangles(greyMat, mParameters, showDetect, region);
+    rtnerr = gspClassifierPool->r(cmType).detectRectangles(greyMat, mParameters, showDetect, region);
     if (rtnerr.isError() || rtnerr.isNull()
             || cvClassifier::PreScan != cmType) return rtnerr;
     return rtnerr.set(preScanMergeRects(rtnerr.result()));
@@ -107,14 +106,22 @@ void RectangleFinder::loadCascadeFile(const QString &cascadeXmlFileName)
 void RectangleFinder::loadCascadeFile(const QQFileInfo &cascadeFileInfo)
 {
     TRACEQFI << cascadeFileInfo;
-    EXPECT(classifierPool->r(cmType).loadCascade(cascadeFileInfo));
+    EXPECT(gspClassifierPool->r(cmType).loadCascade(cascadeFileInfo));
 }
 
 void RectangleFinder::configure()
 {
-    TRACEFN;
+    TRACEQFI << cvClassifier::typeName(cmType)();
+    if (cvClassifier::PreScan == cmType)
+        return configurePreScan();
+    MUSTDO(others);
+}
+
+void RectangleFinder::configurePreScan()
+{
+    TRACEQFI << cvClassifier::typeName(cmType)();
     STG->beginGroup(cmFinderKey);
-    unsigned quality = STG->unsignedInt("Quality", 500);
+    unsigned quality = STG->unsignedInt("PreScanQuality", 500);
     qreal factor = STG->realPerMille("ScaleFactor", 0.0);
     signed neighbors = STG->signedInt("Neighbors", -1);
     STG->endGroup();

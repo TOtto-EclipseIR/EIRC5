@@ -10,3 +10,8 @@ RectangleGrouper::RectangleGrouper(const cvClassifier::Type cascadeType, const S
     TRACEQFI << cvClassifier::typeName(cascadeType)() << grouperKey() << QOBJNAME(parent);
     setObjectName("RectangleGrouper:"+cvClassifier::typeName(cascadeType));
 }
+
+void RectangleGrouper::initialize()
+{
+    TRACEQFI << cvClassifier::typeName(cmType)() << QOBJNAME(this);
+}

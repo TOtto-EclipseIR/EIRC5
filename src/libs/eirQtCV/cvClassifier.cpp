@@ -11,6 +11,7 @@ cvClassifier::cvClassifier(const cvClassifierType &type) : mType(type) {;}
 
 void cvClassifier::initialize()
 {
+    TRACEQFI << typeName(mType)();
     MUSTDO(what);
 }
 
