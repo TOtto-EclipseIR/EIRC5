@@ -50,6 +50,7 @@ SOURCES += \
     Sortable.cpp \
     BitFlags.cpp \
     Value.cpp \
+    ValueMap.cpp \
     ValuePak.cpp \
     Var.cpp \
     VarMap.cpp \
@@ -100,6 +101,7 @@ HEADERS += \
     Region.h \
     Sortable.h \
     Value.h \
+    ValueMap.h \
     ValuePak.h \
     Var.h \
     VarMap.h \

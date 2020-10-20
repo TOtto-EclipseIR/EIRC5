@@ -48,6 +48,7 @@ signals:
     void baseDirSetup();
     void baseDirSet(const cvClassifier::Type type, const QQDir baseDir);
     void cascadeLoaded(cvClassifier::Type type, QFileInfo cascadeXmlFileInfo);
+    void cascadeNoLoad(const cvClassifier::Type type);
     void setupFinished(const cvClassifier::Type type);
 
 private:
@@ -62,5 +63,6 @@ private:
     cvClassifier::Parameters mParameters;
     QQDir mBaseDir;
     RectFinderCatalog mCatalog;
+    QQFileInfo mCascadeFileInfo;
 };
 

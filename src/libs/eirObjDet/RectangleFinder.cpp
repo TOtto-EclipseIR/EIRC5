@@ -10,7 +10,8 @@ RectangleFinder::RectangleFinder(QObject *parent)
     , cmType(cvClassifier::nullType)
 {
     TRACEQFI << "null" << QOBJNAME(parent);
-    setObjectName("RectangleFinder:"+cvClassifier::typeName(cvClassifier::nullType));
+    setObjectName("RectangleFinder:"
+            + cvClassifier::typeName(cvClassifier::nullType));
 }
 
 RectangleFinder::RectangleFinder(const cvClassifier::Type cascadeType,
@@ -22,7 +23,8 @@ RectangleFinder::RectangleFinder(const cvClassifier::Type cascadeType,
     , cmResourceKey(resourceKey)
     , cmFinderKey(finderKey)
 {
-    TRACEQFI << cvClassifier::typeName(cascadeType)() << finderKey() << QOBJNAME(parent);
+    TRACEQFI << cvClassifier::typeName(cascadeType)()
+             << cmResourceKey() << cmFinderKey() << QOBJNAME(parent);
     setObjectName("RectangleFinder:"+cvClassifier::typeName(cascadeType));
     EMIT(ctord(cmType));
 }
@@ -49,6 +51,8 @@ void RectangleFinder::initialize()
             this, &RectangleFinder::loadCascade);
     CONNECT(this, &RectangleFinder::cascadeLoaded,
             this, &RectangleFinder::finishSetup);
+    CONNECT(this, &RectangleFinder::cascadeNoLoad,
+            this, &RectangleFinder::finishSetup);
     DUMP << Qt::endl << gspClassifierPool->statusStrings().join("\r\n");
     EMIT(initialized(cmType));
 }
@@ -63,8 +67,8 @@ void RectangleFinder::readCatalogs()
 void RectangleFinder::setDetectorsBaseDir()
 {
     TRACEQFI << QOBJNAME(parent());
-    QQString baseDirName = STG->string(cmResourceKey+"BaseDir");
-    mBaseDir = QQDir(baseDirName);
+    QQString baseDirName = STG->string(cmResourceKey.appended("BaseDir"));
+    mBaseDir = QDir(baseDirName);
     EMIT(baseDirSetup());
     EMIT(baseDirSet(cmType, mBaseDir));
 }
@@ -72,9 +76,19 @@ void RectangleFinder::setDetectorsBaseDir()
 void RectangleFinder::loadCascade()
 {
     TRACEQFI << QOBJNAME(parent());
-    QQString xmlFileName = STG->string(cmResourceKey+cvClassifier::typeName(cmType)+"XmlFile");
-    if ( ! xmlFileName.isEmpty())
+    Settings::Key resourceTypeKey = cmResourceKey.
+            appended(cvClassifier::typeName(cmType)());
+    QQString xmlFileName = STG->string(resourceTypeKey.appended("xmlFileKey"));
+    bool autoLoad = STG->boolean(resourceTypeKey.appended("AutoLoad"));
+    if (autoLoad && ! xmlFileName.isEmpty())
+    {
         loadCascadeFile(xmlFileName);
+        EMIT(cascadeLoaded(cmType, mCascadeFileInfo));
+    }
+    else
+    {
+        EMIT(cascadeNoLoad(cmType));
+    }
     DUMP << Qt::endl << gspClassifierPool->statusStrings().join('\n');
 }
 
@@ -107,6 +121,7 @@ void RectangleFinder::loadCascadeFile(const QQFileInfo &cascadeFileInfo)
 {
     TRACEQFI << cascadeFileInfo;
     EXPECT(gspClassifierPool->r(cmType).loadCascade(cascadeFileInfo));
+    if (isLoaded()) mCascadeFileInfo = cascadeFileInfo;
 }
 
 void RectangleFinder::configure()

@@ -47,8 +47,8 @@ public:
 
 private:
     const cvClassifier::Type cmType=cvClassifier::nullType;
-    const Settings::Key cmResourceKey;
-    const Settings::Key cmObjDetTypeKey;
+    Settings::Key mResourceKey;
+    Settings::Key mObjDetTypeKey;
     RectangleFinder * mpRectFinder=nullptr;
     RectangleGrouper * mpRectGrouper=nullptr;
     XerEntry mError;

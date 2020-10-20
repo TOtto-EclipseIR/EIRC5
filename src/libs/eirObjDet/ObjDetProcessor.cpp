@@ -3,16 +3,21 @@
 #include <APP>
 #include <eirXfr/Debug.h>
 
-ObjDetProcessor::ObjDetProcessor(const cvClassifier::Type cascadeType, const Settings::Key objDetKey, QObject * parent)
+ObjDetProcessor::ObjDetProcessor(const cvClassifier::Type cascadeType,
+                                 const Settings::Key objDetKey,
+                                 QObject * parent)
     : QObject(parent)
     , cmType(cascadeType)
-    , cmResourceKey(objDetKey+"Resources")
-    , cmObjDetTypeKey(objDetKey+cvClassifier::typeName(cascadeType))
-    , mpRectFinder(new RectangleFinder(cmType, cmResourceKey+"RectFinder",
-                                       cmObjDetTypeKey+"RectFinder", parent))
-    , mpRectGrouper(new RectangleGrouper(cmType, cmObjDetTypeKey+"RectGrouper", parent))
+    , mResourceKey(objDetKey.appended("Resources"))
+    , mObjDetTypeKey(objDetKey.appended(cvClassifier::typeName(cascadeType)()))
+    , mpRectFinder(new RectangleFinder(cmType,
+                        mResourceKey.appended("RectFinder"),
+                        mObjDetTypeKey.appended("RectFinder"), parent))
+    , mpRectGrouper(new RectangleGrouper(cmType,
+                        mObjDetTypeKey.appended("RectGrouper"), parent))
 {
-    TRACEQFI << cvClassifier::typeName(cmType)() << cmObjDetTypeKey() << QOBJNAME(parent);
+    TRACEQFI << cvClassifier::typeName(cmType)() << mResourceKey()
+             << mObjDetTypeKey() << QOBJNAME(parent);
     setObjectName("ObjDetProcessor");
 }
 
@@ -48,7 +53,8 @@ void ObjDetProcessor::setImage(const QQImage &inputImage)
     BEXPECTEQ(1, mGreyInputMat.depthInBytes());
 }
 
-XerReturn<QQRectList> ObjDetProcessor::findRects(const bool showMat, const QQRect &region)
+XerReturn<QQRectList> ObjDetProcessor::findRects(const bool showMat,
+                                                 const QQRect &region)
 {
     TRACEQFI << showMat << region;
     TOUSE(region);

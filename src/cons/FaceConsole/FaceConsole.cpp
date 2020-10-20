@@ -33,7 +33,7 @@ void FaceConsole::initializeApplication()
     QLocale locale;
     cvVersion cvv;
     TODO(WhyZero);
-    writeLine(QString("%1 %2 started %3")
+    writeLine(QString("===%1 %2 started %3")
               .arg(qApp->applicationName())
               .arg(qApp->applicationVersion())
               .arg(locale.toString(QDateTime::currentDateTime())));
@@ -41,11 +41,8 @@ void FaceConsole::initializeApplication()
     writeLine("---Arguments:");
     writeLines(arguments(), true, "   ");
     BasicName::List classifierTypeNames = gspClassifierPool->typeNameList();
-    writeLine("---Available Cascade Types:");
+    writeLine("---Supported Cascades:");
     foreach (BasicName name, classifierTypeNames) writeLine("   "+name());
-
-    OBJD->set("/ObjectDetect");
-
     CONNECT(this, &FaceConsole::resourseInitFailed,
             qApp, &QCoreApplication::quit);
     CONNECT(this, &FaceConsole::processingStarted,
@@ -98,14 +95,7 @@ void FaceConsole::setConfiguration()
 {
     TRACEFN;
     writeLine("---Configuration:");
-    writeLines(STG->toStringList());
-    /*
-    STG->beginGroup("PreScan");
-    mScaleFactor = STG->unsignedInt("RectFinder/ScaleFactor", 0);
-    mNeighbors = STG->signedInt("RectFinder/Neighbors", -1);
-    mMinQuality = STG->unsignedInt("RectGrouper/MinQuality", 0);
-    STG->endGroup();
-    */
+    writeLines(STG->toDebugStringList(), true, "   ");
     EMIT(configurationSet());
     QTimer::singleShot(100, this, &FaceConsole::initializeResources);
 }
@@ -119,37 +109,6 @@ void FaceConsole::initializeResources()
                    .cascadeFileInfo().absoluteFilePath())
               .arg(OBJD->processor(cvClassifier::PreScan)->
                    finder()->isLoaded() ? "loaded" : "ERROR"));
-#if 0
-    STG->beginGroup("/ObjectDetector/Resources/RectFinder");
-    QQDir baseCascadeDir(STG->string("BaseDir"));
-    QString cascadeFileName = STG->string("PreScan/XmlFile");
-    QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
-    STG->endGroup();
-
-    TRACE << baseCascadeDir << baseCascadeDir.exists() << baseCascadeDir.isReadable();
-    EXPECT(baseCascadeDir.exists());
-    EXPECT(baseCascadeDir.isReadable());
-    TRACE << cascadeFileInfo.absoluteFilePath() << cascadeFileInfo.exists()
-          << cascadeFileInfo.isReadable() << cascadeFileInfo.isFile();
-    EXPECTNOT(cascadeFileInfo.notExists());
-    EXPECTNOT(cascadeFileInfo.notReadable());
-    EXPECTNOT(cascadeFileInfo.notFile());
-
-    write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
-/*
-    EXPECT(mPreScanProcessor.cascade()->loadCascade(cascadeFileInfo));
-    if (mPreScanProcessor.cascade()->isLoaded())
-    {
-        writeLine("done");
-    }
-    else
-    {
-        writeLine("error");
-        writeErr("***Cascade file load reported failed: "
-                 + cascadeFileInfo.absoluteFilePath());
-    }
-*/
-#endif
     EMIT(resoursesInitd());
     QTimer::singleShot(100, this, &FaceConsole::setBaseOutputDir);
     NEEDDO(cascade()->configure);
@@ -330,32 +289,32 @@ void FaceConsole::failedExit(const qint8 retcode, const QString &errmsg)
     qApp->exit(retcode);
 }
 
-void FaceConsole::catchSettingsGet(const Settings::Key key, const Settings::Value valu)
+void FaceConsole::catchSettingsGet(const Settings::Key key, const Settings::Valu valu)
 {
     TRACEQFI << key() << valu;
 }
 
-void FaceConsole::catchSettingsImport(const Settings::Key key, const Settings::Value valu)
+void FaceConsole::catchSettingsImport(const Settings::Key key, const Settings::Valu valu)
 {
     TRACEQFI << key() << valu;
 }
 
-void FaceConsole::catchSettingsCreate(const Settings::Key key, const Settings::Value valu)
+void FaceConsole::catchSettingsCreate(const Settings::Key key, const Settings::Valu valu)
 {
     TRACEQFI << key() << valu;
 }
 
-void FaceConsole::catchSettingsDefault(const Settings::Key key, const Settings::Value valu)
+void FaceConsole::catchSettingsDefault(const Settings::Key key, const Settings::Valu valu)
 {
     TRACEQFI << key() << valu;
 }
 
-void FaceConsole::catchSettingsRemove(const Settings::Key key, const Settings::Value valu)
+void FaceConsole::catchSettingsRemove(const Settings::Key key, const Settings::Valu valu)
 {
     TRACEQFI << key() << valu;
 }
 
-void FaceConsole::catchSettingsChange(const Settings::Key key, const Settings::Value newValu, const Settings::Value oldValu)
+void FaceConsole::catchSettingsChange(const Settings::Key key, const Settings::Valu newValu, const Settings::Valu oldValu)
 {
     TRACEQFI << key() << newValu << oldValu;
 }

@@ -42,7 +42,7 @@ void Settings::insert(const Map &keyVariantMap)
 
 }
 
-void Settings::insert(const Settings::Key &key, const Settings::Value &valu)
+void Settings::insert(const Settings::Key &key, const Settings::Valu &valu)
 {
     TRACEQFI << key() << valu;
     EMIT(importing(key, valu));
@@ -54,18 +54,18 @@ bool Settings::contains(const Settings::Key &key) const
     return QSettings::contains(key);
 }
 
-void Settings::set(const Key &key, const Value &valu)
+void Settings::set(const Key &key, const Valu &vlu)
 {
-    TRACEQFI << key() << valu;
+    TRACEQFI << key() << vlu;
     if (this->contains(key))
     {
-        EMIT(changing(key, valu, get(key)));
+        EMIT(changing(key, vlu, valu(key)));
     }
     else
     {
-        EMIT(creating(key, valu));
+        EMIT(creating(key, vlu));
     }  // TODO see [#11] comment re {EMIT}s
-    QSettings::setValue(key, valu);
+    QSettings::setValue(key, vlu);
 }
 
 void Settings::set(const Settings::Key &key, const QVariant &vari)
@@ -80,7 +80,7 @@ void Settings::setValue(const QString &key, const QVariant &vari)
     TRACEQFI << key << vari;
     if (this->contains(key))
     {
-        EMIT(changing(key, vari.toString(), get(key)));
+        EMIT(changing(key, vari.toString(), valu(key)));
     }
     else
     {
@@ -93,11 +93,11 @@ void Settings::remove(const QString &key)
 {
     TRACEQFI << key << QSettings::contains(key);
     if ( ! QSettings::contains(key))    return;     /* /========\ */
-    EMIT(removing(key, get(key)));
+    EMIT(removing(key, valu(key)));
     QSettings::remove(key);
 }
 
-void Settings::setDefault(const Key &key, const Value &valu)
+void Settings::setDefault(const Key &key, const Valu &valu)
 {
     MUSTDO(it);
     MUSTUSE(key);
@@ -127,89 +127,83 @@ void Settings::endGroup()
     EMIT(groupChanging(QSettings::group()));
 }
 
-Settings::Value Settings::get(const Key &key, const Value &defaultValu) const
+Settings::Valu Settings::valu(const Key &key, const Valu &defaultValu) const
 {
-    TRACEQFI << key() << defaultValu;
-    EMIT(getting(key, QSettings::value(key, defaultValu).toString())) ;
-    return QSettings::value(key, defaultValu).toString();
+    Settings::Valu valu = QSettings::value(key, defaultValu).toString();
+    EMIT(getting(key, valu));
+    TRACEQFI << key() << valu << defaultValu;
+    return valu;
 }
 
-QVariant Settings::value(const Settings::Key &key, const QVariant &defaultVari) const
+QVariant Settings::vari(const Settings::Key &key, const QVariant &defaultVari) const
 {
-    TRACEQFI << key() << defaultVari;
-    EMIT(getting(key, QSettings::value(key(), defaultVari).toString()));
-    return QSettings::value(key(), defaultVari);
-}
-
-MultiName::List Settings::keys() const
-{
-    MultiName::List mnl;
-    foreach (QString key, QSettings::allKeys())
-        mnl << MultiName(key);
-    return mnl;
+    QVariant vari = QSettings::value(key(), defaultVari);
+    EMIT(getting(key, vari.toString()));
+    TRACEQFI << key() << vari << defaultVari;
+    return vari;
 }
 
 Settings::Map Settings::extract(const Key groupKey, const bool keepKey) const
 {
     Settings::Map extractedMap;
-    int nGroupSegments = groupKey.segmentCount();
     foreach (Key key, keys())
         if (key.startsWith(groupKey))
         {
-            Value extractValue = get(key);
-            Key extractKey = keepKey ? key : key.firstSegmentsRemoved(nGroupSegments);
-            extractedMap.insert(extractKey, extractValue);
+            Valu extractValue = valu(key);
+            Key extractKey = keepKey ? key : key.mid(groupKey.size());
+            extractedMap[extractKey] = extractValue;
         }
     return extractedMap;
 }
 
-QStringList Settings::toStringList(const Key &groupKey)
+QStringList Settings::toDebugStringList(const Key &groupKey)
 {
     QStringList qsl;
     if ( ! groupKey.isEmpty()) beginGroup(groupKey);
     foreach (Key key, keys())
-        qsl << QString("%1={%2}").arg(key).arg(get(key));
+        qsl << QString("%1={%2}").arg(key).arg(valu(key));
     if ( ! groupKey.isEmpty()) endGroup();
     return qsl;
 }
 
-QStringList Settings::toStringList(const QSettings::SettingsMap &map)
+QStringList Settings::toDebugStringList(const Map &map)
 {
     QStringList qsl;
     foreach (QString key, map.keys())
-        qsl << QString("%1={%2}").arg(key).arg(map.value(key).toString());
+        qsl << QString("%1={%2}").arg(key).arg(map.get(key).value().toString());
     return qsl;
 }
 
 void Settings::dump(const Key &groupKey)
 {
-    foreach (QString s, toStringList(groupKey)) DUMP << s;
+    foreach (QString s, toDebugStringList(groupKey)) DUMP << s;
 }
 
+// static
 void Settings::dump(const QSettings::SettingsMap &map)
 {
-    foreach (QString s, toStringList(map)) DUMP << s;
+    foreach (QString key, map.keys())
+        DUMP << QString("%1={%2}").arg(key).arg(map.value(key).toString());
 }
 
 bool Settings::boolean(const Settings::Key &key, const bool &defaultValue) const
 {
     bool ok = contains(key);
-    bool result = value(key).toBool();
+    bool result = vari(key).toBool();
     return ok ? result : defaultValue;
 }
 
-int Settings::signedInt(const Key &key, const signed &defaultValue) const
+signed Settings::signedInt(const Key &key, const signed &defaultValue) const
 {
-    bool ok;
-    unsigned result = get(key).toInt(&ok);
-    ok &= contains(key);
-    return ok ? result : defaultValue;
+    signed rtn = vari(key, defaultValue).value<signed>();
+    TRACEQFI << key() << rtn << defaultValue;
+    return rtn;
 }
 
 unsigned Settings::unsignedInt(const Key &key, const unsigned &defaultValue) const
 {
     bool ok;
-    unsigned result = get(key).toUInt(&ok);
+    unsigned result = valu(key).toUInt(&ok);
     ok &= contains(key);
     return ok ? result : defaultValue;
 }
@@ -217,15 +211,20 @@ unsigned Settings::unsignedInt(const Key &key, const unsigned &defaultValue) con
 qreal Settings::real(const Key &key, const qreal &defaultValue) const
 {
     bool ok = contains(key);
-    qreal result = get(key).toDouble(&ok);
+    qreal result = valu(key).toDouble(&ok);
     return ok ? result : defaultValue;
 }
 
 qreal Settings::realPerMille(const Key &key, const unsigned &defaultValue) const
 {
     bool ok = contains(key);
-    qreal result = get(key).toUInt(&ok);
+    qreal result = valu(key).toUInt(&ok);
     return perMille(ok ? result : defaultValue);
+}
+
+QString Settings::string(const Settings::Key &key, const QString &defaultValu) const
+{
+    return valu(key, defaultValu);
 }
 
 QQSize Settings::size(const Settings::Key &key, const QQSize &defaultValu) const
@@ -233,26 +232,25 @@ QQSize Settings::size(const Settings::Key &key, const QQSize &defaultValu) const
     QQSize resultSize = defaultValu;
     if (contains(key))
     {
-        QQString sizeString = get(key);
+        QQString sizeString = valu(key);
         resultSize.set(sizeString);
     }
     return resultSize;
 }
 
 // static
-qreal Settings::perMille(const unsigned uValue)
+qreal Settings::perMille(const unsigned uValue, bool unitBound)
 {
-    return qBound(0.001, qreal(uValue) / 1000.0, 0.999);
+    qreal fValue = qreal(uValue);
+    return unitBound ? fValue : qBound(0.001, qreal(uValue) / 1000.0, 0.999);
 }
 
-QString Settings::string(const Key &key, const Value &defaultValue) const
+#if 0
+QString Settings::string(const Key &key, const Valu &defaultValue) const
 {
     TRACEQFI << key() << defaultValue << get(key, defaultValue);
     return get(key, defaultValue);
 }
-
-
-#if 0
 
 void Settings::Map::import(const Settings::Map &keyValueStringMap)
 {

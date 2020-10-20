@@ -10,7 +10,7 @@
 #include <QVariant>
 
 #include "BasicName.h"
-
+#include "QQStringList.h"
 
 class EIRTYPE_EXPORT MultiName
 {
@@ -37,7 +37,7 @@ public:
     BasicName firstSegment() const;
     MultiName firstSegments(int count) const;
     BasicName segmentAt(const int index) const;
-    MultiName &append(const BasicName &segment);
+    MultiName appended(const BasicName &segment) const;
     bool startsWith(const MultiName &groupName) const;
     int segmentCount() const;
     void removeFirstSegments(int count);
@@ -50,11 +50,11 @@ public:
     QString operator () (void) const;
     QVariant toVariant(void) const;
     operator QVariant (void) const;
+    static QQStringList stringList(const List mnames);
     QString sortable(void) const;
     uint hash() const;
     bool operator == (const MultiName & other) const;
     bool operator <  (const MultiName & other) const;
-    MultiName &operator += (const BasicName &segment);
     void dump() const;
 
 protected:
