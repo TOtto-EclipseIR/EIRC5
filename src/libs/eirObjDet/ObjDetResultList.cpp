@@ -6,6 +6,15 @@
 ObjDetResultList::ObjDetResultList() {;}
 ObjDetResultList::~ObjDetResultList() {;}
 
+void ObjDetResultList::clear()
+{
+    TRACEFN;
+    mQualityItemMap.clear();
+    mRankedList.clear();
+    mOrphanRects.clear();
+    mMaxCount = 0;
+}
+
 void ObjDetResultList::set(const QVariant &variant)
 {
     *this = variant.value<ObjDetResultList>();
@@ -21,11 +30,11 @@ void ObjDetResultList::appendOrphan(const QQRectList rect)
     mOrphanRects.append(rect);
 }
 
-void ObjDetResultList::append(ObjDetResultItem item, const cvCascade *cascade)
+void ObjDetResultList::append(ObjDetResultItem item, const cvClassifier *classifier)
 {
     EXPECTNOT(item.isEmpty());
     EXPECTNOT(item.isOrphan());
-    item.calculate(cascade);
+    item.calculate(classifier);
     if ( ! item.isEmpty() && ! item.isOrphan())
         mQualityItemMap.insert( - item.quality(), item);
 }

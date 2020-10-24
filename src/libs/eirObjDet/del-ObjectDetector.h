@@ -9,8 +9,8 @@ class QTimer;
 #include <eirBase/Uuid.h>
 #include <eirType/Milliseconds.h>
 #include <eirExe/Settings.h>
-//#include <eirQtCV/cvCascade.h>
-class cvCascade;
+//#include <eirQtCV/cvClassifier.h>
+class cvClassifier;
 
 #include "ObjDetResultItem.h"
 #include "ObjDetResultList.h"
@@ -21,11 +21,11 @@ class EIROBJDET_EXPORT ObjectDetector : public QObject
 public:
     typedef ObjectDetector * This;
 public:
-    ObjectDetector(const cvCascade::Type type,
+    ObjectDetector(const cvClassifier::Type type,
                             QObject *parent = nullptr);
     ~ObjectDetector();
-    static ObjectDetector * p(const cvCascadeType type);
-    cvCascade * cascade();
+    static ObjectDetector * p(const cvClassifierType type);
+    cvClassifier * cascade();
 
     // single-threaded execution
     bool load(const QQFileInfo cascadeFInfo);
@@ -89,7 +89,7 @@ private slots:
     void removeReleased(const Uuid uuid);
 
 private:
-    cvCascade *mpCascade;
+    cvClassifier *mpCascade;
     QTimer  * const cmpTimer=nullptr;
     Settings *mpObjDetSettings;
     QQImage mProcessInputImage;
@@ -98,6 +98,6 @@ private:
     Uuid::Queue mGrouperQueue;
     Uuid::Queue mProcessedQueue;
     Uuid::Queue mReleasedQueue;
-    static QHash<cvCascadeType, This> smTypeDetectorHash;
+    static QHash<cvClassifierType, This> smTypeDetectorHash;
 };
 

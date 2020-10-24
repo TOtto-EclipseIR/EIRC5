@@ -29,11 +29,15 @@ public:
     void ctor(void);
     QQString string() const;
     void set(const QString &other);
-    QString squeezed() const;
-    operator QVariant () const;
+    QQString squeezed() const;
+    QQString appended(const QQString s, const bool delimited=true) const;
+    QString operator () () const;
     bool operator == (const QQString &other);
+    bool operator <  (const QQString &other);
+    operator QVariant() const;
 
 private:
     Flags mFlags=NoFlag;
+    static QChar smDelimiter;
 };
 

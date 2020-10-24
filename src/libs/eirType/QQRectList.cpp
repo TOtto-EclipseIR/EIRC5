@@ -43,6 +43,14 @@ QVariant QQRectList::toVariant() const
     return QVariant::fromValue(*this);
 }
 
+QString QQRectList::toDebugString() const
+{
+    QString rtn;
+    foreach (QQRect qqrc, mid(0))
+        rtn += (rtn.isEmpty() ? "{" : ", {") + qqrc.toString() + "}";
+    return rtn;
+}
+
 QQRectList::operator QVariant() const
 {
     return toVariant();

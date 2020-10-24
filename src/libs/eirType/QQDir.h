@@ -12,16 +12,17 @@ public:
 public:
     QQDir();
     QQDir(const QDir &other);
-    QQDir(const QString &path);
-    QQDir(const QDir &dir, const QString &path);
+    QQDir(QString path, const bool datestamp=true);
+    QQDir(const QDir &dir, QString path, const bool datestamp=true);
     QQDir &operator = (const QQDir &other);
     bool isNull() const;
     bool notNull() const;
     void setNull(const bool nowNull);
+    bool isExistingReadable() const;
 
-    bool mkpath(const QString &dirPath);
-    bool cd(const QString &dirName);
-    void setPath(const QString &path);
+    bool mkpath(QString dirPath, const bool datestamp=true);
+    bool cd(QString dirName, const bool datestamp=true);
+    void setPath(QString path, const bool datestamp=true);
 
 private:
     bool mNull=true;

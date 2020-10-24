@@ -14,11 +14,12 @@ class EIROBJDET_EXPORT ObjDetResultList
 public:
     ObjDetResultList();
     ~ObjDetResultList();
+    void clear();
     void set(const QVariant &variant);
     QList<ObjDetResultItem> list() const;
     ObjDetResultItem at(const int rank) const;
     void appendOrphan(const QQRectList rect);
-    void append(ObjDetResultItem item, const cvCascade *cascade);
+    void append(ObjDetResultItem item, const cvClassifier *classifier);
     void assignRanks();
     int count() const;
     int orphanCount() const;

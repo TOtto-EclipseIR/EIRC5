@@ -13,6 +13,12 @@ XfrFunctionInfo::XfrFunctionInfo(const char *qFuncInfo)
     parse();
 }
 
+void XfrFunctionInfo::clear()
+{
+    qDebug() << Q_FUNC_INFO;
+    *this = XfrFunctionInfo("");
+}
+
 bool XfrFunctionInfo::isNull() const
 {
     return getPrettyFunction().isEmpty();

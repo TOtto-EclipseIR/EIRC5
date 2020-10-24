@@ -2,10 +2,10 @@
 #include <eirBase/eirBase_global.h>
 
 #define VER_MAJOR 5
-#define VER_MINOR 9
-#define VER_RELEASE 0xA4
+#define VER_MINOR 10
+#define VER_RELEASE 1
 #define VER_BRANCH 0
-#define VER_STRING "v5.09-Alpha4"
+#define VER_STRING "v5.10A"
 #define VER_TRUNKNAME "current"
 #define VER_MINI  VER_RELEASE
 #define VER_MICRO VER_BRANCH

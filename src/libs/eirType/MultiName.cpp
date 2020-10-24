@@ -114,8 +114,8 @@ BasicName MultiName::firstSegment() const
 MultiName MultiName::firstSegments(int count) const
 {
     MultiName result;
-    for (int x = 0; x < count; ++x)
-        result.append(segmentAt(x));
+    for (int x = 0; x < qMin(count, segmentCount()); ++x)
+        result.mBasicSegmentNames.append(segmentAt(x));
     return result;
 }
 
@@ -124,12 +124,25 @@ BasicName MultiName::segmentAt(const int index) const
     return mBasicSegmentNames.at(index);
 }
 
+MultiName MultiName::appended(const BasicName &segment) const
+{
+    TRACEQFI << segment() << toString();
+    MultiName result = *this;
+    result.mBasicSegmentNames.append(segment);
+    TRACEFNR(result.toString());
+    return result;
+}
+/*
 MultiName &MultiName::append(const BasicName &segment)
 {
+    TRACEQFI << segment() << "append() to" << toString();
+    TRACE << BasicName::toStringList(mBasicSegmentNames);
     mBasicSegmentNames.append(segment);
+    TRACE << BasicName::toStringList(mBasicSegmentNames);
+    TRACE << toString();
     return *this;
 }
-
+*/
 int MultiName::segmentCount() const
 {
     return mBasicSegmentNames.size();
@@ -181,6 +194,13 @@ QVariant MultiName::toVariant() const
     return QVariant(toStringList());
 }
 
+QQStringList MultiName::stringList(const MultiName::List mnames)
+{
+    QQStringList rtn;
+    foreach (MultiName mname, mnames) rtn << mname.toString();
+    return rtn;
+}
+
 QString MultiName::sortable() const
 {
     return toString().toLower();
@@ -200,12 +220,12 @@ bool MultiName::operator < (const MultiName & other) const
 {
     return sortable() < other.sortable();
 }
-
+/*
 MultiName &MultiName::operator +=(const BasicName &segment)
 {
     return append(segment);
 }
-
+*/
 void MultiName::dump() const
 {
     DUMP << toString();

@@ -85,6 +85,7 @@ void BasicName::clear()
 QString BasicName::fromBack(const QString &stuffAndName)
 {
     TRACEQFI << stuffAndName;
+    MUSTDO(why);
     int ix;
     mName.clear();
     for (ix = stuffAndName.size()-1; ix > 0; --ix)
@@ -93,16 +94,11 @@ QString BasicName::fromBack(const QString &stuffAndName)
         bool valid = isValidChar(qch);
         TRACE << ix << qch << valid;
         if (valid)
-        {
             mName.prepend(qch);
-        }
         else
-        {
-            break;                                  /*/--------\*/
-        }
+            break;                                  /* /--------\ */
     }
     return stuffAndName.left(ix);
-
 }
 
 /*!

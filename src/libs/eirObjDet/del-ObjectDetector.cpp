@@ -10,16 +10,16 @@
 #include "ObjDetResultItem.h"
 #include "ObjDetResultList.h"
 
-QHash<cvCascadeType, ObjectDetector::This> ObjectDetector::smTypeDetectorHash;
+QHash<cvClassifierType, ObjectDetector::This> ObjectDetector::smTypeDetectorHash;
 
-ObjectDetector::ObjectDetector(const cvCascade::Type type,
+ObjectDetector::ObjectDetector(const cvClassifier::Type type,
                                QObject *parent)
     : QObject(parent)
-    , mpCascade(new cvCascade(type))
+    , mpCascade(new cvClassifier(type))
     , cmpTimer(new QTimer(parent))
 {
-    TRACEQFI << cvCascade::typeName(type)() << QOBJNAME(parent);
-    setObjectName("ObjectDetector:"+cvCascade::typeName(type));
+    TRACEQFI << cvClassifier::typeName(type)() << QOBJNAME(parent);
+    setObjectName("ObjectDetector:"+cvClassifier::typeName(type));
     TSTALLOC(cmpTimer);
     cmpTimer->setObjectName("QTimer:ObjectDetector");
     if (smTypeDetectorHash.contains(type))
@@ -34,18 +34,18 @@ ObjectDetector::ObjectDetector(const cvCascade::Type type,
 
 ObjectDetector::~ObjectDetector()
 {
-    cvCascadeType type = cascade()->type();
+    cvClassifierType type = cascade()->type();
     if (smTypeDetectorHash.contains(type)
             && smTypeDetectorHash.value(type) == this)
         smTypeDetectorHash.remove(type);
 }
 
-ObjectDetector *ObjectDetector::p(const cvCascadeType type)
+ObjectDetector *ObjectDetector::p(const cvClassifierType type)
 {
     return smTypeDetectorHash[type];
 }
 
-cvCascade *ObjectDetector::cascade()
+cvClassifier *ObjectDetector::cascade()
 {
     return mpCascade;
 }

@@ -4,17 +4,32 @@
 
 #include "Debug.h"
 
-XerEntry::UidMap XerEntry::smMap;
 
-XerEntry::XerEntry()
-    : mUid(QUuid::createUuid())
+XerEntry::XerEntry() : mUid(QUuid::createUuid()) {;}
+XerEntry::~XerEntry() {;}
+
+void XerEntry::clear()
 {
-    smMap.insert(uid(), this);
+    TRACEFN;
+    mUid = QUuid();
+    mLevel.clear();
+    mFuncInfo.clear();
+    mWhat.clear();
+    mWhy.clear();
+    mWhere.clear();
+    mHow.clear();
+
 }
 
-XerEntry::~XerEntry()
+QString XerEntry::toString() const
 {
-    smMap.remove(uid());
+    return QString("%1: %2 %3 %4 %5 @%6")
+            .arg(level().name())
+            .arg(what())
+            .arg(why())
+            .arg(where())
+            .arg(how())
+            .arg(funcInfo());
 }
 
 XerEntry XerEntry::from(const char *qFuncInfo, const char *levelName,

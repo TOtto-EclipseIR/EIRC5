@@ -16,12 +16,18 @@ public:
 public:
     XerEntry();
     ~XerEntry();
-    QUuid uid() const { return mUid; }
-    XfrLevel level() const;
-    QString what() const;
-    QString why() const;
-    QString where() const;
-    QString how() const;
+    bool isNull() const             { return XfrLevel::level("NoLevel") == mLevel.level();}
+    bool notNull() const            { return ! isNull(); }
+    bool isError() const            { return XfrLevel::isError(mLevel.name()); }
+    void clear();
+    QUuid uid() const               { return mUid; }
+    XfrLevel level() const          { return mLevel; }
+    QString what() const            { return mWhat; }
+    QString why() const             { return mWhy; }
+    QString where() const           { return mWhere; }
+    QString how() const             { return mHow; }
+    QString funcInfo() const        { return mFuncInfo.getPrettyFunction(); }
+    QString toString() const;
 
 private:
     QUuid mUid;
@@ -35,24 +41,12 @@ private:
 //  ---------------- static ----------------
 public:
     static XerEntry at(const QUuid &uid);
-    static bool isError();
     static int errorCount();
 
-
-
     static XerEntry from(const char *qFuncInfo, const char *levelName,
-                         const QString &what, const QString &why,
-                         const QString &where, const QString &how);
- /*
-    static XerEntry from(const char *qFuncInfo, const char *levelName,
-                              const QStringList names=QStringList(),
-                         const QVariantList &vars=QVariantList());
-    static XerEntry from(const char *qFuncInfo, const char *levelName,
-                              const QString name1, const QVariant &var1,
-                              const QString name2=QString(), const QVariant &var2=QVariant(),
-                              const QString name3=QString(), const QVariant &var3=QVariant(),
-                              const QString name4=QString(), const QVariant &var4=QVariant());
-*/
-private:
-    static UidMap smMap;
+                         const QString &what, const QString &why=QString(),
+                         const QString &where=QString(), const QString &how=QString());
 };
+
+#define XRTNERROR(level, what, why, where, how) \
+

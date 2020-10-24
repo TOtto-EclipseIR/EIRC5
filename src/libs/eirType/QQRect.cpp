@@ -4,8 +4,8 @@
 #include <QtMath>
 
 #include <eirXfr/Debug.h>
-//#include "../../libs/eirType/Debug.h"
 
+#include "QQPoint.h"
 #include "QQRectF.h"
 
 QQRect::QQRect() {;}
@@ -31,10 +31,21 @@ void QQRect::set(const QSize size, const QPoint center)
             size.height(), size.width());
 }
 
-void QQRect::makeSquare()
+void QQRect::makeSquare(const bool byArea)
 {
-    int d = qRound(qSqrt(area()));
-    set(QSize(d,d), center());
+    if (byArea)
+    {
+        int d = qRound(qSqrt(area()));
+        set(QSize(d,d), center());
+    }
+    else
+    {
+        int w = width(), h = height();
+        if (w == h) return;                                 /* /=======\ */
+        QQPoint c = center();
+        int m = qMax(w, h);
+        set(QQSize(m, m), c);
+    }
 }
 
 void QQRect::unite(const QQRect other)
@@ -72,10 +83,10 @@ qreal QQRect::overlap(const QQRect other) const
     TRACEQFI << other << toString();
     EXPECT(isValid());
     EXPECT(other.isValid());
-    if ( ! isValid() || ! other.isValid()) return 0.0;
-    if (contains(other)) return 1.0;
-    if (other.contains(*this)) return 1.0;
-    if ( ! intersects(other)) return 0.0;
+    if ( ! isValid() || ! other.isValid()) return qQNaN();  /* /========\ */
+    if (contains(other)) return 1.0;                        /* /========\ */
+    if (other.contains(*this)) return 1.0;                  /* /========\ */
+    if ( ! intersects(other)) return 0.0;                   /* /========\ */
 
     QQRect intersection = intersected(other);
     qreal intArea = intersection.area();

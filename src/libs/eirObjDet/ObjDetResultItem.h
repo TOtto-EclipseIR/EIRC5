@@ -6,20 +6,20 @@
 #include <eirType/QQRect.h>
 #include <eirType/QQRectF.h>
 #include <eirType/QQRectList.h>
-#include <eirQtCV/cvCascade.h>
+#include <eirQtCV/cvClassifier.h>
 
 class EIROBJDET_EXPORT ObjDetResultItem
 {
 public:
     ObjDetResultItem();
-    ObjDetResultItem(const cvCascade::Parameters &parms);
-    void setParameters(const cvCascade::Parameters &parms);
+    ObjDetResultItem(const cvClassifier::Parameters &parms);
+    void setParameters(const cvClassifier::Parameters &parms);
     bool isEmpty() const;
     void unite(const QQRect rect);
     bool unite(const QQRect rect, const qreal overlapThreshold);
     void accumulate(const QQRect rect);
     bool isOrphan(const int threshold=1) const;
-    void calculate(const cvCascade *cascade);
+    void calculate(const cvClassifier *classifier);
     QQRect united() const;
     qreal unitedOverlap(const QQRect rect) const;
 
@@ -35,7 +35,7 @@ public:
     void dump(int verbosity=0) const;
 
 private:
-    cvCascade::Parameters mParameters;
+    cvClassifier::Parameters mParameters;
     QQRect mResultRect;
     QQRect mUnitedRect;
     QQRectF mAccumulator;

@@ -242,7 +242,7 @@ QString cvMat::toDebugString(cv::Mat *mat)
 {
     return (nullptr == mat)
             ? "Null cv::Mat"
-            : QString("cvMat size=%1x%2 type=%3 depth=%4 total=%5 data=%5")
+            : QString("cvMat size=%1x%2 type=%3 depth=%4 total=%5 data=%6")
                     .arg(mat->size().width).arg(mat->size().height)
                     .arg(mat->type()).arg(mat->elemSize())
                     .arg(mat->elemSize() * mat->total())

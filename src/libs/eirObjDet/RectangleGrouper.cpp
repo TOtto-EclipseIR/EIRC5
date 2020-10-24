@@ -1,6 +1,17 @@
 #include "RectangleGrouper.h"
 
-RectangleGrouper::RectangleGrouper(QObject *parent) : QObject(parent)
-{
+#include <eirXfr/Debug.h>
 
+RectangleGrouper::RectangleGrouper(const cvClassifier::Type cascadeType, const Settings::Key grouperKey, QObject *parent)
+    : QObject(parent)
+    , cmType(cascadeType)
+    , cmGrouperKey(grouperKey)
+{
+    TRACEQFI << cvClassifier::typeName(cascadeType)() << grouperKey() << QOBJNAME(parent);
+    setObjectName("RectangleGrouper:"+cvClassifier::typeName(cascadeType));
+}
+
+void RectangleGrouper::initialize()
+{
+    TRACEQFI << cvClassifier::typeName(cmType)() << QOBJNAME(this);
 }

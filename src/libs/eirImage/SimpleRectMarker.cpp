@@ -7,10 +7,9 @@
 
 #include <APP>
 #include <eirExe/Settings.h>
-#include <eirObjDet/del-ObjectDetector.h>
 #include <eirObjDet/ObjDetResultItem.h>
 #include <eirObjDet/ObjDetResultList.h>
-#include <eirQtCV/cvCascade.h>
+#include <eirQtCV/cvClassifier.h>
 #include <eirType/QQSize.h>
 #include <eirXfr/Debug.h>
 
@@ -24,16 +23,29 @@ void SimpleRectMarker::markAll(const Settings::Key &groupKey,
                                const QQRectList &rectList)
 {
     TRACEQFI << rectList.size();
+    int cwk = 12;
+    ColorWheel cw(0.75);
     QPainter painter(this);
+
     STG->beginGroup(groupKey);
-    QColor penColor = QColor(STG->string("PenColor","#CC66FFFF"));
+    cw.set(cwk, Hue::red, Hue::magenta);
+//    QColor penColor = QColor(STG->string("PenColor","#CC66FFFF"));
     qreal penWidth = STG->real("PenWidth", 5.0);
-    Qt::PenStyle penStyle = Qt::PenStyle(STG->unsignedInt("PenStyle", 2));
+    Qt::PenStyle penStyle = Qt::PenStyle(STG->unsignedInt("PenStyle", 1));
     STG->endGroup();
-    QBrush penBrush(penColor);
+
+    QBrush penBrush;
     QPen pen(penBrush, penWidth, penStyle);
-    painter.setPen(pen);
-    painter.drawRects(rectList.vector());
+    int k = 0, n = rectList.size();
+    foreach (QQRect rc, rectList)
+    {
+        pen.setColor(cw.at((n < cwk / 2) ? (k * cwk / n) : k));
+        painter.setPen(pen);
+        TRACE << k << painter.pen().color() << painter.pen().width()
+                   << painter.pen().style() << rc;
+        painter.drawRect(rc);
+        ++k;
+    }
     painter.end();
 }
 

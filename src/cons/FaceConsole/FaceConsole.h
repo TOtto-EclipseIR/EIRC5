@@ -3,11 +3,12 @@
 #include <QObject>
 #include <eirExe/Console.h>
 
-#include <eirType/QQDir.h>
-#include <eirObjDet/ObjDetProcessor.h>
-#include <eirObjDet/ObjDetResultList.h>
-
 class QCommandLineParser;
+
+#include <eirType/QQDir.h>
+#include <eirObjDet/ObjectDetection.h>
+#include <eirObjDet/ObjDetResultList.h>
+#include <eirQtCV/cvVersion.h>
 
 class FaceConsole : public Console
 {
@@ -29,12 +30,12 @@ private slots:
     void processCurrentFile();
     void finishProcessing();
     void failedExit(const qint8 retcode, const QString &errmsg);
-    void catchSettingsGet(const Settings::Key key, const Settings::Value valu);
-    void catchSettingsImport(const Settings::Key key, const Settings::Value valu);
-    void catchSettingsCreate(const Settings::Key key, const Settings::Value valu);
-    void catchSettingsDefault(const Settings::Key key, const Settings::Value valu);
-    void catchSettingsRemove(const Settings::Key key, const Settings::Value valu);
-    void catchSettingsChange(const Settings::Key key, const Settings::Value newValu, const Settings::Value oldValu);
+    void catchSettingsGet(const Settings::Key key, const Settings::Valu valu);
+    void catchSettingsImport(const Settings::Key key, const Settings::Valu valu);
+    void catchSettingsCreate(const Settings::Key key, const Settings::Valu valu);
+    void catchSettingsDefault(const Settings::Key key, const Settings::Valu valu);
+    void catchSettingsRemove(const Settings::Key key, const Settings::Valu valu);
+    void catchSettingsChange(const Settings::Key key, const Settings::Valu newValu, const Settings::Valu oldValu);
     void catchSettingsGroup(const Settings::Key key);
     void catchCommandLineWarning(const QString what, const QString why);
     void catchCommandLineInfo(const QString what, const QString why);
@@ -49,21 +50,17 @@ signals:
     void resoursesInitd();
     void resourseInitFailed(const qint8 retcode, const QString &errmsg);
     void processingStarted();
-    void processed(QFileInfo fileInfo, int rectCount);
-    void processFailed(QFileInfo fileInfo, QString errorString);
+    void processed(const QFileInfo &fileInfo, const int rectCount);
+    void processFailed(const QFileInfo &fileInfo, const QString &errorString);
+    void processEmpty(const QFileInfo &fileInfo, const QString &methodString);
     void processingComplete();
 
 private:
-    ObjDetProcessor mPreScanProcessor;
-#ifdef QTCV_SETTINGS_HACK
-    unsigned mScaleFactor=120;
-    signed mNeighbors=1;
-    unsigned mMinQuality=0;
-#endif
-    QQString mMethodString;
-    QDir mBaseOutputDir;
+    bool mWriteInfo=true;
+    //QQString mMethodString;
+    QQDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
-    QQDir::Vector mMarkedFaceQualityDirs;
+    //QQDir::Vector mMarkedFaceQualityDirs;
     int mCurrentFileCount=0;
     QQFileInfo mCurrentFileInfo;
     QQRectList mCurrentRectangles;

@@ -1,4 +1,4 @@
-#include "ObjDetRectSettings.h"
+#include "del=ObjDetRectSettings.h"
 
 #include <APP>
 #include <eirExe/Settings.h>
