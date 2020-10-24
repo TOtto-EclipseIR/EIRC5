@@ -5,11 +5,11 @@
 Hue Hue::white;
 Hue Hue::black;
 Hue Hue::red(0);
-Hue Hue::blue(240);
-Hue Hue::green(120);
-Hue Hue::magenta(300);
-Hue Hue::cyan(180);
 Hue Hue::yellow(60);
+Hue Hue::green(120);
+Hue Hue::cyan(180);
+Hue Hue::blue(240);
+Hue Hue::magenta(300);
 
 
 Hue::Hue() {;}

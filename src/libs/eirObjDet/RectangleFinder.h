@@ -59,6 +59,7 @@ private:
 private:
     const cvClassifier::Type cmType;
     const Settings::Key cmResourceKey;
+    const Settings::Key cmResourceTypeKey;
     const Settings::Key cmFinderKey;
     cvClassifier::Parameters mParameters;
     QQDir mBaseDir;

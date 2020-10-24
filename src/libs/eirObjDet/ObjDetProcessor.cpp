@@ -52,7 +52,6 @@ void ObjDetProcessor::setImage(const QQImage &inputImage)
     EXPECTNOT(mGreyInputMat.isNull());
     BEXPECTEQ(1, mGreyInputMat.depthInBytes());
 }
-
 XerReturn<QQRectList> ObjDetProcessor::findRects(const bool showMat,
                                                  const QQRect &region)
 {
@@ -63,6 +62,7 @@ XerReturn<QQRectList> ObjDetProcessor::findRects(const bool showMat,
 
     rtnerr = finder()->findRectangles(mGreyInputMat, showMat, region);
     mMethodString = finder()->methodString();
+    DUMP << rtnerr.toDebugString();
     return rtnerr;
 }
 

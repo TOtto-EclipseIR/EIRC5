@@ -24,8 +24,7 @@ public:
     QRectVector vector() const;
     QVariant toVariant() const;
     operator QVariant() const;
+    QString toDebugString() const;
 };
 Q_DECLARE_METATYPE(QQRectList);
-
-//template class XerReturn<QQRectList>;
 

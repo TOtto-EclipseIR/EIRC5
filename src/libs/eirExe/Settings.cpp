@@ -188,54 +188,50 @@ void Settings::dump(const QSettings::SettingsMap &map)
 
 bool Settings::boolean(const Settings::Key &key, const bool &defaultValue) const
 {
-    bool ok = contains(key);
-    bool result = vari(key).toBool();
-    return ok ? result : defaultValue;
+    bool rtn = vari(key, defaultValue).toBool();
+    DUMP << rtn << group() << key << contains(key) << "(" << defaultValue << ")";
+    return rtn;
 }
 
 signed Settings::signedInt(const Key &key, const signed &defaultValue) const
 {
     signed rtn = vari(key, defaultValue).value<signed>();
-    TRACEQFI << key() << rtn << defaultValue;
+    DUMP << rtn << group() << key << contains(key) << "(" << defaultValue << ")";
     return rtn;
 }
 
 unsigned Settings::unsignedInt(const Key &key, const unsigned &defaultValue) const
 {
-    bool ok;
-    unsigned result = valu(key).toUInt(&ok);
-    ok &= contains(key);
-    return ok ? result : defaultValue;
+    unsigned rtn = vari(key, defaultValue).value<unsigned>();
+    DUMP << rtn << group() << key << contains(key) << "(" << defaultValue << ")";
+    return rtn;
 }
 
 qreal Settings::real(const Key &key, const qreal &defaultValue) const
 {
-    bool ok = contains(key);
-    qreal result = valu(key).toDouble(&ok);
-    return ok ? result : defaultValue;
-}
+    qreal rtn = vari(key, defaultValue).value<qreal>();
+    DUMP << rtn << group() << key << contains(key) << "(" << defaultValue << ")";
+    return rtn;}
 
 qreal Settings::realPerMille(const Key &key, const unsigned &defaultValue) const
 {
-    bool ok = contains(key);
-    qreal result = valu(key).toUInt(&ok);
-    return perMille(ok ? result : defaultValue);
+    signed rtn = vari(key, defaultValue).value<signed>();
+    DUMP << rtn << group() << key << contains(key) << "(" << defaultValue << ")";
+    return perMille(rtn);
 }
 
 QString Settings::string(const Settings::Key &key, const QString &defaultValu) const
 {
-    return valu(key, defaultValu);
+    QString rtn = valu(key, defaultValu);
+    DUMP << rtn << group() << key << contains(key) << "(" << defaultValu << ")";
+    return rtn;
 }
 
 QQSize Settings::size(const Settings::Key &key, const QQSize &defaultValu) const
 {
-    QQSize resultSize = defaultValu;
-    if (contains(key))
-    {
-        QQString sizeString = valu(key);
-        resultSize.set(sizeString);
-    }
-    return resultSize;
+    QQSize rtn = vari(key, defaultValu).value<QSize>();
+    DUMP << rtn << group() << key << contains(key) << "(" << defaultValu << ")";
+    return rtn;
 }
 
 // static
@@ -244,40 +240,3 @@ qreal Settings::perMille(const unsigned uValue, bool unitBound)
     qreal fValue = qreal(uValue);
     return unitBound ? fValue : qBound(0.001, qreal(uValue) / 1000.0, 0.999);
 }
-
-#if 0
-QString Settings::string(const Key &key, const Valu &defaultValue) const
-{
-    TRACEQFI << key() << defaultValue << get(key, defaultValue);
-    return get(key, defaultValue);
-}
-
-void Settings::Map::import(const Settings::Map &keyValueStringMap)
-{
-    foreach (QString key, keyValueStringMap.keys())
-        insert(key, keyValueStringMap.value(key));
-}
-
-void Settings::Map::operator +=(const Settings::Map &keyValueStringMap)
-{
-    import(keyValueStringMap);
-}
-
-void Settings::Map::setDefault(const QString key, const QVariant &variant)
-{
-    if ( ! contains(key)) insert(key, variant.toString());
-}
-
-QStringList Settings::Map::toStringList() const
-{
-    QStringList qsl;
-    foreach (QString key, keys())
-        qsl << QString("%1={%2}").arg(key).arg(value(key));
-    return qsl;
-}
-
-void Settings::Map::dump() const
-{
-    foreach (QString d, toStringList()) DUMP << d;
-}
-#endif

@@ -58,7 +58,7 @@ signals:
 private:
     bool mWriteInfo=true;
     //QQString mMethodString;
-    QDir mBaseOutputDir;
+    QQDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
     //QQDir::Vector mMarkedFaceQualityDirs;
     int mCurrentFileCount=0;

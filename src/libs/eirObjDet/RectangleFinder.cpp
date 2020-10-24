@@ -21,6 +21,7 @@ RectangleFinder::RectangleFinder(const cvClassifier::Type cascadeType,
     : QObject(parent)
     , cmType(cascadeType)
     , cmResourceKey(resourceKey)
+    , cmResourceTypeKey(resourceKey.appended(cvClassifier::typeName(cmType)()))
     , cmFinderKey(finderKey)
 {
     TRACEQFI << cvClassifier::typeName(cascadeType)()
@@ -76,10 +77,8 @@ void RectangleFinder::setDetectorsBaseDir()
 void RectangleFinder::loadCascade()
 {
     TRACEQFI << QOBJNAME(parent());
-    Settings::Key resourceTypeKey = cmResourceKey.
-            appended(cvClassifier::typeName(cmType)());
-    QQString xmlFileName = STG->string(resourceTypeKey.appended("xmlFileKey"));
-    bool autoLoad = STG->boolean(resourceTypeKey.appended("AutoLoad"));
+    QQString xmlFileName = STG->string(cmResourceTypeKey.appended("XmlFile"));
+    bool autoLoad = STG->boolean(cmResourceTypeKey.appended("AutoLoad"));
     if (autoLoad && ! xmlFileName.isEmpty())
     {
         loadCascadeFile(xmlFileName);
@@ -98,16 +97,24 @@ void RectangleFinder::finishSetup()
     EMIT(setupFinished(cmType));
 }
 
-XerReturn<QQRectList> RectangleFinder::findRectangles(const cvMat greyMat, const bool showDetect, const QQRect &region)
+XerReturn<QQRectList> RectangleFinder::findRectangles(const cvMat greyMat,
+                                                      const bool showDetect,
+                                                      const QQRect &region)
 
 {
     TRACEQFI << greyMat.toDebugString() << showDetect << region;
-    XerReturn<QQRectList> rtnerr;
+    XerReturn<QQRectList> rtnerr("RectangleFinder::findRectangles(rtnerr)");
     configure();
-    rtnerr = gspClassifierPool->r(cmType).detectRectangles(greyMat, mParameters, showDetect, region);
-    if (rtnerr.isError() || rtnerr.isNull()
-            || cvClassifier::PreScan != cmType) return rtnerr;
-    return rtnerr.set(preScanMergeRects(rtnerr.result()));
+    rtnerr.set(gspClassifierPool->r(cmType)
+            .detectRectangles(greyMat, mParameters, showDetect, region));
+    EXPECTNOT(rtnerr.isNull());
+    if (rtnerr.isError()) DUMP << rtnerr.toDebugString();
+    if (rtnerr.isError()) return rtnerr;                        /* /========\ */
+    QQRectList rectList = rtnerr.result();
+
+    if (cvClassifier::PreScan == cmType && mParameters.preScanMerge())
+        rectList = preScanMergeRects(rectList);
+    return XerReturn<QQRectList>(rectList);
 }
 
 void RectangleFinder::loadCascadeFile(const QString &cascadeXmlFileName)
@@ -137,6 +144,7 @@ void RectangleFinder::configurePreScan()
     TRACEQFI << cvClassifier::typeName(cmType)();
     STG->beginGroup(cmFinderKey);
     unsigned quality = STG->unsignedInt("PreScanQuality", 500);
+    bool merge = STG->boolean("PreScanMerge", true);
     qreal factor = STG->realPerMille("ScaleFactor", 0.0);
     signed neighbors = STG->signedInt("Neighbors", -1);
     STG->endGroup();
@@ -154,26 +162,36 @@ void RectangleFinder::configurePreScan()
     }
     mParameters.setFactor(factor);
     mParameters.setNeighbors(neighbors);
+    mParameters.setPreScanMerge(merge);
     NEEDDO(sizes);
 }
 
 QQRectList RectangleFinder::preScanMergeRects(const QQRectList &rawRects)
 {
     TRACEQFI << rawRects;
+#if 1
+    return rawRects;
+#else
     QQRectList remainingRects = rawRects;
     QQRectList resultRects;
     while ( ! remainingRects.isEmpty())
     {
         QQRect currentRect = remainingRects.takeFirst();
-        foreach (QQRect priorRect, resultRects)
+        DUMPVAL(currentRect);
+        DUMPVAL(remainingRects);
+        foreach (QQRect otherRect, remainingRects)
         {
-            if (priorRect.contains(currentRect))
-                break;
-            if (currentRect.contains(priorRect))
-                resultRects.removeAll(priorRect);
-            resultRects << currentRect;
+            if (otherRect.contains(currentRect))
+                break; // discard currentRect
+            else if (currentRect.contains(otherRect))
+                remainingRects.removeOne(otherRect);
+            else
+                resultRects << currentRect;
+            DUMPVAL(resultRects.toDebugString());
         }
     }
+    TRACERTN(resultRects);
     return resultRects;
+#endif
 }
 

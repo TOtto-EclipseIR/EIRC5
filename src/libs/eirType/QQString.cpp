@@ -48,7 +48,7 @@ QQString QQString::squeezed() const
 QQString QQString::appended(const QQString s, const bool delimited) const
 {
     QQString rtn = string();
-    if (delimited && smDelimiter != rtn[0]) rtn.prepend(smDelimiter);
+    if (delimited && smDelimiter != s[0]) rtn.append(smDelimiter);
     return rtn + s;
 }
 

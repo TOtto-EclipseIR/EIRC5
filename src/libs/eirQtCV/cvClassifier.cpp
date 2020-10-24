@@ -25,7 +25,7 @@ XerReturn<QQRectList> cvClassifier::detectRectangles(const cvMat greyMat, const 
                                 const bool showDetect, const QQRect &region)
 {
     TRACEQFI << showDetect << region;
-    XerReturn<QQRectList> rtnerr;
+    XerReturn<QQRectList> rtnerr("cvClassifier::detectRectangles(rtnerr)");
     if (greyMat.isNull())
         return rtnerr.set(XerEntry::from(Q_FUNC_INFO, "Error", "Grey cv::Mat", "Is Null"));
     if (notLoaded())
@@ -74,51 +74,6 @@ BasicName cvClassifier::typeName(cvClassifier::Type type)
 /* ----------------------- Parameters ------------------------ */
 
 cvClassifier::Parameters::Parameters() { TRACEFN; }
-
-double cvClassifier::Parameters::factor() const
-{
-    return mFactor;
-}
-
-int cvClassifier::Parameters::neighbors() const
-{
-    return mNeighbors;
-}
-
-int cvClassifier::Parameters::flags() const
-{
-    return mFlags;
-}
-
-cvSize cvClassifier::Parameters::minSize() const
-{
-    return mMinSize.isValid() ? mMinSize : QQSize::null;
-}
-
-cvSize cvClassifier::Parameters::maxSize() const
-{
-    return mMaxSize.isValid() ? mMaxSize : QQSize::null;
-}
-
-void cvClassifier::Parameters::setFactor(const qreal &factor)
-{
-    mFactor = factor;
-}
-
-void cvClassifier::Parameters::setNeighbors(const unsigned &neighbors)
-{
-    mNeighbors = neighbors;
-}
-
-void cvClassifier::Parameters::setMinSize(const cvSize &minSize)
-{
-    mMinSize = minSize;
-}
-
-void cvClassifier::Parameters::setMaxSize(const cvSize &maxSize)
-{
-    mMaxSize = maxSize;
-}
 
 QString cvClassifier::Parameters::methodString(const QQFileInfo &cascadeXmlInfo) const
 {

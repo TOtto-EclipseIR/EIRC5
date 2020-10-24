@@ -18,7 +18,9 @@ class EIROBJDET_EXPORT ObjDetProcessor : public QObject
 {
     Q_OBJECT
 public:
-    ObjDetProcessor(const cvClassifier::Type cascadeType, const Settings::Key objDetKey, QObject * parent=nullptr);
+    ObjDetProcessor(const cvClassifier::Type cascadeType,
+                    const Settings::Key objDetKey,
+                    QObject * parent=nullptr);
     cvClassifier::Type type() const         { return cmType; }
     RectangleFinder *finder()               { return mpRectFinder; }
     RectangleGrouper *grouper()             { return mpRectGrouper; }

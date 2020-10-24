@@ -57,11 +57,9 @@ QString QQColor::toSpecString() const
     case Cmyk:          s = "Cmyk", c1 = cyan(), c2 = magenta(), c3 = yellow(), c4 = black();       break;
     case Invalid:       break;
     }
-    return notValid() ? toString() : QString("%5: #%1%2%3%4").arg(c1, 2, 16, QChar('0'))
-                                                             .arg(c2, 2, 16, QChar('0'))
-                                                             .arg(c3, 2, 16, QChar('0'))
-                                                             .arg(c4, 2, 16, QChar('0'))
-                                                             .arg(s);
+    return notValid() ? "{Invalid}" : QString("%5: #%1%2%3%4")
+            .arg(c1, 2, 16, QChar('0')).arg(c2, 2, 16, QChar('0'))
+            .arg(c3, 2, 16, QChar('0')).arg(c4, 2, 16, QChar('0')).arg(s);
 }
 
 QDebug operator<<(QDebug dbg, const QQColor &color)

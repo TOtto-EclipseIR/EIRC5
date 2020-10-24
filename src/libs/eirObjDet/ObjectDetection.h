@@ -28,7 +28,7 @@ signals:
     
 private:
     QMap<cvClassifier::Type, ObjDetProcessor*> mTypeProcessorMap;
-    Settings::Key mObjDetKey=Settings::Key("ObjectDetector");
+    Settings::Key mObjDetKey=Settings::Key("/ObjectDetector");
 };
 Q_GLOBAL_STATIC(ObjectDetection, OBJD);
 

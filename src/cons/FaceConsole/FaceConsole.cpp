@@ -49,6 +49,8 @@ void FaceConsole::initializeApplication()
             this, &FaceConsole::nextFile);
     CONNECT(this, &FaceConsole::processed,
             this, &FaceConsole::nextFile);
+    CONNECT(this, &FaceConsole::processEmpty,
+            this, &FaceConsole::nextFile);
     CONNECT(this, &FaceConsole::processFailed,
             this, &FaceConsole::nextFile);
     CONNECT(this, &FaceConsole::processingComplete,
@@ -118,10 +120,8 @@ void FaceConsole::setBaseOutputDir()
 {
     TRACEFN;
     QString baseDirString(STG->string("/Output/BaseDir"));
-    baseDirString.replace("@", QDateTime::currentDateTime()
-        .toString("DyyyyMMdd-Thhmm"));
     DUMPVAL(baseDirString);
-    QDir baseDir(baseDirString);
+    QQDir baseDir(baseDirString);
     EXPECT(baseDir.mkpath("."));
     EXPECT(baseDir.cd("."));
     EXPECT(baseDir.exists());
@@ -143,9 +143,9 @@ void FaceConsole::setOutputDirs()
     {
         // do nothing, leave mMarkedRectOutputDir null
     }
-    else if (QDir::isRelativePath(markedRectDirString))
+    else if (QQDir::isRelativePath(markedRectDirString))
     {
-        QDir relativeDir(mBaseOutputDir);
+        QQDir relativeDir(mBaseOutputDir);
         DUMPVAL(relativeDir);
         if ( ! relativeDir.exists(markedRectDirString))
             created = relativeDir.mkpath(markedRectDirString);
@@ -157,9 +157,9 @@ void FaceConsole::setOutputDirs()
             mMarkedRectOutputDir = relativeDir;
         // else mMarkedRectOutputDir is still null
     }
-    else if (QDir::isAbsolutePath(markedRectDirString))
+    else if (QQDir::isAbsolutePath(markedRectDirString))
     {
-        QDir absoluteDir(markedRectDirString);
+        QQDir absoluteDir(markedRectDirString);
         if ( ! absoluteDir.exists())
             created = absoluteDir.mkpath(".");
         if (absoluteDir.exists())
@@ -238,6 +238,7 @@ void FaceConsole::processCurrentFile()
 
     proc->setImage(inputImage);
     XerReturn<QQRectList> rtnerr = proc->findRects();
+    DUMP << rtnerr.toDebugString();
     if (rtnerr.isNull())
     {
         writeErr("***Error: Null Result");
@@ -252,7 +253,7 @@ void FaceConsole::processCurrentFile()
     }
     if (rtnerr.isSuccess())
     {
-        mCurrentRectangles = proc->rectList();
+        mCurrentRectangles = rtnerr.result();
         if (mCurrentRectangles.isEmpty())
         {
             writeLine("   No PreScan Rectangles Detected");
@@ -261,12 +262,14 @@ void FaceConsole::processCurrentFile()
         }
         else
         {
-            writeLine(QString("    %1 PreScan Rectangles Detected"));
+            writeLine(QString("    %1 PreScan Rectangles Detected")
+                      .arg(mCurrentRectangles.size()));
             EMIT(processed(mCurrentFileInfo, mCurrentRectangles.size()));
             SimpleRectMarker rectMarker(inputImage);
             rectMarker.markAll("Marker/PreScanRect", mCurrentRectangles);
             QQFileInfo rectFileInfo(mMarkedRectOutputDir,
-                    mCurrentFileInfo.completeBaseName(QQString::Squeeze), "png");
+                    mCurrentFileInfo.completeBaseName(QQString::Squeeze)
+                                    +"-"+proc->methodString(), "png");
             if (rectMarker.save(rectFileInfo.absoluteFilePath()))
                 writeLine("   " + rectFileInfo.absoluteFilePath() + " saved");
             return;

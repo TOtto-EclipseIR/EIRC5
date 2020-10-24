@@ -21,7 +21,7 @@ public:
     QQRect(const QRectF rcf);
     QQRect set(const QRectF rcf);
     void set(const QSize size, const QPoint center);
-    void makeSquare();
+    void makeSquare(const bool byArea=false);
     void unite(const QQRect other);
     int area() const;
     QQRect overlapped(const QQRect other) const;
