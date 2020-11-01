@@ -1,8 +1,9 @@
 #pragma once
+#include "eirImage.h"
 
 #include <QObject>
 
-class MarkManager : public QObject
+class EIRIMAGE_EXPORT MarkManager : public QObject
 {
     Q_OBJECT
 public:

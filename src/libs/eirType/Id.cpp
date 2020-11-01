@@ -41,14 +41,9 @@ Id::~Id()
     remove();
 }
 
-QVariant Id::data() const
-{
-    return mData;
-}
-
 void Id::clear()
 {
-    TRACEQFI << toString();
+    TRACEQFI << toDebugString();
     remove();
     mUuid = Uuid(),
             mU64Key = 0,
@@ -56,41 +51,6 @@ void Id::clear()
             mFlags.clear(),
             mDescription.clear(),
             mData.clear();
-}
-
-void Id::set(const Uuid &uuid)
-{
-    mUuid = uuid;
-}
-
-void Id::set(const MultiName name)
-{
-    mNameKey = name;
-}
-
-void Id::set(const QVariant data)
-{
-    mData = data;
-}
-
-MultiName Id::name() const
-{
-    return mNameKey;
-}
-
-Uuid Id::uuid() const
-{
-    return mUuid;
-}
-
-QString Id::toString() const
-{
-    return mNameKey.toString();
-}
-
-QString Id::operator ()() const
-{
-    return toString();
 }
 
 bool Id::operator <(const Id &other)
@@ -117,6 +77,12 @@ void Id::remove()
 void Id::insert()
 {
     insert(*this);
+}
+
+QString Id::toDebugString() const
+{
+    return QString("Uid=%1 Key=%2 %3").arg(uuid().trace())
+            .arg(QString::number(key(), 16).toUpper()).arg(name()());
 }
 
 void Id::remove(const Id &id)
@@ -146,4 +112,10 @@ Id Id::newId(const MultiName &name)
     id.set(name);
     id.insert();
     return id;
+}
+
+QDebug operator<<(QDebug dbg, const Id &id)
+{
+    dbg << id.toDebugString();
+    return dbg;
 }

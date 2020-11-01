@@ -22,7 +22,6 @@ LIBS *= -leirXfr5
 LIBS *= -leirBase5
 
 SOURCES += \
-    ArgumentItem.cpp \
     Enumeration.cpp \
     FunctionInfo.cpp \
     Id.cpp \
@@ -65,7 +64,6 @@ SOURCES += \
 
 HEADERS += \
     ../../version.h \
-    ArgumentItem.h \
     BitFlags.h \
     DProperty.h \
     Enumeration.h \

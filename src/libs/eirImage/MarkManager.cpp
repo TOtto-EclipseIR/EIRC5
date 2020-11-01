@@ -1,6 +1,10 @@
 #include "MarkManager.h"
 
-MarkManager::MarkManager(QObject *parent) : QObject(parent)
-{
+#include <eirXfr/Debug.h>
 
+MarkManager::MarkManager(QObject *parent)
+    : QObject(parent)
+{
+    TRACEQFI << QOBJNAME(parent);
+    setObjectName("MarkManager");
 }

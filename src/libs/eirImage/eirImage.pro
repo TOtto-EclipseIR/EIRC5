@@ -17,7 +17,10 @@ LIBS *= -leirObjDet5
 LIBS *= -leirQtCV5
 
 SOURCES += \
+    AbstractImageMarker.cpp \
+    BaseImagePak.cpp \
     ColorWheel.cpp \
+    FrameImagePak.cpp \
     HeatmapMarker.cpp \
     Hue.cpp \
     MarkManager.cpp \
@@ -25,7 +28,10 @@ SOURCES += \
     SimpleRectMarker.cpp \
 
 HEADERS += \
+    AbstractImageMarker.h \
+    BaseImagePak.h \
     ColorWheel.h \
+    FrameImagePak.h \
     HeatmapMarker.h \
     Hue.h \
     MarkManager.h \
