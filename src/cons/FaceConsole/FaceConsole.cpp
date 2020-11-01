@@ -229,7 +229,8 @@ void FaceConsole::processCurrentFile()
 
     writeLine(QString("---Processing: %1. %2").arg(++mCurrentFileCount, 4)
               .arg(mCurrentFileInfo.fileName(QQString::Squeeze)));
-    QQImage inputImage(mCurrentFileInfo.absoluteFilePath());
+    mCurrentFrame = FrameImagePak(mCurrentFileInfo.absoluteFilePath());
+    QQImage inputImage(mCurrentFrame.image(FrameImagePak::Original));
     if (inputImage.isNull())
     {
         writeLine("***Invalid Image File");

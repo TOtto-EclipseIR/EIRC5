@@ -57,6 +57,10 @@ public:
     bool operator <  (const MultiName & other) const;
     void dump() const;
 
+public:
+    static QStringList toStringList(const List &mnl);
+    static List toList(const QStringList &qsl);
+
 protected:
     QString join(const QChar & delimiter) const;
 

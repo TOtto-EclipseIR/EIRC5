@@ -231,6 +231,22 @@ void MultiName::dump() const
     DUMP << toString();
 }
 
+// static
+QStringList MultiName::toStringList(const List &mnl)
+{
+    QStringList qsl;
+    foreach (MultiName mn, mnl) qsl << mn.toString();
+    return qsl;
+}
+
+// static
+MultiName::List MultiName::toList(const QStringList &qsl)
+{
+    List mnl;
+    foreach (QString qs, qsl) mnl << MultiName(qs);
+    return mnl;
+}
+
 // protected
 QString MultiName::join(const QChar & delimiter) const
 {

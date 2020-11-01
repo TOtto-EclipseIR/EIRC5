@@ -38,9 +38,14 @@ void VarPak::insert(const MultiName &key, const QVariant &value)
     insert(Var(key, value));
 }
 
+QVariant VarPak::get(const int index) const
+{
+    return mVarList[index].value();
+}
+
 Var &VarPak::at(const MultiName &name)
 {
-    return mVarMap.at(name);
+    return mVarMap[name];
 }
 
 Var VarPak::var(const MultiName &name) const
@@ -68,3 +73,9 @@ QByteArray VarPak::bytes() const
     return mBA;
 }
 
+
+QDebug operator<<(QDebug dbg, const VarPak &pak)
+{
+    dbg << pak.id();
+    return dbg;
+}

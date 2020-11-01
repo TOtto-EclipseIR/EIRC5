@@ -20,6 +20,7 @@ SOURCES += \
     AbstractImageMarker.cpp \
     BaseImagePak.cpp \
     ColorWheel.cpp \
+    FaceImagePak.cpp \
     FrameImagePak.cpp \
     HeatmapMarker.cpp \
     Hue.cpp \
@@ -31,6 +32,7 @@ HEADERS += \
     AbstractImageMarker.h \
     BaseImagePak.h \
     ColorWheel.h \
+    FaceImagePak.h \
     FrameImagePak.h \
     HeatmapMarker.h \
     Hue.h \

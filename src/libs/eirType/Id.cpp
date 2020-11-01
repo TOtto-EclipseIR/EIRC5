@@ -53,7 +53,7 @@ void Id::clear()
             mData.clear();
 }
 
-bool Id::operator <(const Id &other)
+bool Id::operator <(const Id &other) const
 {
     if (mUuid < other.mUuid) return true;
     if (mU64Key < other.mU64Key) return true;
@@ -61,7 +61,7 @@ bool Id::operator <(const Id &other)
     return false;
 }
 
-bool Id::operator ==(const Id &other)
+bool Id::operator ==(const Id &other) const
 {
     if (mUuid == other.mUuid) return true;
     if (mU64Key == other.mU64Key) return true;

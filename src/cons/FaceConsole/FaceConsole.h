@@ -6,6 +6,7 @@
 class QCommandLineParser;
 
 #include <eirType/QQDir.h>
+#include <eirImage/FrameImagePak.h>
 #include <eirObjDet/ObjectDetection.h>
 #include <eirObjDet/ObjDetResultList.h>
 #include <eirQtCV/cvVersion.h>
@@ -63,6 +64,7 @@ private:
     //QQDir::Vector mMarkedFaceQualityDirs;
     int mCurrentFileCount=0;
     QQFileInfo mCurrentFileInfo;
+    FrameImagePak mCurrentFrame;
     QQRectList mCurrentRectangles;
     ObjDetResultList mCurrentResults;
     QImage mRectImage;

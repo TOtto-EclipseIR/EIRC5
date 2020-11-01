@@ -45,8 +45,8 @@ public:
     Uuid uuid() const                   { return mUuid; }
     quint64 key() const                 { return mU64Key; }
     QVariant data() const               { return mData; }
-    bool operator <  (const Id & other);
-    bool operator == (const Id & other);
+    bool operator <  (const Id & other) const;
+    bool operator == (const Id & other) const;
     void remove();
     void insert();
     QString toDebugString() const;

@@ -2,6 +2,7 @@
 #pragma once
 #include "eirType.h"
 
+#include <QJsonObject>
 #include <QList>
 #include <QMap>
 #include <QStack>
@@ -27,7 +28,7 @@ public:
     VarMap insert(const Var &var);
     void insert(const MultiName &key, const QVariant &vari);
     Var value(const MultiName & name) const;
-    //MultiName::List keys(const MultiName &groupName=MultiName(), const bool recurse=true);
+    MultiName::List keys() const;
     //BasicName::List groupKeys(const MultiName &groupName);
     VarMap extract(const MultiName & groupName) const;
     void insert(const MultiName &groupName,
@@ -35,10 +36,13 @@ public:
     void insert(const VarMap &other, const bool useMapName=false);
     void operator += (const VarMap &other);
     Var::List values() const;
+    Var var(const MultiName &name) const;
     Var &at(const MultiName &name);
+    Var &operator [] (const MultiName &name);
     BasicName::List firstSegmentKeys() const;
     VarMap operator << (const Var &var);
     QVariant toVariant() const;
+    QJsonObject toJsonObject() const;
     QStringList dumpList() const;
     void dump() const;
 
