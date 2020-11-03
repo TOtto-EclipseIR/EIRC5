@@ -25,7 +25,7 @@ void VarPak::insert(const VarMap &varMap)
 
 void VarPak::set(const int index, const Var &listItem)
 {
-    mVarList[index] = listItem;
+    mVarList.insert(index, listItem);
 }
 
 void VarPak::insert(const Var &mapItem)
@@ -40,7 +40,7 @@ void VarPak::insert(const MultiName &key, const QVariant &value)
 
 QVariant VarPak::get(const int index) const
 {
-    return mVarList[index].value();
+    return mVarList.value(index).value();
 }
 
 Var &VarPak::at(const MultiName &name)

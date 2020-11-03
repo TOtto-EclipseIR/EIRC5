@@ -76,10 +76,10 @@ public: // values
     signed signedInt(const Key &key, const signed &defaultValue=0) const;
     unsigned unsignedInt(const Key &key, const unsigned &defaultValue=0) const;
     qreal real(const Key &key, const qreal &defaultValue=0) const;
-    qreal realPerMille(const Key &key, const unsigned &defaultValue=0) const;
+    qreal realPerMille(const Key &key, const signed &defaultValue=0) const;
     QString string(const Key &key, const QString &defaultValu=QString()) const;
     QQSize size(const Key &key, const QQSize &defaultValu=QQSize()) const;
-    static qreal perMille(const unsigned uValue, bool unitBound=true);
+    static qreal perMille(const signed sValue, bool unitBound=true);
 
     /*
         Rational rational(const QString &key, const Rational &defaultValue=Rational(0)) const;

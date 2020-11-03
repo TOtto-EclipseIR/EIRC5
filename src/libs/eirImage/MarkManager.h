@@ -24,7 +24,8 @@ private:
 signals:
 
 private:
-    static QMap<Id, BaseImagePak> smIdImagePakMap;
+    QMap<Id, BaseImagePak> mIdImagePakMap;
 
 };
 
+Q_GLOBAL_STATIC(MarkManager, gpMarkManager);

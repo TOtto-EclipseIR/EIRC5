@@ -59,7 +59,7 @@ void ObjDetResultItem::calculate(const cvClassifier *classifier)
         mResultRect = mAccumulator / count();
     else if (mUnitedRect.isValid())
         mResultRect =mUnitedRect;
-    mResultRect.makeSquare();
+    mResultRect.squareByMaxDimension();
     TRACE << mResultRect;
 
     qreal qualityF = log(count()) * 900.0 / 4.0;
@@ -75,7 +75,7 @@ void ObjDetResultItem::calculate(const cvClassifier *classifier)
 
 qreal ObjDetResultItem::unitedOverlap(const QQRect rect) const
 {
-    return mUnitedRect.overlap(rect);
+    return mUnitedRect.overlapRatio(rect);
 }
 
 QQRect ObjDetResultItem::resultRect() const
@@ -118,9 +118,9 @@ void ObjDetResultItem::setRank(const int rank)
 QString ObjDetResultItem::toString() const
 {
     return QString("%1. Q%2 %3 (%4/%5 %6)")
-                .arg(mRank, 2).arg(mQuality, 3).arg(mResultRect)
+                .arg(mRank, 2).arg(mQuality, 3).arg(mResultRect.toString())
                 .arg(mAccumulator.toString()).arg(mAccumulatedRects.size())
-                .arg(mUnitedRect);;
+                .arg(mUnitedRect.toString());;
 }
 
 void ObjDetResultItem::dump(int verbosity) const

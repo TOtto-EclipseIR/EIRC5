@@ -1,6 +1,6 @@
 # file: {EIRC2repo}./ourdest.pri
 
-OURDEST = <base>/<bld>-<dbg>+<ver>-<trunk>
+OURDEST = <base>/<bld>-<dbg>-<ver>-<trunk>
 OURDEST = $$replace(OURDEST, <base>, $(QTBASEDESTDIR))
 OURDEST = $$replace(OURDEST, <bld>, $$OURBLD)
 CONFIG(debug, debug|release|profile) {

@@ -145,19 +145,19 @@ void RectangleFinder::configurePreScan()
     STG->beginGroup(cmFinderKey);
     unsigned quality = STG->unsignedInt("PreScanQuality", 500);
     bool merge = STG->boolean("PreScanMerge", true);
-    qreal factor = STG->realPerMille("ScaleFactor", 0.0);
+    qreal factor = STG->realPerMille("ScaleFactor", 0);
     signed neighbors = STG->signedInt("Neighbors", -1);
     STG->endGroup();
 
     if (quality)
     {
-        factor = 1.120;
+        factor = 1.080;
         neighbors = cvClassifier::Parameters
                 ::neighborsForPreScanQuality(quality);
     }
     else
     {
-        factor = qIsNull(factor) ? 1.120 : factor;
+        factor = qIsNull(factor) ? 1.080 : factor;
         neighbors = (neighbors < 0) ? 2 : neighbors;
     }
     mParameters.setFactor(factor);

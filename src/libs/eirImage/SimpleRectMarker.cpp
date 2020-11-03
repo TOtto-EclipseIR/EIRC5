@@ -24,7 +24,7 @@ void SimpleRectMarker::markAll(const Settings::Key &groupKey,
 {
     TRACEQFI << rectList.size();
     int cwk = 12;
-    ColorWheel cw(0.75);
+    ColorWheel cw;
     QPainter painter(this);
 
     STG->beginGroup(groupKey);
@@ -43,7 +43,7 @@ void SimpleRectMarker::markAll(const Settings::Key &groupKey,
         painter.setPen(pen);
         TRACE << k << painter.pen().color() << painter.pen().width()
                    << painter.pen().style() << rc;
-        painter.drawRect(rc);
+        painter.drawRect(QRect(rc));
         ++k;
     }
     painter.end();
@@ -67,7 +67,7 @@ void SimpleRectMarker::mark(const Settings::Key &groupKey,
         QBrush penBrush(wheel.at(item.quality(item.quality())));
         QPen pen(penBrush, penWidth, penStyle);
         painter.setPen(pen);
-        painter.drawRect(item.resultRect());
+        painter.drawRect(QRect(item.resultRect()));
         if (markAll)
         {
             QPen allPen(penBrush, 1, Qt::SolidLine);

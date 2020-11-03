@@ -6,8 +6,6 @@
 #include "FaceImagePak.h"
 #include "FrameImagePak.h"
 
-QMap<Id, BaseImagePak> MarkManager::smIdImagePakMap;
-
 MarkManager::MarkManager(QObject *parent)
     : QObject(parent)
 {
@@ -30,5 +28,5 @@ void MarkManager::add(const FaceImagePak &facepak)
 void MarkManager::add(const BaseImagePak &imagepak)
 {
     TRACEQFI << imagepak.id();
-    smIdImagePakMap.insert(imagepak.id(), imagepak);
+    mIdImagePakMap.insert(imagepak.id(), imagepak);
 }

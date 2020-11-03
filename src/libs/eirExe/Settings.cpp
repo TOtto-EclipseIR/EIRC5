@@ -213,7 +213,7 @@ qreal Settings::real(const Key &key, const qreal &defaultValue) const
     DUMP << rtn << group() << key << contains(key) << "(" << defaultValue << ")";
     return rtn;}
 
-qreal Settings::realPerMille(const Key &key, const unsigned &defaultValue) const
+qreal Settings:: realPerMille(const Key &key, const signed &defaultValue) const
 {
     signed rtn = vari(key, defaultValue).value<signed>();
     DUMP << rtn << group() << key << contains(key) << "(" << defaultValue << ")";
@@ -235,8 +235,8 @@ QQSize Settings::size(const Settings::Key &key, const QQSize &defaultValu) const
 }
 
 // static
-qreal Settings::perMille(const unsigned uValue, bool unitBound)
+qreal Settings::perMille(const signed sValue, bool unitBound)
 {
-    qreal fValue = qreal(uValue);
-    return unitBound ? fValue : qBound(0.001, qreal(uValue) / 1000.0, 0.999);
+    qreal fValue = qreal(sValue) / 1000.0;
+    return unitBound ? fValue : qBound(0.001, qreal(sValue) / 1000.0, 0.999);
 }

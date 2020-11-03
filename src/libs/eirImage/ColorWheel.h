@@ -24,9 +24,9 @@ public:
     QRgb rgba(const int index);
 
 private:
-    qreal mBaseOpacity=0.5;
-    qreal mBaseSaturation=0.5;
-    qreal mBaseValue=0.5;
+    qreal mBaseOpacity=0.75;
+    qreal mBaseSaturation=0.75;
+    qreal mBaseValue=0.75;
     QQColor::Vector mColorVector;
 };
 Q_DECLARE_METATYPE(ColorWheel)
