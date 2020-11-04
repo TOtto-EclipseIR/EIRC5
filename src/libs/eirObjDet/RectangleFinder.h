@@ -11,8 +11,6 @@
 #include <eirQtCV/cvClassifier.h>
 #include <eirQtCV/cvClassifierPool.h>
 
-#include "RectFinderCatalog.h"
-
 class EIROBJDET_EXPORT RectangleFinder : public QObject
 {
     Q_OBJECT
@@ -29,7 +27,6 @@ public:
 public slots:
     void initialize();
     void setDetectorsBaseDir();
-    void readCatalogs();
     void loadCascade();
     void finishSetup();
 
@@ -42,9 +39,6 @@ private:
 signals:
     void ctord(const cvClassifier::Type type);
     void initialized(const cvClassifier::Type type);
-    void catalogRead(const cvClassifier::Type type, const QQFileInfo qqfi);
-    void catalogRead(const cvClassifier::Type type, const Settings::Key key);
-    void catalogsRead(const cvClassifier::Type type);
     void baseDirSetup();
     void baseDirSet(const cvClassifier::Type type, const QQDir baseDir);
     void cascadeLoaded(cvClassifier::Type type, QFileInfo cascadeXmlFileInfo);
@@ -63,7 +57,6 @@ private:
     const Settings::Key cmFinderKey;
     cvClassifier::Parameters mParameters;
     QQDir mBaseDir;
-    RectFinderCatalog mCatalog;
     QQFileInfo mCascadeFileInfo;
 };
 

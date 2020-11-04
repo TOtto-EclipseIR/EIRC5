@@ -1,20 +1,10 @@
 // file: {EIRC2 repo)./src/libs/eirType/QQRectList.cpp
 #include "QQRectList.h"
 
-QQRectList::QQRectList(const QList<QQRect> rects)
-{
-    set(rects);
-}
-
 void QQRectList::set(const QList<QQRect> &rects)
 {
     QList<QQRect>::clear();
     QList<QQRect>::append(rects);
-}
-
-void QQRectList::set(const QVariant &variant)
-{
-    set(variant.value<QQRectList>());
 }
 
 qreal QQRectList::averageOverlap() const
@@ -39,11 +29,6 @@ QRectVector QQRectList::vector() const
     return vec;
 }
 
-QVariant QQRectList::toVariant() const
-{
-    return QVariant::fromValue(*this);
-}
-
 QString QQRectList::toDebugString() const
 {
     QString rtn;
@@ -51,12 +36,6 @@ QString QQRectList::toDebugString() const
         rtn += (rtn.isEmpty() ? "{" : ", {") + qqrc.toString() + "}";
     return rtn;
 }
-
-QQRectList::operator QVariant() const
-{
-    return toVariant();
-}
-
 
 QList<QRect> QQRectList::list() const
 {

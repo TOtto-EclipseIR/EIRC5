@@ -11,7 +11,6 @@
 
 #include "ObjDetResultList.h"
 #include "RectangleFinder.h"
-#include "RectFinderCatalog.h"
 #include "RectangleGrouper.h"
 
 class EIROBJDET_EXPORT ObjDetProcessor : public QObject
@@ -25,6 +24,7 @@ public:
     RectangleFinder *finder()               { return mpRectFinder; }
     RectangleGrouper *grouper()             { return mpRectGrouper; }
     QQDir detectorBaseDir()                 { return finder()->baseDir(); }
+    QQRectList rectangleList() const        { return mRectList; }
 
 public slots:
     void initialize();

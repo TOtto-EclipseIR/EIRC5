@@ -45,8 +45,6 @@ void RectangleFinder::initialize()
 {
     TRACEQFI << QOBJNAME(parent());
     CONNECT(this, &RectangleFinder::initialized,
-            this, &RectangleFinder::readCatalogs);
-    CONNECT(this, &RectangleFinder::catalogsRead,
             this, &RectangleFinder::setDetectorsBaseDir);
     CONNECT(this, &RectangleFinder::baseDirSetup,
             this, &RectangleFinder::loadCascade);
@@ -56,13 +54,6 @@ void RectangleFinder::initialize()
             this, &RectangleFinder::finishSetup);
     DUMP << Qt::endl << gspClassifierPool->statusStrings().join("\r\n");
     EMIT(initialized(cmType));
-}
-
-void RectangleFinder::readCatalogs()
-{
-    TRACEQFI << QOBJNAME(parent());
-    TODO(it);
-    EMIT(catalogsRead(cmType));
 }
 
 void RectangleFinder::setDetectorsBaseDir()
