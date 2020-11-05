@@ -5,6 +5,8 @@
 
 #include <eirXfr/Debug.h>
 
+#include "JsonItem.h"
+
 VarMap::VarMap(const MultiName &name) : mName(name) {;}
 
 
@@ -50,6 +52,12 @@ Var VarMap::value(const MultiName &name) const
 {
     return mVarMap.value(name.sortable());
 }
+
+MultiName::List VarMap::keys() const
+{
+    return MultiName::toList(mVarMap.keys());
+}
+
 /*
 BasicName::List VarMap::groupKeys(const MultiName &groupName)
 {
@@ -122,9 +130,19 @@ Var::List VarMap::values() const
     return mVarMap.values();
 }
 
+Var VarMap::var(const MultiName &name) const
+{
+    return mVarMap.value(name);
+}
+
 Var &VarMap::at(const MultiName &name)
 {
-    return mVarMap[name.sortable()];
+    return mVarMap[name];
+}
+
+Var &VarMap::operator [](const MultiName &name)
+{
+    return at(name);
 }
 
 BasicName::List VarMap::firstSegmentKeys() const
@@ -156,6 +174,19 @@ QVariant VarMap::toVariant() const
         ds << var.defaultVari();
     }
     return QVariant(ds);
+}
+
+QJsonObject VarMap::toJsonObject() const
+{
+    QJsonObject jso;
+    MultiName::List mnl = keys();
+    foreach (MultiName mn, mnl)
+    {
+        Var v = value(mn);
+        JsonItem ji(mn, v.value().toString());
+        jso.insert(mn, ji.toObject());
+    }
+    return jso;
 }
 
 QStringList VarMap::dumpList() const

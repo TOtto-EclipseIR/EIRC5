@@ -10,6 +10,7 @@ SUBDIRS += \
         ../../libs/eirObjDet \
         ../../libs/eirImage \
         ../../tests/testXfr \
+        ../../tests/testType \
         ../FaceConsole \
 
 

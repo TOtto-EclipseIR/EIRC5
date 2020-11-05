@@ -2,6 +2,7 @@
 #include "eirType.h"
 
 #include <QImage>
+#include <QJsonDocument>
 #include <QStringList>
 
 #include <eirBase/Typedefs.h>
@@ -27,6 +28,9 @@ public:
     QRgb operator[](const int index) const;
     QRgb &operator[](const int index);
     void overlay(const QQImage &other, const Rational opacity=Rational());
+
+private:
+    QJsonDocument mDocument;
 
 public: // static
     static QStringList supportedReadFormats();

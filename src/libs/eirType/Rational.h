@@ -13,7 +13,7 @@ public:
     Rational(const int n);
     Rational(const int n, const int d);
     Rational(const qreal r, const int d);
-    bool isNull() const;
+    bool isNull() const             { return 0 == denominator(); }
     bool isUnit(const bool formal=true) const;
     bool isValid() const;
     bool isZero() const;
@@ -21,8 +21,9 @@ public:
     qreal toReal() const;
     float toFloat() const;
     double toDouble() const;
-    int numerator() const;
-    int denominator() const;
+    int numerator() const           { return mNumerator; }
+    int denominator() const         { return mDenominator; }
+    operator qreal () const         { return toReal(); }
     void set(const int n, const int d);
     void nullify();
     void unitify(const bool byModulo=false);

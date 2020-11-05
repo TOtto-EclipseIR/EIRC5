@@ -1,16 +1,32 @@
 #include "QQImage.h"
 
+#include <QFileInfo>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QImageReader>
 #include <QImageWriter>
 
 #include <eirBase/eirBase.h>
 #include <eirXfr/Debug.h>
 
+#include "JsonItem.h"
 #include "QQPoint.h"
+#include "SystemId.h"
 
 QQImage::QQImage() {;}
 QQImage::QQImage(const QImage &other) : QImage(other) {;}
-QQImage::QQImage(const QString &fileName, const char *format) : QImage(fileName, format) {;}
+
+QQImage::QQImage(const QString &fileName, const char *format)
+    : QImage(fileName, format)
+{
+    QJsonObject jso;
+    SystemId sid(SystemId::Flags(SystemId::SystemInfo
+                                 | SystemId::NetworkInfo));
+    jso.insert("Input/FileName", fileName);
+    jso.insert("Input/SystemId", sid.toJsonObject());
+    QJsonDocument jsd(jso);
+    setText("JsonInfo", jsd.toJson(QJsonDocument::Compact));
+}
 
 QQImage::QQImage(int width, int height, QImage::Format format)
     : QImage(width, height, format)

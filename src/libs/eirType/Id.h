@@ -2,6 +2,8 @@
 #pragma once
 #include "eirType.h"
 
+#include <QtDebug>
+
 #include <QBitArray>
 #include <QList>
 #include <QMap>
@@ -33,21 +35,21 @@ public:
        const QString &desc=QString(),
        const QVariant &data=QVariant());
     ~Id();
-    QVariant data() const;
     void clear();
-    void set(const Uuid &uuid);
-    void set(const quint64 key64);
-    void set(const MultiName name);
-    void set(const QString desc);
-    void set(const QVariant data);
-    MultiName name() const;
-    Uuid uuid() const;
-    QString toString() const;
-    QString operator () () const;
-    bool operator <  (const Id & other);
-    bool operator == (const Id & other);
+    void set(const Uuid &uuid)          { mUuid = uuid; }
+    void set(const quint64 key64)       { mU64Key = key64; }
+    void set(const MultiName name)      { mNameKey = name; }
+    void set(const QString desc)        { mDescription = desc; }
+    void set(const QVariant data)       { mData = data; }
+    MultiName name() const              { return mNameKey; }
+    Uuid uuid() const                   { return mUuid; }
+    quint64 key() const                 { return mU64Key; }
+    QVariant data() const               { return mData; }
+    bool operator <  (const Id & other) const;
+    bool operator == (const Id & other) const;
     void remove();
     void insert();
+    QString toDebugString() const;
 
 public: // static
     static void remove(const Id &id);
@@ -69,3 +71,4 @@ private: // static
     static QMap<MultiName, Uuid> smNameUidMap;
 };
 
+EIRTYPE_EXPORT QDebug operator<<(QDebug dbg, const Id &id);

@@ -23,16 +23,29 @@ void SimpleRectMarker::markAll(const Settings::Key &groupKey,
                                const QQRectList &rectList)
 {
     TRACEQFI << rectList.size();
+    int cwk = 12;
+    ColorWheel cw;
     QPainter painter(this);
+
     STG->beginGroup(groupKey);
-    QColor penColor = QColor(STG->string("PenColor","#CC66FFFF"));
+    cw.set(cwk, Hue::red, Hue::magenta);
+//    QColor penColor = QColor(STG->string("PenColor","#CC66FFFF"));
     qreal penWidth = STG->real("PenWidth", 5.0);
-    Qt::PenStyle penStyle = Qt::PenStyle(STG->unsignedInt("PenStyle", 2));
+    Qt::PenStyle penStyle = Qt::PenStyle(STG->unsignedInt("PenStyle", 1));
     STG->endGroup();
-    QBrush penBrush(penColor);
+
+    QBrush penBrush;
     QPen pen(penBrush, penWidth, penStyle);
-    painter.setPen(pen);
-    painter.drawRects(rectList.vector());
+    int k = 0, n = rectList.size();
+    foreach (QQRect rc, rectList)
+    {
+        pen.setColor(cw.at((n < cwk / 2) ? (k * cwk / n) : k));
+        painter.setPen(pen);
+        TRACE << k << painter.pen().color() << painter.pen().width()
+                   << painter.pen().style() << rc;
+        painter.drawRect(QRect(rc));
+        ++k;
+    }
     painter.end();
 }
 
@@ -54,7 +67,7 @@ void SimpleRectMarker::mark(const Settings::Key &groupKey,
         QBrush penBrush(wheel.at(item.quality(item.quality())));
         QPen pen(penBrush, penWidth, penStyle);
         painter.setPen(pen);
-        painter.drawRect(item.resultRect());
+        painter.drawRect(QRect(item.resultRect()));
         if (markAll)
         {
             QPen allPen(penBrush, 1, Qt::SolidLine);

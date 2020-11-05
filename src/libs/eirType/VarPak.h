@@ -28,6 +28,7 @@ public:
     void insert(const Var &mapItem);
     void insert(const MultiName &key,
                 const QVariant &value);
+    QVariant get(const int index) const;
     Var &at(const MultiName &name);
     Var var(const MultiName &name) const;
     QVariant value(const MultiName &name) const;
@@ -45,4 +46,6 @@ private:
     Var::List mVarList;
     VarMap mVarMap;
 };
+
+EIRTYPE_EXPORT QDebug operator<<(QDebug dbg, const VarPak &pak);
 

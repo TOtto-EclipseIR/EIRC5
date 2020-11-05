@@ -4,39 +4,109 @@
 #include <QtMath>
 
 #include <eirXfr/Debug.h>
-//#include "../../libs/eirType/Debug.h"
 
+#include "QQPoint.h"
 #include "QQRectF.h"
 
 QQRect::QQRect() {;}
-QQRect::QQRect(const QRect rc) : QRect(rc) {;}
-QQRect::QQRect(int x, int y, int width, int height)
-    : QRect(x, y, width, height) {;}
-QQRect::QQRect(const QSize size, const QPoint center)
-    : QRect(QPoint(center.x() - size.width()  / 2,
-                   center.y() - size.height() / 2), size) {;}
+QQRect::QQRect(const QRect rc) : mSize(rc.size()), mCenter(rc.center()) {;}
+QQRect::QQRect(int width, int height, int left, int top) : mSize(width, height), mCenter(left + width / 2, top + height / 2) {;}
+QQRect::QQRect(const QQSize size, const QPoint center) : mSize(size), mCenter(center) {;}
 QQRect::QQRect(const QRectF rcf) { set(rcf); }
+
+QQRect::operator QRect() const
+{
+    return QRect(left(), top(), width(), height());
+}
+#if 0
+QQRect::operator QRectF() const
+{
+    return QRectF(left(), top(), width(), height());
+}
+#endif
+bool QQRect::operator ==(const QQRect &other)
+{
+    return size() == other.size() && center() == other.center();
+}
+
+bool QQRect::isValid() const
+{
+    return left() < right() && top() < bottom();
+}
+
+bool QQRect::contains(const int x, const int y) const
+{
+    return left() <= x && x <= right() && top() <= y && y <= bottom();
+}
+
+bool QQRect::contains(const QQRect other) const
+{
+    return contains(other.left(), other.top())
+            && contains(other.right(), other.bottom());
+}
+
+bool QQRect::intersects(const QQRect &other) const
+{
+    return QRect(*this).intersects(QRect(other));
+}
+
+QQRect QQRect::intersected(const QQRect &other) const
+{
+    return QRect(*this).intersected(QRect(other));
+}
 
 QQRect QQRect::set(const QRectF rcf)
 {
-    QQRect rc(qRound(rcf.x()), qRound(rcf.y()),
-              qRound(rcf.width()), qRound(rcf.width()));
+    QQRect rc(qRound(rcf.width()), qRound(rcf.height()),
+              qRound(rcf.x()), qRound(rcf.y()));
     return rc;
 }
 
 void QQRect::set(const QSize size, const QPoint center)
 {
-    setRect(center.x() - size.width()  / 2,
-            center.y() - size.height() / 2,
-            size.height(), size.width());
+    mSize = size, mCenter = center;
 }
 
-void QQRect::makeSquare()
+QQRect QQRect::squaredByMaxDimension() const
 {
-    int d = qRound(qSqrt(area()));
-    set(QSize(d,d), center());
+    int maxdim = qMax(width(), height());
+    return QQRect(QQSize(maxdim, maxdim), center());
 }
 
+void QQRect::squareByMaxDimension()
+{
+    *this = squaredByMaxDimension();
+}
+
+QQRect QQRect::united(const QQRect other)
+{
+    QQRect rtn;
+    int l = qMin(left(),  other.left());
+    int t = qMin(top(),  other.top());
+    int r = qMin(right(),  other.right());
+    int b = qMin(bottom(),  other.bottom());
+    QQPoint c((l + r) / 2, (t + b) / 2);
+    QQSize s(r - l, b - t);
+    return QQRect(s, c);
+}
+#if 0
+void QQRect::square(const bool byArea)
+{
+    if (byArea)
+    {
+        int d = qRound(qSqrt(area()));
+        set(QSize(d,d), center());
+    }
+    else
+    {
+        int w = width(), h = height();
+        if (w == h) return;                                 /* /=======\ */
+        QQPoint c = center();
+        int m = qMax(w, h);
+        set(QQSize(m, m), c);
+    }
+}
+#endif
 void QQRect::unite(const QQRect other)
 {
     *this = united(other);
@@ -49,7 +119,7 @@ int QQRect::area() const
 
 inline int contains(const int lo, const int v, const int hi)
 { return lo <= v && v <= hi; }
-
+#if 0
 QQRect QQRect::overlapped(const QQRect other) const
 {
     TRACEQFI << toString() << other.toString() << intersects(other);
@@ -66,16 +136,17 @@ QQRect QQRect::overlapped(const QQRect other) const
     EXPECT(rc.isValid());
     return rc;
 }
-
-qreal QQRect::overlap(const QQRect other) const
+#endif
+#if 1
+qreal QQRect::overlapRatio(const QQRect other) const
 {
     TRACEQFI << other << toString();
     EXPECT(isValid());
     EXPECT(other.isValid());
-    if ( ! isValid() || ! other.isValid()) return 0.0;
-    if (contains(other)) return 1.0;
-    if (other.contains(*this)) return 1.0;
-    if ( ! intersects(other)) return 0.0;
+    if ( ! isValid() || ! other.isValid()) return qQNaN();  /* /========\ */
+    if (contains(other)) return 1.0;                        /* /========\ */
+    if (other.contains(*this)) return 1.0;                  /* /========\ */
+    if ( ! intersects(other)) return 0.0;                   /* /========\ */
 
     QQRect intersection = intersected(other);
     qreal intArea = intersection.area();
@@ -83,7 +154,7 @@ qreal QQRect::overlap(const QQRect other) const
     TRACE << intersection << intArea << minArea << intArea / minArea;
     return intArea / minArea;
 }
-
+#endif
 QQRect QQRect::expandedBy(const qreal factor) const
 {
     WANTDO(TrimmedToSize);
@@ -106,15 +177,18 @@ QString QQRect::toString() const
                .arg(center().x()).arg(center().y());
 }
 
-QQRect::operator QString() const
-{
-    return toString();
-}
-
-
-
 QDebug operator<<(QDebug dbg, const QQRect &rc)
 {
     dbg << rc.toString();
     return dbg;
+}
+
+uint qHash(const QQRect &rc, uint seed) noexcept
+{
+    QtPrivate::QHashCombine hash;
+    seed = hash(seed, rc.width());
+    seed = hash(seed, rc.height());
+    seed = hash(seed, rc.center().x());
+    seed = hash(seed, rc.center().y());
+    return seed;
 }

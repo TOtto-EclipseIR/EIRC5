@@ -6,6 +6,7 @@
 class QCommandLineParser;
 
 #include <eirType/QQDir.h>
+#include <eirImage/FrameImagePak.h>
 #include <eirObjDet/ObjectDetection.h>
 #include <eirObjDet/ObjDetResultList.h>
 #include <eirQtCV/cvVersion.h>
@@ -30,12 +31,12 @@ private slots:
     void processCurrentFile();
     void finishProcessing();
     void failedExit(const qint8 retcode, const QString &errmsg);
-    void catchSettingsGet(const Settings::Key key, const Settings::Value valu);
-    void catchSettingsImport(const Settings::Key key, const Settings::Value valu);
-    void catchSettingsCreate(const Settings::Key key, const Settings::Value valu);
-    void catchSettingsDefault(const Settings::Key key, const Settings::Value valu);
-    void catchSettingsRemove(const Settings::Key key, const Settings::Value valu);
-    void catchSettingsChange(const Settings::Key key, const Settings::Value newValu, const Settings::Value oldValu);
+    void catchSettingsGet(const Settings::Key key, const Settings::Valu valu);
+    void catchSettingsImport(const Settings::Key key, const Settings::Valu valu);
+    void catchSettingsCreate(const Settings::Key key, const Settings::Valu valu);
+    void catchSettingsDefault(const Settings::Key key, const Settings::Valu valu);
+    void catchSettingsRemove(const Settings::Key key, const Settings::Valu valu);
+    void catchSettingsChange(const Settings::Key key, const Settings::Valu newValu, const Settings::Valu oldValu);
     void catchSettingsGroup(const Settings::Key key);
     void catchCommandLineWarning(const QString what, const QString why);
     void catchCommandLineInfo(const QString what, const QString why);
@@ -58,11 +59,12 @@ signals:
 private:
     bool mWriteInfo=true;
     //QQString mMethodString;
-    QDir mBaseOutputDir;
+    QQDir mBaseOutputDir;
     QQDir mMarkedRectOutputDir;
     //QQDir::Vector mMarkedFaceQualityDirs;
     int mCurrentFileCount=0;
     QQFileInfo mCurrentFileInfo;
+    FrameImagePak mCurrentFrame;
     QQRectList mCurrentRectangles;
     ObjDetResultList mCurrentResults;
     QImage mRectImage;

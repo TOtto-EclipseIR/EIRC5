@@ -2,16 +2,16 @@
 #pragma once
 #include "eirType.h"
 
-#include <QList>
 #include <QMap>
 #include <QVariant>
 
-#include <eirType/MultiName.h>
+#include "MultiName.h"
+#include "QQList.h"
 
 class EIRTYPE_EXPORT Var
 {
 public:
-    typedef QList<Var> List;
+    typedef QQList<Var> List;
     typedef QMap<QString /* MultiName.sortable() */, Var> Map;
 
 public:

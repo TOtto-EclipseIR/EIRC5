@@ -1,5 +1,7 @@
 #include "QQString.h"
 
+QChar QQString::smDelimiter=QChar('/');
+
 QQString::QQString(const Flags flags) : mFlags(flags) {;}
 QQString::QQString(const QQString &other)
     : QString(other), mFlags(NoFlag) { ctor(); }
@@ -33,14 +35,31 @@ void QQString::set(const QString &other)
     append(other);
 }
 
-QString QQString::squeezed() const
+QString QQString::operator ()() const
+{
+    return string();
+}
+
+QQString QQString::squeezed() const
 {
     return mid(0).simplified().replace(QChar(' '), "");
+}
+
+QQString QQString::appended(const QQString s, const bool delimited) const
+{
+    QQString rtn = string();
+    if (delimited && smDelimiter != s[0]) rtn.append(smDelimiter);
+    return rtn + s;
 }
 
 bool QQString::operator ==(const QQString &other)
 {
     return isNull() == other.isNull() && string() == other.string();
+}
+
+bool QQString::operator <(const QQString &other)
+{
+    return string().mid(0) < other.mid(0);
 }
 
 QQString::operator QVariant() const

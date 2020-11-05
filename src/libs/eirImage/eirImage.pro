@@ -17,18 +17,40 @@ LIBS *= -leirObjDet5
 LIBS *= -leirQtCV5
 
 SOURCES += \
+    BaseImagePak.cpp \
+    BaseImageScene.cpp \
+    BaseImageView.cpp \
     ColorWheel.cpp \
+    FaceImagePak.cpp \
+    FaceImageView.cpp \
+    FrameImagePak.cpp \
+    FrameImageScene.cpp \
+    FrameImageView.cpp \
+    GraphicsLayer.cpp \
     HeatmapMarker.cpp \
     Hue.cpp \
+    ImageMarkerInterface.cpp \
     MarkManager.cpp \
+    MarkerType.cpp \
     OutputManager.cpp \
     SimpleRectMarker.cpp \
 
 HEADERS += \
+    BaseImagePak.h \
+    BaseImageScene.h \
+    BaseImageView.h \
     ColorWheel.h \
+    FaceImagePak.h \
+    FaceImageView.h \
+    FrameImagePak.h \
+    FrameImageScene.h \
+    FrameImageView.h \
+    GraphicsLayer.h \
     HeatmapMarker.h \
     Hue.h \
+    ImageMarkerInterface.h \
     MarkManager.h \
+    MarkerType.h \
     OutputManager.h \
     SimpleRectMarker.h \
     eirImage_global.h \
@@ -39,3 +61,5 @@ unix {
     target.path = /usr/lib
 }
 !isEmpty(target.path): INSTALLS += target
+
+QT += widgets

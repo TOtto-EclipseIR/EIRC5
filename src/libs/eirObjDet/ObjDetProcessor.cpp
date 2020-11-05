@@ -3,25 +3,33 @@
 #include <APP>
 #include <eirXfr/Debug.h>
 
-ObjDetProcessor::ObjDetProcessor(const cvClassifier::Type cascadeType, const Settings::Key objDetKey, QObject * parent)
+ObjDetProcessor::ObjDetProcessor(const cvClassifier::Type cascadeType,
+                                 const Settings::Key objDetKey,
+                                 QObject * parent)
     : QObject(parent)
     , cmType(cascadeType)
-    , cmResourceKey(objDetKey+"Resources")
-    , cmObjDetTypeKey(objDetKey+cvClassifier::typeName(cascadeType))
-    , mpRectFinder(new RectangleFinder(cmType, objDetKey+"Resources/RectFinder",
-                                       cmObjDetTypeKey+"RectFinder", parent))
-    , mpRectGrouper(new RectangleGrouper(cmType, cmObjDetTypeKey+"RectGrouper", parent))
+    , mResourceKey(objDetKey.appended("Resources"))
+    , mObjDetTypeKey(objDetKey.appended(cvClassifier::typeName(cascadeType)()))
+    , mpRectFinder(new RectangleFinder(cmType,
+                        mResourceKey.appended("RectFinder"),
+                        mObjDetTypeKey.appended("RectFinder"), parent))
+    , mpRectGrouper(new RectangleGrouper(cmType,
+                        mObjDetTypeKey.appended("RectGrouper"), parent))
 {
-    TRACEQFI << cvClassifier::typeName(cmType)() << cmObjDetTypeKey() << QOBJNAME(parent);
+    TRACEQFI << cvClassifier::typeName(cmType)() << mResourceKey()
+             << mObjDetTypeKey() << QOBJNAME(parent);
     setObjectName("ObjDetProcessor");
-    finder()->initialize();
 }
 
 void ObjDetProcessor::initialize()
 {
-    TRACEQFI << cvClassifier::typeName(cmType)();
-    classifierPool->r(cmType).initialize();
+    TRACEQFI << cvClassifier::typeName(cmType)() << QOBJNAME(this);
+    CONNECT(this, &ObjDetProcessor::setupFinished,
+            finder(), &RectangleFinder::initialize);
+    CONNECT(this, &ObjDetProcessor::setupFinished,
+            grouper(), &RectangleGrouper::initialize);
     reset();
+    EMIT(setupFinished());
 }
 
 void ObjDetProcessor::reset()
@@ -33,6 +41,7 @@ void ObjDetProcessor::reset()
     mMethodString.clear();
     mRectList.clear();
     mResultList.clear();
+    EMIT(resetd());
 }
 
 void ObjDetProcessor::setImage(const QQImage &inputImage)
@@ -44,7 +53,8 @@ void ObjDetProcessor::setImage(const QQImage &inputImage)
     BEXPECTEQ(1, mGreyInputMat.depthInBytes());
 }
 
-XerReturn<QQRectList> ObjDetProcessor::findRects(const bool showMat, const QQRect &region)
+XerReturn<QQRectList> ObjDetProcessor::findRects(const bool showMat,
+                                                 const QQRect &region)
 {
     TRACEQFI << showMat << region;
     TOUSE(region);
@@ -53,6 +63,7 @@ XerReturn<QQRectList> ObjDetProcessor::findRects(const bool showMat, const QQRec
 
     rtnerr = finder()->findRectangles(mGreyInputMat, showMat, region);
     mMethodString = finder()->methodString();
+    DUMP << rtnerr.toDebugString();
     return rtnerr;
 }
 

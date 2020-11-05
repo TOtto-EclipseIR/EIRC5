@@ -33,21 +33,23 @@ void FaceConsole::initializeApplication()
     QLocale locale;
     cvVersion cvv;
     TODO(WhyZero);
-    writeLine(QString("%1 %2 started %3")
+    writeLine(QString("===%1 %2 started %3")
               .arg(qApp->applicationName())
               .arg(qApp->applicationVersion())
               .arg(locale.toString(QDateTime::currentDateTime())));
     writeLine("   with Open Source Computer Vision library (OpenCV) " + cvv.string());
     writeLine("---Arguments:");
     writeLines(arguments(), true, "   ");
-    BasicName::List classifierTypeNames = classifierPool->typeNameList();
-    writeLine("---Available Cascade Types:");
+    BasicName::List classifierTypeNames = gspClassifierPool->typeNameList();
+    writeLine("---Supported Cascades:");
     foreach (BasicName name, classifierTypeNames) writeLine("   "+name());
     CONNECT(this, &FaceConsole::resourseInitFailed,
             qApp, &QCoreApplication::quit);
     CONNECT(this, &FaceConsole::processingStarted,
             this, &FaceConsole::nextFile);
     CONNECT(this, &FaceConsole::processed,
+            this, &FaceConsole::nextFile);
+    CONNECT(this, &FaceConsole::processEmpty,
             this, &FaceConsole::nextFile);
     CONNECT(this, &FaceConsole::processFailed,
             this, &FaceConsole::nextFile);
@@ -95,14 +97,7 @@ void FaceConsole::setConfiguration()
 {
     TRACEFN;
     writeLine("---Configuration:");
-    writeLines(STG->toStringList());
-    /*
-    STG->beginGroup("PreScan");
-    mScaleFactor = STG->unsignedInt("RectFinder/ScaleFactor", 0);
-    mNeighbors = STG->signedInt("RectFinder/Neighbors", -1);
-    mMinQuality = STG->unsignedInt("RectGrouper/MinQuality", 0);
-    STG->endGroup();
-    */
+    writeLines(STG->toDebugStringList(), true, "   ");
     EMIT(configurationSet());
     QTimer::singleShot(100, this, &FaceConsole::initializeResources);
 }
@@ -112,41 +107,10 @@ void FaceConsole::initializeResources()
     TRACEFN;
     OBJD->newProcessor(cvClassifier::PreScan);
     writeLine(QString("---Cascade Classifier: %1 %2")
-              .arg(classifierPool->r(cvClassifier::PreScan)
+              .arg(gspClassifierPool->r(cvClassifier::PreScan)
                    .cascadeFileInfo().absoluteFilePath())
               .arg(OBJD->processor(cvClassifier::PreScan)->
                    finder()->isLoaded() ? "loaded" : "ERROR"));
-#if 0
-    STG->beginGroup("/ObjectDetector/Resources/RectFinder");
-    QQDir baseCascadeDir(STG->string("BaseDir"));
-    QString cascadeFileName = STG->string("PreScan/XmlFile");
-    QQFileInfo cascadeFileInfo(baseCascadeDir, cascadeFileName);
-    STG->endGroup();
-
-    TRACE << baseCascadeDir << baseCascadeDir.exists() << baseCascadeDir.isReadable();
-    EXPECT(baseCascadeDir.exists());
-    EXPECT(baseCascadeDir.isReadable());
-    TRACE << cascadeFileInfo.absoluteFilePath() << cascadeFileInfo.exists()
-          << cascadeFileInfo.isReadable() << cascadeFileInfo.isFile();
-    EXPECTNOT(cascadeFileInfo.notExists());
-    EXPECTNOT(cascadeFileInfo.notReadable());
-    EXPECTNOT(cascadeFileInfo.notFile());
-
-    write("---Cascade: "+cascadeFileInfo.absoluteFilePath()+" loading...");
-/*
-    EXPECT(mPreScanProcessor.cascade()->loadCascade(cascadeFileInfo));
-    if (mPreScanProcessor.cascade()->isLoaded())
-    {
-        writeLine("done");
-    }
-    else
-    {
-        writeLine("error");
-        writeErr("***Cascade file load reported failed: "
-                 + cascadeFileInfo.absoluteFilePath());
-    }
-*/
-#endif
     EMIT(resoursesInitd());
     QTimer::singleShot(100, this, &FaceConsole::setBaseOutputDir);
     NEEDDO(cascade()->configure);
@@ -156,10 +120,8 @@ void FaceConsole::setBaseOutputDir()
 {
     TRACEFN;
     QString baseDirString(STG->string("/Output/BaseDir"));
-    baseDirString.replace("@", QDateTime::currentDateTime()
-        .toString("DyyyyMMdd-Thhmm"));
     DUMPVAL(baseDirString);
-    QDir baseDir(baseDirString);
+    QQDir baseDir(baseDirString);
     EXPECT(baseDir.mkpath("."));
     EXPECT(baseDir.cd("."));
     EXPECT(baseDir.exists());
@@ -181,9 +143,9 @@ void FaceConsole::setOutputDirs()
     {
         // do nothing, leave mMarkedRectOutputDir null
     }
-    else if (QDir::isRelativePath(markedRectDirString))
+    else if (QQDir::isRelativePath(markedRectDirString))
     {
-        QDir relativeDir(mBaseOutputDir);
+        QQDir relativeDir(mBaseOutputDir);
         DUMPVAL(relativeDir);
         if ( ! relativeDir.exists(markedRectDirString))
             created = relativeDir.mkpath(markedRectDirString);
@@ -195,9 +157,9 @@ void FaceConsole::setOutputDirs()
             mMarkedRectOutputDir = relativeDir;
         // else mMarkedRectOutputDir is still null
     }
-    else if (QDir::isAbsolutePath(markedRectDirString))
+    else if (QQDir::isAbsolutePath(markedRectDirString))
     {
-        QDir absoluteDir(markedRectDirString);
+        QQDir absoluteDir(markedRectDirString);
         if ( ! absoluteDir.exists())
             created = absoluteDir.mkpath(".");
         if (absoluteDir.exists())
@@ -267,7 +229,8 @@ void FaceConsole::processCurrentFile()
 
     writeLine(QString("---Processing: %1. %2").arg(++mCurrentFileCount, 4)
               .arg(mCurrentFileInfo.fileName(QQString::Squeeze)));
-    QQImage inputImage(mCurrentFileInfo.absoluteFilePath());
+    mCurrentFrame = FrameImagePak(mCurrentFileInfo.absoluteFilePath());
+    QQImage inputImage(mCurrentFrame.image(FrameImagePak::Original));
     if (inputImage.isNull())
     {
         writeLine("***Invalid Image File");
@@ -276,6 +239,7 @@ void FaceConsole::processCurrentFile()
 
     proc->setImage(inputImage);
     XerReturn<QQRectList> rtnerr = proc->findRects();
+    DUMP << rtnerr.toDebugString();
     if (rtnerr.isNull())
     {
         writeErr("***Error: Null Result");
@@ -290,7 +254,7 @@ void FaceConsole::processCurrentFile()
     }
     if (rtnerr.isSuccess())
     {
-        mCurrentRectangles = proc->rectList();
+        mCurrentRectangles = rtnerr.result();
         if (mCurrentRectangles.isEmpty())
         {
             writeLine("   No PreScan Rectangles Detected");
@@ -299,12 +263,14 @@ void FaceConsole::processCurrentFile()
         }
         else
         {
-            writeLine(QString("    %1 PreScan Rectangles Detected"));
+            writeLine(QString("    %1 PreScan Rectangles Detected")
+                      .arg(mCurrentRectangles.size()));
             EMIT(processed(mCurrentFileInfo, mCurrentRectangles.size()));
             SimpleRectMarker rectMarker(inputImage);
             rectMarker.markAll("Marker/PreScanRect", mCurrentRectangles);
             QQFileInfo rectFileInfo(mMarkedRectOutputDir,
-                    mCurrentFileInfo.completeBaseName(QQString::Squeeze), "png");
+                    mCurrentFileInfo.completeBaseName(QQString::Squeeze)
+                                    +"-"+proc->methodString(), "png");
             if (rectMarker.save(rectFileInfo.absoluteFilePath()))
                 writeLine("   " + rectFileInfo.absoluteFilePath() + " saved");
             return;
@@ -327,32 +293,32 @@ void FaceConsole::failedExit(const qint8 retcode, const QString &errmsg)
     qApp->exit(retcode);
 }
 
-void FaceConsole::catchSettingsGet(const Settings::Key key, const Settings::Value valu)
+void FaceConsole::catchSettingsGet(const Settings::Key key, const Settings::Valu valu)
 {
     TRACEQFI << key() << valu;
 }
 
-void FaceConsole::catchSettingsImport(const Settings::Key key, const Settings::Value valu)
+void FaceConsole::catchSettingsImport(const Settings::Key key, const Settings::Valu valu)
 {
     TRACEQFI << key() << valu;
 }
 
-void FaceConsole::catchSettingsCreate(const Settings::Key key, const Settings::Value valu)
+void FaceConsole::catchSettingsCreate(const Settings::Key key, const Settings::Valu valu)
 {
     TRACEQFI << key() << valu;
 }
 
-void FaceConsole::catchSettingsDefault(const Settings::Key key, const Settings::Value valu)
+void FaceConsole::catchSettingsDefault(const Settings::Key key, const Settings::Valu valu)
 {
     TRACEQFI << key() << valu;
 }
 
-void FaceConsole::catchSettingsRemove(const Settings::Key key, const Settings::Value valu)
+void FaceConsole::catchSettingsRemove(const Settings::Key key, const Settings::Valu valu)
 {
     TRACEQFI << key() << valu;
 }
 
-void FaceConsole::catchSettingsChange(const Settings::Key key, const Settings::Value newValu, const Settings::Value oldValu)
+void FaceConsole::catchSettingsChange(const Settings::Key key, const Settings::Valu newValu, const Settings::Valu oldValu)
 {
     TRACEQFI << key() << newValu << oldValu;
 }

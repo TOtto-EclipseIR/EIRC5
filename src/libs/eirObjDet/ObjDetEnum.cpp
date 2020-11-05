@@ -1,0 +1,2 @@
+#include "ObjDetEnum.h"
+DEFINE_ENUMERATION(ObjDetEnum, OBJDETENUM_ENUM);

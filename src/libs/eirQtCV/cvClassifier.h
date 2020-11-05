@@ -31,17 +31,17 @@ public:
     {
     public:
         Parameters();
-        void set(const Settings::Key &groupKey);
-        double factor() const;
-        int neighbors() const;
-        int flags() const;
-        cvSize minSize() const;
-        cvSize maxSize() const;
-
-        void setFactor(const qreal &factor);
-        void setNeighbors(const unsigned &neighbors);
-        void setMinSize(const cvSize &minSize);
-        void setMaxSize(const cvSize &maxSize);
+        double factor() const                           { return mFactor; }
+        int neighbors() const                           { return mNeighbors; }
+        int flags() const                               { return mFlags; }
+        cvSize minSize() const                          { return mMinSize; }
+        cvSize maxSize() const                          { return mMaxSize; }
+        bool preScanMerge() const                       { return mPreScanMerge; }
+        void setFactor(const qreal &factor)             { mFactor = factor; }
+        void setNeighbors(const unsigned &neighbors)    { mNeighbors = neighbors; }
+        void setMinSize(const cvSize &minSize)          { mMinSize = minSize; }
+        void setMaxSize(const cvSize &maxSize)          { mMaxSize = maxSize; }
+        void setPreScanMerge(const bool merge)          { mPreScanMerge = merge; }
 
         QString methodString(const QQFileInfo &cascadeXmlInfo) const;
         QVariant toVariant() const;
@@ -58,6 +58,7 @@ public:
         int mFlags=0;
         cvSize mMinSize;
         cvSize mMaxSize;
+        bool mPreScanMerge=true;
     };
 
 public:

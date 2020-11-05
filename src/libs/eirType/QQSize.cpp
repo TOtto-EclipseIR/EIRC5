@@ -6,6 +6,8 @@ QQSize QQSize::null(0,0);
 
 QQSize::QQSize() {;}
 QQSize::QQSize(const QSize qsz) : QSize(qsz) {;}
+QQSize::QQSize(const QSizeF qszf)
+    : QSize(qRound(qszf.width()), qRound(qszf.height())) {;}
 QQSize::QQSize(const QQSize &other) : QSize(other.width(), other.height()) {;}
 QQSize::QQSize(const int width, const int height) : QSize(width, height) {;}
 

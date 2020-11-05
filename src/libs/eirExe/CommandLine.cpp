@@ -89,7 +89,7 @@ void CommandLine::process(const ApplicationHelper::Flags flags)
     expandFileArguments();
     stripSettings();
     TRACE << "Settings:";
-    DUMP << STG->toStringList();
+    DUMP << STG->toDebugStringList();
     TRACE << "Post Settings:" << mRemainingArgumentList;
     if (flags.testFlag(ApplicationHelper::ExpandCommandLineDirs)) expandDirectories();
     TRACE << "Remaining:" << mRemainingArgumentList;
@@ -230,8 +230,8 @@ void CommandLine::parseSettingArgument(const QString &arg,
     TRACEQFI << arg << prefix();
     QStringList qsl = arg.split('=');
     Settings::Key key = qsl[0].mid(1);
-    key.prependName(prefix);
-    Settings::Value valu = (qsl.size() > 1) ? qsl[1] : "true";
+    key.prepend(prefix+"/");
+    Settings::Valu valu = (qsl.size() > 1) ? qsl[1] : "true";
     STG->set(key, valu);
     TRACE << key() << "=" << valu;
     EMIT(info(QString("%1={%2}").arg(key).arg(valu), "Added"));

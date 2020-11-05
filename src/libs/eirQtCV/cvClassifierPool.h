@@ -17,7 +17,7 @@ public:
 private:
     cvClassifier mClassifierArray[cvClassifier::sizeType];
 };
-Q_GLOBAL_STATIC(cvClassifierPool, classifierPool)
+Q_GLOBAL_STATIC(cvClassifierPool, gspClassifierPool)
 
 extern EIRQTCV_EXPORT cvClassifier gPreScanClassifier;
 extern EIRQTCV_EXPORT cvClassifier gFaceClassifier;

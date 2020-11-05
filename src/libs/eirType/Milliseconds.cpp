@@ -9,7 +9,7 @@ const Milliseconds Milliseconds::csmZoneMsecDelta(
         (csmBaseDateTime.toUTC().toMSecsSinceEpoch())
         - csmBaseDateTime.toMSecsSinceEpoch());
 const Milliseconds Milliseconds::csmNullMsec(INT64_MIN);
-QString Milliseconds::smDateStampFormat("-DyyyyMMdd-Thhmmss");
+QString Milliseconds::smDateStampFormat("DyyyyMMdd-Thhmmss");
 QString Milliseconds::smBaseDateStamp(toDateStamp(csmBaseMsec));
 
 Milliseconds::Milliseconds(void) : mEpochMsec(csmNullMsec) {;}

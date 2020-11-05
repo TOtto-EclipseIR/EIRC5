@@ -16,7 +16,7 @@ public:
     QQColor();
     QQColor(const QColor other);
     QQColor(const QRgb rgb);
-    QQColor(int r, const int g, const int b, const int a=255);
+    QQColor(const int r, const int g, const int b, const int a=255);
     QQColor(const QString &namedColor);
     QQColor(const char *namedColor);
     QQColor(const QColor::Spec spec, const int i1=0, const int i2=0,

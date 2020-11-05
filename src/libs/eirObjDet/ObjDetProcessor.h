@@ -11,18 +11,20 @@
 
 #include "ObjDetResultList.h"
 #include "RectangleFinder.h"
-#include "RectFinderCatalog.h"
 #include "RectangleGrouper.h"
 
 class EIROBJDET_EXPORT ObjDetProcessor : public QObject
 {
     Q_OBJECT
 public:
-    ObjDetProcessor(const cvClassifier::Type cascadeType, const Settings::Key objDetKey, QObject * parent=nullptr);
+    ObjDetProcessor(const cvClassifier::Type cascadeType,
+                    const Settings::Key objDetKey,
+                    QObject * parent=nullptr);
     cvClassifier::Type type() const         { return cmType; }
     RectangleFinder *finder()               { return mpRectFinder; }
     RectangleGrouper *grouper()             { return mpRectGrouper; }
     QQDir detectorBaseDir()                 { return finder()->baseDir(); }
+    QQRectList rectangleList() const        { return mRectList; }
 
 public slots:
     void initialize();
@@ -30,6 +32,7 @@ public slots:
 
 signals:
     void setupFinished();
+    void resetd();
 
 public:
     void setImage(const QQImage &inputImage);
@@ -46,8 +49,8 @@ public:
 
 private:
     const cvClassifier::Type cmType=cvClassifier::nullType;
-    const Settings::Key cmResourceKey;
-    const Settings::Key cmObjDetTypeKey;
+    Settings::Key mResourceKey;
+    Settings::Key mObjDetTypeKey;
     RectangleFinder * mpRectFinder=nullptr;
     RectangleGrouper * mpRectGrouper=nullptr;
     XerEntry mError;

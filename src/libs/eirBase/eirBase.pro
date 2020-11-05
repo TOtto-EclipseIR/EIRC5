@@ -19,6 +19,7 @@ SOURCES += \
 
 HEADERS += \
     ../../version.h \
+    ../APP \
     Typedefs.h \
     UInt128.h \
     Uuid.h \
