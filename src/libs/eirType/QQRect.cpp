@@ -10,20 +10,23 @@
 
 QQRect::QQRect() {;}
 QQRect::QQRect(const QRect rc) : mSize(rc.size()), mCenter(rc.center()) {;}
-QQRect::QQRect(int width, int height, int left, int top) : mSize(width, height), mCenter(left + width / 2, top + height / 2) {;}
+QQRect::QQRect(int width, int height, int left, int top)
+    : mSize(width, height), mCenter(left + width / 2, top + height / 2) {;}
 QQRect::QQRect(const QQSize size, const QPoint center) : mSize(size), mCenter(center) {;}
+QQRect::QQRect(const QQSize size) : mSize(size), mCenter(0, 0) {;}
 QQRect::QQRect(const QRectF rcf) { set(rcf); }
 
 QQRect::operator QRect() const
+
 {
     return QRect(left(), top(), width(), height());
 }
-#if 0
-QQRect::operator QRectF() const
+
+QRectF QQRect::toRectF() const
 {
     return QRectF(left(), top(), width(), height());
 }
-#endif
+
 bool QQRect::operator ==(const QQRect &other)
 {
     return size() == other.size() && center() == other.center();
@@ -192,3 +195,4 @@ uint qHash(const QQRect &rc, uint seed) noexcept
     seed = hash(seed, rc.center().y());
     return seed;
 }
+

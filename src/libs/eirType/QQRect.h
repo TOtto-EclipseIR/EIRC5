@@ -18,9 +18,10 @@ public:
     QQRect(const QRect rc);
     QQRect(int width, int height, int left, int top);
     QQRect(const QQSize size, const QPoint center);
+    QQRect(const QQSize size);
     QQRect(const QRectF rcf);
     operator QRect() const;
-//    operator QRectF() const;
+    QRectF toRectF() const;
     bool operator == (const QQRect &other);
     bool isValid() const;
     bool contains(const int x, const int y) const;
