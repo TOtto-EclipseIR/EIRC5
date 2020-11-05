@@ -18,3 +18,4 @@ DESTDIR = $$OURDEST
 LIBS *= -L$$OURDEST
 
 #message(OURDEST = $$OURDEST)
+#message(LIBS = $$LIBS)
