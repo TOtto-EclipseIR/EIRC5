@@ -1,4 +1,4 @@
-QT -= gui
+#QT -= gui ### QIcon
 QT *= xml
 
 TEMPLATE = lib
@@ -23,6 +23,7 @@ LIBS *= -leirBase5
 LIBS *= -leirType5
 
 SOURCES += \
+    ActionManager.cpp \
     ApplicationHelper.cpp \
     ArgumentId.cpp \
     ArgumentItem.cpp \
@@ -45,6 +46,7 @@ SOURCES += \
 HEADERS += \
     ../../version.h \
     ../APP \
+    ActionManager.h \
     ApplicationHelper.h \
     ArgumentId.h \
     ArgumentItem.h \
