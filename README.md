@@ -1,6 +1,5 @@
-# EIRC2
+# EIRC5
 
-Second Generation Face Image Pocessing Projects for Eclipse Identity Recognition Corporation.
+INDIface5 Face Image Processing Projects for EclipseIR.
 
-A git submodule to LAA's Excelsior project.
-
+Copyright &copy; 1993-2020 Eclipse Identity Recognition Corporation. All rights reserved worldwide. See the adjacent LICENSE.txt file for details.
